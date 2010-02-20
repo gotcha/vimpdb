@@ -26,6 +26,8 @@ class Debugger(object):
         self.setupVim()
         self.commandResult = ''
         self.captured = False
+        self.vim = False
+        self.vimprompt = False
 
     def setupVim(self):
         # .vim file should initialize a value
@@ -99,6 +101,22 @@ class Debugger(object):
         self.expr('foreground()')
         return self.expr('PDB_GetCommand("%s")' % feedback)
 
+    def enterVimMode(self):
+        if not self.vim:
+            print "Entering Vim mode"
+            self.vim = True
+
+    def exitVimMode(self):
+        self.vim = False
+
+    def enterVimPromptMode(self):
+        if not self.vimprompt:
+            print "Entering Vim mode"
+            self.vimprompt = True
+
+    def exitVimPromptMode(self):
+        self.vimprompt = False
+
 hook = Debugger()
 
 
@@ -126,10 +144,12 @@ def default(self, line):
 
 
 def do_vimprompt(self, arg):
+    hook.enterVimPromptMode()
     hook.reset_stdout()
     command = hook.getCommand()
     if command == "novimprompt\n":
         hook.reset_stdin(self)
+        hook.exitVimPromptMode()
         return
     elif command == "\n":
         command = hook.lastCommand
@@ -143,10 +163,12 @@ def do_vimprompt(self, arg):
 
 
 def do_vim(self, arg):
+    hook.enterVimMode()
     hook.expr('foreground()')
     command = server.run(self)
     if command == "novim":
         hook.reset_stdin(self)
+        hook.exitVimMode()
         return
     self.cmdqueue.append(command)
     self.cmdqueue.append('vim')

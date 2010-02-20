@@ -16,6 +16,9 @@ class PDBHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         self.server.pdbcommand = command
         self.send_response(200)
 
+    def log_message(self, format, *args):
+        pass
+
 
 class PDBServer(BaseHTTPServer.HTTPServer):
 
