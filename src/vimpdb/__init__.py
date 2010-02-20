@@ -92,7 +92,7 @@ class Debugger(object):
         feedback = self.commandResult
         self.commandResult = ''
         self.expr('foreground()')
-        return self.expr('VPH_GetCommand("%s")' % feedback)
+        return self.expr('PDB_GetCommand("%s")' % feedback)
 
 hook = Debugger()
 

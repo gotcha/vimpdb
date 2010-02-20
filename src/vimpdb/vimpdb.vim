@@ -1,22 +1,22 @@
 
-function! s:VPH_CreateDebugTab()
+function! s:PDB_CreateDebugTab()
     execute "tabnew"
     let t:vimpdbhook = "vimpdbhook"
 endfunction
 
-function! VPH_MoveToDebugTab()
+function! PDB_MoveToDebugTab()
     for i in range(tabpagenr('$'))
         exe i+1 "tabnext"
         if exists("t:vimpdbhook") == 1
             return
         endif
     endfor
-    call s:VPH_CreateDebugTab()
+    call s:PDB_CreateDebugTab()
 endfunction
 
-call VPH_MoveToDebugTab()
+call PDB_MoveToDebugTab()
 
-function! VPH_GetCommand(feedback)
+function! PDB_GetCommand(feedback)
     let command = input(a:feedback . " Pdb:")
     return command
 endfunction
