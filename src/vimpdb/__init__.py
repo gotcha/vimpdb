@@ -39,6 +39,7 @@ class Debugger(object):
         self.vim_present = False
 
     def send(self, command):
+        #print "send", command
         return_code = call([PROGRAM, '--servername', SERVERNAME,
                             '--remote-send', command])
         self.vim_present = return_code == 0
@@ -57,9 +58,13 @@ class Debugger(object):
         if self.vim_present:
             self.sendgotoline(debugger)
 
-    def sendgotoline(self, debugger):
+    def getFileAndLine(self, debugger):
         frame, lineno = debugger.stack[debugger.curindex]
         filename = debugger.canonic(frame.f_code.co_filename)
+        return filename, lineno
+
+    def sendgotoline(self, debugger):
+        filename, lineno = self.getFileAndLine(debugger)
         if exists(filename):
             command = ":view %(filename)s<CR>" % dict(filename=filename)
             keys = VIM_KEYS % dict(lineno=lineno)
@@ -102,6 +107,12 @@ def precmd(self, line):
     return self._orig_precmd(line)
 
 
+def postcmd(self, stop, line):
+    if line.strip() in ["u", "up", "d", "down"]:
+        hook.sendgotoline(self)
+    return self._orig_postcmd(stop, line)
+
+
 def preloop(self):
     hook.preloop(self)
     return self._orig_preloop()
@@ -122,7 +133,7 @@ def do_vimprompt(self, arg):
         return
     elif command == "\n":
         command = hook.lastCommand
-    elif command == "a\n":
+    elif command.strip() in ["a", "args", "u", "up", "d", "down"]:
         hook.lastCommand = command
         hook.capture_stdout()
     else:
@@ -149,7 +160,7 @@ def setup(klass):
         setattr(klass, '_orig_' + name, orig)
         setattr(klass, name, method)
 
-    for function in [preloop, default, precmd]:
+    for function in [preloop, default, precmd, postcmd]:
         setupMethod(klass, function)
 
     klass.do_vim = do_vim
