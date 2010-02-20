@@ -52,6 +52,9 @@ endif
 if !exists(":PDBStep")
   command PDBStep :call PDB_Command("s")
 endif
+if !exists(":PDBReturn")
+  command PDBReturn :call PDB_Command("r")
+endif
 if !exists(":PDBContinue")
   command PDBContinue :call PDB_Continue()
 endif
@@ -71,4 +74,5 @@ noremap <buffer><silent> c :PDBContinue<CR>
 noremap <buffer><silent> q :PDBQuit<CR>
 noremap <buffer><silent> d :PDBDown<CR>
 noremap <buffer><silent> u :PDBUp<CR>
-noremap <buffer><silent> r :PDBReset<CR>
+noremap <buffer><silent> r :PDBReturn<CR>
+noremap <buffer><silent> x :PDBReset<CR>
