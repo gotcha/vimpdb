@@ -78,6 +78,7 @@ class Debugger(object):
         sys.stdin.readlines()
 
     def capture_stdout(self):
+        #print "capture"
         self.stdout = sys.stdout
         sys.stdout = StringIO.StringIO()
         self.captured = True
@@ -87,6 +88,7 @@ class Debugger(object):
             self.captured = False
             self.commandResult = sys.stdout.getvalue()
             sys.stdout = self.stdout
+        #print "reset"
 
     def preloop(self, debugger):
         if self.vim_present:
@@ -105,6 +107,7 @@ class Debugger(object):
         if not self.vim:
             print "Entering Vim mode"
             self.vim = True
+        self.expr('foreground()')
 
     def exitVimMode(self):
         self.vim = False
@@ -117,18 +120,16 @@ class Debugger(object):
     def exitVimPromptMode(self):
         self.vimprompt = False
 
+    def sendFeedback(self):
+        self.expr('PDB_Feedback("%s")' % self.commandResult)
+        self.commandResult = ''
+
 hook = Debugger()
 
 
 def precmd(self, line):
     hook.precmd(self)
     return self._orig_precmd(line)
-
-
-def postcmd(self, stop, line):
-    if line.strip() in ["u", "up", "d", "down"]:
-        hook.sendgotoline(self)
-    return self._orig_postcmd(stop, line)
 
 
 def preloop(self):
@@ -164,14 +165,24 @@ def do_vimprompt(self, arg):
 
 def do_vim(self, arg):
     hook.enterVimMode()
-    hook.expr('foreground()')
     command = server.run(self)
     if command == "novim":
         hook.reset_stdin(self)
         hook.exitVimMode()
         return
+    elif command.strip() in ["a", "args", "u", "up", "d", "down"]:
+        hook.capture_stdout()
     self.cmdqueue.append(command)
     self.cmdqueue.append('vim')
+
+
+def postcmd(self, stop, line):
+    cmd = line.strip()
+    if cmd in ["a", "args", "u", "up", "d", "down"]:
+        hook.reset_stdout()
+        hook.sendgotoline(self)
+    hook.sendFeedback()
+    return self._orig_postcmd(stop, line)
 
 
 def setup(klass):

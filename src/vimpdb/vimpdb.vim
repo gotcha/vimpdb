@@ -2,6 +2,8 @@
 function! s:PDB_CreateDebugTab()
     execute "tabnew"
     let t:vimpdbhook = "vimpdbhook"
+    execute "sp"
+    execute "enew"
 endfunction
 
 function! PDB_MoveToDebugTab()
@@ -25,7 +27,20 @@ function! PDB_Command(command)
     python << EOF
 import urllib2
 cmd = vim.eval("a:command")
-urllib2.urlopen('http://localhost:8000/?pdbcmd=%s' % cmd)
+result = urllib2.urlopen('http://localhost:8000/?pdbcmd=%s' % cmd).read()
+EOF
+endfunction
+
+function! PDB_Feedback(message)
+    python << EOF
+message = vim.eval("a:message")
+vim.command("let g:pdbfeedback='%s'" % message)
+w = vim.windows[1]
+w.height = 5
+b = w.buffer
+b[:] = None
+for line in message.splitlines():
+    b.append(line)
 EOF
 endfunction
 
@@ -67,6 +82,9 @@ endif
 if !exists(":PDBReset")
   command PDBReset :call PDB_Reset()
 endif
+if !exists(":PDBArgs")
+  command PDBArgs :call PDB_Command("a")
+endif
 
 noremap <buffer><silent> n :PDBNext<CR>
 noremap <buffer><silent> s :PDBStep<CR>
@@ -76,3 +94,4 @@ noremap <buffer><silent> d :PDBDown<CR>
 noremap <buffer><silent> u :PDBUp<CR>
 noremap <buffer><silent> r :PDBReturn<CR>
 noremap <buffer><silent> x :PDBReset<CR>
+noremap <buffer><silent> a :PDBArgs<CR>

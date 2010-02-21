@@ -15,6 +15,9 @@ class PDBHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             command = query[PDB][0]
         self.server.pdbcommand = command
         self.send_response(200)
+        self.send_header("Content-type", "text/html")
+        self.send_header("Content-Length", str(0))
+        self.end_headers()
 
     def log_message(self, format, *args):
         pass
