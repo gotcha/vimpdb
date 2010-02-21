@@ -2,7 +2,7 @@
 function! s:PDB_CreateDebugTab()
     execute "tabnew"
     let t:vimpdbhook = "vimpdbhook"
-    execute "sp"
+    execute "5sp"
     execute "enew"
 endfunction
 
