@@ -19,17 +19,13 @@ def getPackagePath(instance):
     return os.path.dirname(module.__file__)
 
 
-class Debugger(object):
+class ProxyToVim(object):
 
     def __init__(self):
         self.reset()
-        self.setupVim()
-        self.commandResult = ''
-        self.captured = False
-        self.vim = False
-        self.vimprompt = False
+        self.sourceVimpdb()
 
-    def setupVim(self):
+    def sourceVimpdb(self):
         # .vim file should initialize a value
         # then instead of initializing each time
         # we can use --remote-expr to evaluate if the vim server is initialized
@@ -37,40 +33,49 @@ class Debugger(object):
         command = "<C-\><C-N>:source %s<CR>" % filename
         self.send(command)
 
-    def reset(self):
-        self.vim_present = False
-
     def send(self, command):
         #print "send", command
         return_code = call([PROGRAM, '--servername', SERVERNAME,
                             '--remote-send', command])
-        self.vim_present = return_code == 0
+        self.present = return_code == 0
 
     def expr(self, expr):
         p = Popen([PROGRAM, '--servername',
                    SERVERNAME, "--remote-expr", expr],
             stdin=PIPE, stdout=PIPE)
         return_code = p.wait()
-        self.vim_present = return_code == 0
+        self.present = return_code == 0
         child_stdout = p.stdout
         return child_stdout.read()
 
-    def gotoline(self, debugger):
-        self.setupVim()
-        if self.vim_present:
-            self.sendgotoline(debugger)
+    def gotoline(self, filename, lineno):
+        self.sourceVimpdb()
+        if self.present:
+            self.sendgotoline(filename, lineno)
+
+    def sendgotoline(self, filename, lineno):
+        if exists(filename):
+            command = ":view %(filename)s<CR>" % dict(filename=filename)
+            keys = VIM_KEYS % dict(lineno=lineno)
+            self.send("%(command)s%(keys)s" % dict(command=command, keys=keys))
+
+    def reset(self):
+        self.present = False
+
+
+class Debugger(object):
+
+    def __init__(self):
+        self.vim = ProxyToVim()
+        self.commandResult = ''
+        self.captured = False
+        self.vimhttp = False
+        self.vimprompt = False
 
     def getFileAndLine(self, debugger):
         frame, lineno = debugger.stack[debugger.curindex]
         filename = debugger.canonic(frame.f_code.co_filename)
         return filename, lineno
-
-    def sendgotoline(self, debugger):
-        filename, lineno = self.getFileAndLine(debugger)
-        if exists(filename):
-            command = ":view %(filename)s<CR>" % dict(filename=filename)
-            keys = VIM_KEYS % dict(lineno=lineno)
-            self.send("%(command)s%(keys)s" % dict(command=command, keys=keys))
 
     def reset_stdin(self, debugger):
         sys.stdout.write('-- Type Ctrl-D to continue --\n')
@@ -91,26 +96,27 @@ class Debugger(object):
         #print "reset"
 
     def preloop(self, debugger):
-        if self.vim_present:
-            self.gotoline(debugger)
+        if self.vim.present:
+            filename, lineno = self.getFileAndLine(debugger)
+            self.vim.gotoline(filename, lineno)
 
     def precmd(self, debugger):
-        self.setupVim()
+        self.vim.sourceVimpdb()
 
     def getCommand(self):
         feedback = self.commandResult
         self.commandResult = ''
-        self.expr('foreground()')
-        return self.expr('PDB_GetCommand("%s")' % feedback)
+        self.vim.expr('foreground()')
+        return self.vim.expr('PDB_GetCommand("%s")' % feedback)
 
     def enterVimMode(self):
-        if not self.vim:
+        if not self.vimhttp:
             print "Entering Vim mode"
-            self.vim = True
-        self.expr('foreground()')
+            self.vimhttp = True
+        self.vim.expr('foreground()')
 
     def exitVimMode(self):
-        self.vim = False
+        self.vimhttp = False
 
     def enterVimPromptMode(self):
         if not self.vimprompt:
@@ -121,7 +127,7 @@ class Debugger(object):
         self.vimprompt = False
 
     def sendFeedback(self):
-        self.expr('PDB_Feedback("%s")' % self.commandResult)
+        self.vim.expr('PDB_Feedback("%s")' % self.commandResult)
         self.commandResult = ''
 
 hook = Debugger()
@@ -180,7 +186,8 @@ def postcmd(self, stop, line):
     cmd = line.strip()
     if cmd in ["a", "args", "u", "up", "d", "down"]:
         hook.reset_stdout()
-        hook.sendgotoline(self)
+        filename, lineno = hook.getFileAndLine(self)
+        hook.vim.sendgotoline(filename, lineno)
     hook.sendFeedback()
     return self._orig_postcmd(stop, line)
 
