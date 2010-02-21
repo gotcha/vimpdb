@@ -1,0 +1,8 @@
+CREDITS
+-------
+Hacked with Jean-François Roche
+
+
+Code inspired by vimpdbhook written by Stefan Eletzhofer 
+http://code.google.com/p/vimpdbhook/
+
