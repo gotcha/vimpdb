@@ -76,7 +76,7 @@ class RemoteUnavailable(Exception):
     pass
 
 
-class Debugger(object):
+class PDBIO(object):
 
     def __init__(self):
         self.textOutput = ''
@@ -90,7 +90,6 @@ class Debugger(object):
         sys.stdin.readlines()
 
     def capture_stdout(self):
-        #print "capture"
         self.stdout = sys.stdout
         sys.stdout = StringIO.StringIO()
         self.captured = True
@@ -100,7 +99,6 @@ class Debugger(object):
             self.captured = False
             self.textOutput = sys.stdout.getvalue()
             sys.stdout = self.stdout
-        #print "reset"
 
     def pop_output(self):
         result = self.textOutput
@@ -125,7 +123,7 @@ class Debugger(object):
 
 
 vim = ProxyToVim()
-hook = Debugger()
+io = PDBIO()
 
 
 def getFileAndLine(self):
@@ -146,43 +144,43 @@ def preloop(self):
 
 
 def default(self, line):
-    hook.capture_stdout()
+    io.capture_stdout()
     result = self._orig_default(line)
-    hook.reset_stdout()
+    io.reset_stdout()
     return result
 
 
 def do_vimp(self, arg):
-    hook.enterVimPromptMode()
-    hook.reset_stdout()
+    io.enterVimPromptMode()
+    io.reset_stdout()
     vim.foreground()
-    prompt = hook.pop_output()
+    prompt = io.pop_output()
     command = vim.getText(prompt)
     if command == "pdb\n":
-        hook.reset_stdin(self)
-        hook.exitVimPromptMode()
+        io.reset_stdin(self)
+        io.exitVimPromptMode()
         return
     elif command == "\n":
-        command = hook.lastCommand
+        command = io.lastCommand
     elif command.strip() in ["a", "args", "u", "up", "d", "down"]:
-        hook.lastCommand = command
-        hook.capture_stdout()
+        io.lastCommand = command
+        io.capture_stdout()
     else:
-        hook.lastCommand = command
+        io.lastCommand = command
     self.cmdqueue.append(command)
     self.cmdqueue.append('vimp')
 
 
 def do_vim(self, arg):
-    hook.enterVimMode()
+    io.enterVimMode()
     vim.foreground()
     command = server.run(self)
     if command == "pdb":
-        hook.reset_stdin(self)
-        hook.exitVimMode()
+        io.reset_stdin(self)
+        io.exitVimMode()
         return
     elif command.strip() in ["a", "args", "u", "up", "d", "down"]:
-        hook.capture_stdout()
+        io.capture_stdout()
     self.cmdqueue.append(command)
     self.cmdqueue.append('vim')
 
@@ -190,10 +188,10 @@ def do_vim(self, arg):
 def postcmd(self, stop, line):
     cmd = line.strip()
     if cmd in ["a", "args", "u", "up", "d", "down"]:
-        hook.reset_stdout()
+        io.reset_stdout()
         filename, lineno = self.getFileAndLine()
         vim.showFileAtLine(filename, lineno)
-    vim.showFeedback(hook.pop_output())
+    vim.showFeedback(io.pop_output())
     return self._orig_postcmd(stop, line)
 
 
