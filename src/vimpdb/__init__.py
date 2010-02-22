@@ -21,10 +21,10 @@ def getPackagePath(instance):
 class ProxyToVim(object):
 
     def __init__(self):
-        self.reset()
         self.setupRemote()
 
     def setupRemote(self):
+        self.remoteVimAvailable = False
         # .vim file should initialize a value
         # then instead of initializing each time
         # we can use --remote-expr to evaluate if the vim server is initialized
@@ -33,7 +33,6 @@ class ProxyToVim(object):
         self._send(command)
 
     def _send(self, command):
-        #print "send", command
         return_code = call([PROGRAM, '--servername', SERVERNAME,
                             '--remote-send', command])
         self.remoteVimAvailable = return_code == 0
@@ -65,9 +64,6 @@ class ProxyToVim(object):
         command = ":view %(filename)s<CR>" % dict(filename=filename)
         keys = VIM_KEYS % dict(lineno=lineno)
         self._send("%(command)s%(keys)s" % dict(command=command, keys=keys))
-
-    def reset(self):
-        self.remoteVimAvailable = False
 
 
 class Debugger(object):
