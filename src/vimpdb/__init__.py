@@ -79,7 +79,6 @@ class RemoteUnavailable(Exception):
 class Debugger(object):
 
     def __init__(self):
-        self.vim = ProxyToVim()
         self.textOutput = ''
         self.captured = False
         self.vimhttp = False
@@ -130,17 +129,18 @@ class Debugger(object):
         self.vimprompt = False
 
 
+vim = ProxyToVim()
 hook = Debugger()
 
 
 def precmd(self, line):
-    hook.vim.setupRemote()
+    vim.setupRemote()
     return self._orig_precmd(line)
 
 
 def preloop(self):
     filename, lineno = hook.getFileAndLine(self)
-    hook.vim.showFileAtLine(filename, lineno)
+    vim.showFileAtLine(filename, lineno)
     return self._orig_preloop()
 
 
@@ -154,9 +154,9 @@ def default(self, line):
 def do_vimprompt(self, arg):
     hook.enterVimPromptMode()
     hook.reset_stdout()
-    hook.vim.foreground()
+    vim.foreground()
     prompt = hook.pop_output()
-    command = hook.vim.getText(prompt)
+    command = vim.getText(prompt)
     if command == "novimprompt\n":
         hook.reset_stdin(self)
         hook.exitVimPromptMode()
@@ -174,7 +174,7 @@ def do_vimprompt(self, arg):
 
 def do_vim(self, arg):
     hook.enterVimMode()
-    hook.vim.foreground()
+    vim.foreground()
     command = server.run(self)
     if command == "novim":
         hook.reset_stdin(self)
@@ -191,8 +191,8 @@ def postcmd(self, stop, line):
     if cmd in ["a", "args", "u", "up", "d", "down"]:
         hook.reset_stdout()
         filename, lineno = hook.getFileAndLine(self)
-        hook.vim.showFileAtLine(filename, lineno)
-    hook.vim.showFeedback(self.pop_output())
+        vim.showFileAtLine(filename, lineno)
+    vim.showFeedback(hook.pop_output())
     return self._orig_postcmd(stop, line)
 
 
