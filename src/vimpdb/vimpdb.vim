@@ -54,7 +54,7 @@ function! PDB_Continue()
 endfunction
 
 function! PDB_Reset()
-    call PDB_Command('novim')
+    call PDB_Command('pdb')
     call PDB_SwitchBack()
 endfunction
 

@@ -151,13 +151,13 @@ def default(self, line):
     return result
 
 
-def do_vimprompt(self, arg):
+def do_vimp(self, arg):
     hook.enterVimPromptMode()
     hook.reset_stdout()
     vim.foreground()
     prompt = hook.pop_output()
     command = vim.getText(prompt)
-    if command == "novimprompt\n":
+    if command == "pdb\n":
         hook.reset_stdin(self)
         hook.exitVimPromptMode()
         return
@@ -169,14 +169,14 @@ def do_vimprompt(self, arg):
     else:
         hook.lastCommand = command
     self.cmdqueue.append(command)
-    self.cmdqueue.append('vimprompt')
+    self.cmdqueue.append('vimp')
 
 
 def do_vim(self, arg):
     hook.enterVimMode()
     vim.foreground()
     command = server.run(self)
-    if command == "novim":
+    if command == "pdb":
         hook.reset_stdin(self)
         hook.exitVimMode()
         return
@@ -208,7 +208,7 @@ def setup(klass):
         setupMethod(klass, function)
 
     klass.do_vim = do_vim
-    klass.do_vimprompt = do_vimprompt
+    klass.do_vimp = do_vimp
 
 
 setup(pdb.Pdb)
