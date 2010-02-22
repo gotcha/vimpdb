@@ -33,19 +33,15 @@ class ProxyToVim(object):
         self._send(command)
 
     def foreground(self):
-        self._checkRemote()
         self._expr('foreground()')
 
     def getText(self, prompt):
-        self._checkRemote()
         return self._expr('PDB_GetCommand("%s")' % prompt)
 
     def showFeedback(self, feedback):
-        self._checkRemote()
         self._expr('PDB_Feedback("%s")' % feedback)
 
     def showFileAtLine(self, filename, lineno):
-        self._checkRemote()
         if os.path.exists(filename):
             self._showFileAtLine(filename, lineno)
 
@@ -57,9 +53,11 @@ class ProxyToVim(object):
     def _showFileAtLine(self, filename, lineno):
         command = ":view %(filename)s<CR>" % dict(filename=filename)
         keys = VIM_KEYS % dict(lineno=lineno)
+        self._checkRemote()
         self._send("%(command)s%(keys)s" % dict(command=command, keys=keys))
 
     def _expr(self, expr):
+        self._checkRemote()
         p = Popen([PROGRAM, '--servername',
                    SERVERNAME, "--remote-expr", expr],
             stdin=PIPE, stdout=PIPE)
