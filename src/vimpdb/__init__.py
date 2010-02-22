@@ -84,7 +84,7 @@ class PDBIO(object):
         self.vimhttp = False
         self.vimprompt = False
 
-    def reset_stdin(self, debugger):
+    def eat_stdin(self):
         sys.stdout.write('-- Type Ctrl-D to continue --\n')
         sys.stdout.flush()
         sys.stdin.readlines()
@@ -94,7 +94,7 @@ class PDBIO(object):
         sys.stdout = StringIO.StringIO()
         self.captured = True
 
-    def reset_stdout(self):
+    def stop_capture(self):
         if self.captured:
             self.captured = False
             self.textOutput = sys.stdout.getvalue()
@@ -146,18 +146,18 @@ def preloop(self):
 def default(self, line):
     io.capture_stdout()
     result = self._orig_default(line)
-    io.reset_stdout()
+    io.stop_capture()
     return result
 
 
 def do_vimp(self, arg):
     io.enterVimPromptMode()
-    io.reset_stdout()
+    io.stop_capture()
     vim.foreground()
     prompt = io.pop_output()
     command = vim.getText(prompt)
     if command == "pdb\n":
-        io.reset_stdin(self)
+        io.eat_stdin()
         io.exitVimPromptMode()
         return
     elif command == "\n":
@@ -176,7 +176,7 @@ def do_vim(self, arg):
     vim.foreground()
     command = server.run(self)
     if command == "pdb":
-        io.reset_stdin(self)
+        io.eat_stdin()
         io.exitVimMode()
         return
     elif command.strip() in ["a", "args", "u", "up", "d", "down"]:
@@ -188,7 +188,7 @@ def do_vim(self, arg):
 def postcmd(self, stop, line):
     cmd = line.strip()
     if cmd in ["a", "args", "u", "up", "d", "down"]:
-        io.reset_stdout()
+        io.stop_capture()
         filename, lineno = self.getFileAndLine()
         vim.showFileAtLine(filename, lineno)
     vim.showFeedback(io.pop_output())
