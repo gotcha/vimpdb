@@ -36,7 +36,12 @@ class ProxyToVim(object):
         self._expr('foreground()')
 
     def getText(self, prompt):
-        return self._expr('PDB_GetCommand("%s")' % prompt)
+        command = self._expr('PDB_GetCommand("%s")' % prompt)
+        return command.strip()
+
+    def waitFor(self, pdb):
+        command = server.run(pdb)
+        return command.strip()
 
     def showFeedback(self, feedback):
         self._expr('PDB_Feedback("%s")' % feedback)
@@ -156,13 +161,13 @@ def do_vimp(self, arg):
     vim.foreground()
     prompt = io.pop_output()
     command = vim.getText(prompt)
-    if command == "pdb\n":
+    if command == "pdb":
         io.eat_stdin()
         io.exitVimPromptMode()
         return
-    elif command == "\n":
+    elif command == "":
         command = io.lastCommand
-    elif command.strip() in ["a", "args", "u", "up", "d", "down"]:
+    elif command in ["a", "args", "u", "up", "d", "down"]:
         io.lastCommand = command
         io.capture_stdout()
     else:
@@ -174,12 +179,12 @@ def do_vimp(self, arg):
 def do_vim(self, arg):
     io.enterVimMode()
     vim.foreground()
-    command = server.run(self)
+    command = vim.waitFor(self)
     if command == "pdb":
         io.eat_stdin()
         io.exitVimMode()
         return
-    elif command.strip() in ["a", "args", "u", "up", "d", "down"]:
+    elif command in ["a", "args", "u", "up", "d", "down"]:
         io.capture_stdout()
     self.cmdqueue.append(command)
     self.cmdqueue.append('vim')
