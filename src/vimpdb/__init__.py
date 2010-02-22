@@ -84,11 +84,6 @@ class Debugger(object):
         self.vimhttp = False
         self.vimprompt = False
 
-    def getFileAndLine(self, debugger):
-        frame, lineno = debugger.stack[debugger.curindex]
-        filename = debugger.canonic(frame.f_code.co_filename)
-        return filename, lineno
-
     def reset_stdin(self, debugger):
         sys.stdout.write('-- Type Ctrl-D to continue --\n')
         sys.stdout.flush()
@@ -133,13 +128,19 @@ vim = ProxyToVim()
 hook = Debugger()
 
 
+def getFileAndLine(self):
+    frame, lineno = self.stack[self.curindex]
+    filename = self.canonic(frame.f_code.co_filename)
+    return filename, lineno
+
+
 def precmd(self, line):
     vim.setupRemote()
     return self._orig_precmd(line)
 
 
 def preloop(self):
-    filename, lineno = hook.getFileAndLine(self)
+    filename, lineno = self.getFileAndLine()
     vim.showFileAtLine(filename, lineno)
     return self._orig_preloop()
 
@@ -190,7 +191,7 @@ def postcmd(self, stop, line):
     cmd = line.strip()
     if cmd in ["a", "args", "u", "up", "d", "down"]:
         hook.reset_stdout()
-        filename, lineno = hook.getFileAndLine(self)
+        filename, lineno = self.getFileAndLine()
         vim.showFileAtLine(filename, lineno)
     vim.showFeedback(hook.pop_output())
     return self._orig_postcmd(stop, line)
@@ -209,6 +210,7 @@ def setup(klass):
 
     klass.do_vim = do_vim
     klass.do_vimp = do_vimp
+    klass.getFileAndLine = getFileAndLine
 
 
 setup(pdb.Pdb)
