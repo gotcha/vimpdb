@@ -108,10 +108,6 @@ class Debugger(object):
             sys.stdout = self.stdout
         #print "reset"
 
-    def preloop(self, debugger):
-        filename, lineno = self.getFileAndLine(debugger)
-        self.vim.showFileAtLine(filename, lineno)
-
     def getCommand(self):
         self.vim.foreground()
         result = self.vim.getText(prompt=self.textOutput)
@@ -122,7 +118,6 @@ class Debugger(object):
         if not self.vimhttp:
             print "Entering Vim mode"
             self.vimhttp = True
-        self.vim.foreground()
 
     def exitVimMode(self):
         self.vimhttp = False
@@ -139,6 +134,7 @@ class Debugger(object):
         self.vim.showFeedback(self.textOutput)
         self.textOutput = ''
 
+
 hook = Debugger()
 
 
@@ -148,7 +144,8 @@ def precmd(self, line):
 
 
 def preloop(self):
-    hook.preloop(self)
+    filename, lineno = hook.getFileAndLine(self)
+    hook.vim.showFileAtLine(filename, lineno)
     return self._orig_preloop()
 
 
@@ -180,6 +177,7 @@ def do_vimprompt(self, arg):
 
 def do_vim(self, arg):
     hook.enterVimMode()
+    hook.vim.foreground()
     command = server.run(self)
     if command == "novim":
         hook.reset_stdin(self)
