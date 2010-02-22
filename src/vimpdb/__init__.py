@@ -33,17 +33,20 @@ class ProxyToVim(object):
         self._send(command)
 
     def foreground(self):
+        self._checkRemote()
         self._expr('foreground()')
 
     def getText(self, prompt):
+        self._checkRemote()
         return self._expr('PDB_GetCommand("%s")' % prompt)
 
     def showFeedback(self, feedback):
+        self._checkRemote()
         self._expr('PDB_Feedback("%s")' % feedback)
 
     def showFileAtLine(self, filename, lineno):
-        self.setupRemote()
-        if self.remoteVimAvailable and os.path.exists(filename):
+        self._checkRemote()
+        if os.path.exists(filename):
             self._showFileAtLine(filename, lineno)
 
     def _send(self, command):
@@ -64,6 +67,15 @@ class ProxyToVim(object):
         self.remoteVimAvailable = return_code == 0
         child_stdout = p.stdout
         return child_stdout.read()
+
+    def _checkRemote(self):
+        self.setupRemote()
+        if not self.remoteVimAvailable:
+            raise RemoteUnavailable()
+
+
+class RemoteUnavailable(Exception):
+    pass
 
 
 class Debugger(object):
