@@ -32,11 +32,6 @@ class ProxyToVim(object):
         command = "<C-\><C-N>:source %s<CR>" % filename
         self._send(command)
 
-    def _send(self, command):
-        return_code = call([PROGRAM, '--servername', SERVERNAME,
-                            '--remote-send', command])
-        self.remoteVimAvailable = return_code == 0
-
     def foreground(self):
         self._expr('foreground()')
 
@@ -46,6 +41,21 @@ class ProxyToVim(object):
     def showFeedback(self, feedback):
         self._expr('PDB_Feedback("%s")' % feedback)
 
+    def gotoline(self, filename, lineno):
+        self.setupRemote()
+        if self.remoteVimAvailable and os.path.exists(filename):
+            self._gotoline(filename, lineno)
+
+    def _send(self, command):
+        return_code = call([PROGRAM, '--servername', SERVERNAME,
+                            '--remote-send', command])
+        self.remoteVimAvailable = return_code == 0
+
+    def _gotoline(self, filename, lineno):
+        command = ":view %(filename)s<CR>" % dict(filename=filename)
+        keys = VIM_KEYS % dict(lineno=lineno)
+        self._send("%(command)s%(keys)s" % dict(command=command, keys=keys))
+
     def _expr(self, expr):
         p = Popen([PROGRAM, '--servername',
                    SERVERNAME, "--remote-expr", expr],
@@ -54,16 +64,6 @@ class ProxyToVim(object):
         self.remoteVimAvailable = return_code == 0
         child_stdout = p.stdout
         return child_stdout.read()
-
-    def gotoline(self, filename, lineno):
-        self.setupRemote()
-        if self.remoteVimAvailable and os.path.exists(filename):
-            self._gotoline(filename, lineno)
-
-    def _gotoline(self, filename, lineno):
-        command = ":view %(filename)s<CR>" % dict(filename=filename)
-        keys = VIM_KEYS % dict(lineno=lineno)
-        self._send("%(command)s%(keys)s" % dict(command=command, keys=keys))
 
 
 class Debugger(object):
