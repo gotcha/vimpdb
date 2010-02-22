@@ -113,10 +113,6 @@ class Debugger(object):
         self.textOutput = ''
         return result
 
-    def getCommand(self):
-        self.vim.foreground()
-        return self.vim.getText(prompt=self.pop_output())
-
     def enterVimMode(self):
         if not self.vimhttp:
             print "Entering Vim mode"
@@ -132,9 +128,6 @@ class Debugger(object):
 
     def exitVimPromptMode(self):
         self.vimprompt = False
-
-    def sendFeedback(self):
-        self.vim.showFeedback(self.pop_output())
 
 
 hook = Debugger()
@@ -161,7 +154,9 @@ def default(self, line):
 def do_vimprompt(self, arg):
     hook.enterVimPromptMode()
     hook.reset_stdout()
-    command = hook.getCommand()
+    hook.vim.foreground()
+    prompt = hook.pop_output()
+    command = hook.vim.getText(prompt)
     if command == "novimprompt\n":
         hook.reset_stdin(self)
         hook.exitVimPromptMode()
@@ -197,7 +192,7 @@ def postcmd(self, stop, line):
         hook.reset_stdout()
         filename, lineno = hook.getFileAndLine(self)
         hook.vim.showFileAtLine(filename, lineno)
-    hook.sendFeedback()
+    hook.vim.showFeedback(self.pop_output())
     return self._orig_postcmd(stop, line)
 
 
