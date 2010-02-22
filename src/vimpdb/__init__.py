@@ -41,17 +41,17 @@ class ProxyToVim(object):
     def showFeedback(self, feedback):
         self._expr('PDB_Feedback("%s")' % feedback)
 
-    def gotoline(self, filename, lineno):
+    def showFileAtLine(self, filename, lineno):
         self.setupRemote()
         if self.remoteVimAvailable and os.path.exists(filename):
-            self._gotoline(filename, lineno)
+            self._showFileAtLine(filename, lineno)
 
     def _send(self, command):
         return_code = call([PROGRAM, '--servername', SERVERNAME,
                             '--remote-send', command])
         self.remoteVimAvailable = return_code == 0
 
-    def _gotoline(self, filename, lineno):
+    def _showFileAtLine(self, filename, lineno):
         command = ":view %(filename)s<CR>" % dict(filename=filename)
         keys = VIM_KEYS % dict(lineno=lineno)
         self._send("%(command)s%(keys)s" % dict(command=command, keys=keys))
@@ -100,7 +100,7 @@ class Debugger(object):
 
     def preloop(self, debugger):
         filename, lineno = self.getFileAndLine(debugger)
-        self.vim.gotoline(filename, lineno)
+        self.vim.showFileAtLine(filename, lineno)
 
     def getCommand(self):
         self.vim.foreground()
@@ -186,7 +186,7 @@ def postcmd(self, stop, line):
     if cmd in ["a", "args", "u", "up", "d", "down"]:
         hook.reset_stdout()
         filename, lineno = hook.getFileAndLine(self)
-        hook.vim.gotoline(filename, lineno)
+        hook.vim.showFileAtLine(filename, lineno)
     hook.sendFeedback()
     return self._orig_postcmd(stop, line)
 
