@@ -108,11 +108,14 @@ class Debugger(object):
             sys.stdout = self.stdout
         #print "reset"
 
-    def getCommand(self):
-        self.vim.foreground()
-        result = self.vim.getText(prompt=self.textOutput)
+    def pop_output(self):
+        result = self.textOutput
         self.textOutput = ''
         return result
+
+    def getCommand(self):
+        self.vim.foreground()
+        return self.vim.getText(prompt=self.pop_output())
 
     def enterVimMode(self):
         if not self.vimhttp:
@@ -131,8 +134,7 @@ class Debugger(object):
         self.vimprompt = False
 
     def sendFeedback(self):
-        self.vim.showFeedback(self.textOutput)
-        self.textOutput = ''
+        self.vim.showFeedback(self.pop_output())
 
 
 hook = Debugger()
