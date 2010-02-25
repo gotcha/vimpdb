@@ -44,7 +44,8 @@ class ProxyToVim(object):
         return command.strip()
 
     def showFeedback(self, feedback):
-        self._expr('PDB_Feedback("%s")' % feedback)
+        feedback_list = feedback.splitlines()
+        self._expr('PDB_Feedback(%s)' % repr(feedback_list))
 
     def showFileAtLine(self, filename, lineno):
         if os.path.exists(filename):

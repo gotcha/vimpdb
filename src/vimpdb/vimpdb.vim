@@ -2,8 +2,6 @@
 function! s:PDB_CreateDebugTab()
     execute "tabnew"
     let t:vimpdbhook = "vimpdbhook"
-    execute "5sp"
-    execute "enew"
 endfunction
 
 function! PDB_MoveToDebugTab()
@@ -31,17 +29,57 @@ result = urllib2.urlopen('http://localhost:8000/?pdbcmd=%s' % cmd).read()
 EOF
 endfunction
 
+python <<EOT
+def vimpdb_buffer_write(message):
+
+    if not vimpdb_buffer_exist():
+        vimpdb_buffer_create()
+
+    pdb_buffer[:] = None
+
+    for line in message:
+        pdb_buffer.append(line)
+    del pdb_buffer[0]
+
+    #from normal mode into insert mode
+    y, x = vim.current.window.cursor
+    if len(vim.current.line) > x + 1:
+        vim.command('normal l')
+        vim.command('startinsert')
+    else:
+        vim.command('startinsert!')
+
+def vimpdb_buffer_create():
+    global pdb_buffer
+    source_buffer = vim.current.buffer.name
+    vim.command('silent rightbelow 5new -PDBVim-')
+    vim.command('set buftype=nofile')
+    vim.command('set noswapfile')
+    vim.command('set nonumber')
+    vim.command('set nowrap')
+    pdb_buffer = vim.current.buffer
+    while True:
+        vim.command('wincmd w')   #switch back window
+        if source_buffer == vim.current.buffer.name:
+            break
+
+def vimpdb_buffer_close():
+    vim.command('silent! bwipeout -PDBVim-')
+
+def vimpdb_buffer_exist():
+    for win in vim.windows:
+        try:                 #FIXME: Error while new a unnamed buffer
+            if 'PDBVim' in win.buffer.name:
+                return True
+        except: pass
+    return False
+EOT
+
 function! PDB_Feedback(message)
-    python << EOF
-message = vim.eval("a:message")
-vim.command("let g:pdbfeedback='%s'" % message)
-w = vim.windows[1]
-w.height = 5
-b = w.buffer
-b[:] = None
-for line in message.splitlines():
-    b.append(line)
-EOF
+python <<EOT
+_message = vim.eval("a:message")
+vimpdb_buffer_write(_message)
+EOT
 endfunction
 
 function! PDB_SwitchBack()
