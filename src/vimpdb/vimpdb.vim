@@ -14,19 +14,57 @@ function! PDB_MoveToDebugTab()
     call s:PDB_CreateDebugTab()
 endfunction
 
-call PDB_MoveToDebugTab()
+function! PDB_Init()
+    call PDB_MoveToDebugTab()
+    call Pdb_comm_init()
+    call PDB_Map()
+endfunction
 
 function! PDB_GetCommand(feedback)
     let command = input(a:feedback . " Pdb:")
     return command
 endfunction
 
+"---------------------------------------------------------------------
+" initialize PDB/Vim communication
+function! Pdb_comm_init()
+python <<EOT
+import vim
+import socket
+ 
+PDB_SERVER_ADDRESS = '127.0.0.1'
+PDB_SERVER_PORT = 6666
+try:
+    pdb_server.close()
+except:
+    pass
+pdb_server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+EOT
+endfunction
+
+"---------------------------------------------------------------------
+" deinitialize PDB/vim communication
+function! Pdb_comm_deinit()
+python <<EOT
+try:
+    pdb_server.close()
+except:
+    pass
+EOT
+endfunction
+
+
+"---------------------------------------------------------------------
+" send a message to the PDB server
+function! Pdb_send(message)
+python <<EOT
+_message = vim.eval("a:message")
+pdb_server.sendto(_message, (PDB_SERVER_ADDRESS, PDB_SERVER_PORT))
+EOT
+endfunction
+
 function! PDB_Command(command)
-    python << EOF
-import urllib2
-cmd = vim.eval("a:command")
-result = urllib2.urlopen('http://localhost:8000/?pdbcmd=%s' % cmd).read()
-EOF
+    call Pdb_send(a:command)
 endfunction
 
 python <<EOT
@@ -82,10 +120,6 @@ vimpdb_buffer_write(_message)
 EOT
 endfunction
 
-function! PDB_SwitchBack()
-    echo "Switch back to shell."   
-endfunction
-
 function! PDB_Continue()
     call PDB_Command('c')
     call PDB_SwitchBack()
@@ -93,7 +127,12 @@ endfunction
 
 function! PDB_Reset()
     call PDB_Command('pdb')
-    call PDB_SwitchBack()
+    call Pdb_exit()
+endfunction
+
+function! PDB_Quit()
+    call PDB_Command('q')
+    call Pdb_exit()
 endfunction
 
 if !exists(":PDBNext")
@@ -124,12 +163,26 @@ if !exists(":PDBArgs")
   command PDBArgs :call PDB_Command("a")
 endif
 
-noremap <buffer><silent> n :PDBNext<CR>
-noremap <buffer><silent> s :PDBStep<CR>
-noremap <buffer><silent> c :PDBContinue<CR>
-noremap <buffer><silent> q :PDBQuit<CR>
-noremap <buffer><silent> d :PDBDown<CR>
-noremap <buffer><silent> u :PDBUp<CR>
-noremap <buffer><silent> r :PDBReturn<CR>
-noremap <buffer><silent> x :PDBReset<CR>
-noremap <buffer><silent> a :PDBArgs<CR>
+function! PDB_Map()
+    noremap <buffer><silent> n :PDBNext<CR>
+    noremap <buffer><silent> s :PDBStep<CR>
+    noremap <buffer><silent> c :PDBContinue<CR>
+    noremap <buffer><silent> q :PDBQuit<CR>
+    noremap <buffer><silent> d :PDBDown<CR>
+    noremap <buffer><silent> u :PDBUp<CR>
+    noremap <buffer><silent> r :PDBReturn<CR>
+    noremap <buffer><silent> x :PDBReset<CR>
+    noremap <buffer><silent> a :PDBArgs<CR>
+endfunction
+
+"---------------------------------------------------------------------
+" PDB Exit
+function! Pdb_exit()
+    call Pdb_comm_deinit()
+python <<EOT
+vimpdb_buffer_write(["Switch back to shell."])   
+EOT
+endfunction
+
+
+call PDB_Init()

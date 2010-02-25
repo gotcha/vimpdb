@@ -2,10 +2,10 @@ import os
 import sys
 import pdb
 import StringIO
+import socket
 from subprocess import call
 from subprocess import Popen
 from subprocess import PIPE
-from vimpdb import server
 
 VIM_KEYS = "%(lineno)dgg:setlocal cursorline<CR>zz"
 
@@ -20,7 +20,13 @@ def getPackagePath(instance):
 
 class ProxyToVim(object):
 
+    PORT = 6666
+    BUFLEN = 512
+
     def __init__(self):
+        self.server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM,
+            socket.IPPROTO_UDP)
+        self.server.bind(('', self.PORT))
         self.setupRemote()
 
     def setupRemote(self):
@@ -40,8 +46,9 @@ class ProxyToVim(object):
         return command.strip()
 
     def waitFor(self, pdb):
-        command = server.run(pdb)
-        return command.strip()
+        (message, address) = self.server.recvfrom(self.BUFLEN)
+        #info("RCV: from %s: %s" % ( address, message))
+        return message.strip()
 
     def showFeedback(self, feedback):
         feedback_list = feedback.splitlines()
