@@ -122,7 +122,7 @@ endfunction
 
 function! PDB_Continue()
     call PDB_Command('c')
-    call PDB_SwitchBack()
+    call Pdb_exit()
 endfunction
 
 function! PDB_Reset()
