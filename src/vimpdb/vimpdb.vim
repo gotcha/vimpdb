@@ -15,9 +15,8 @@ function! PDB_MoveToDebugTab()
 endfunction
 
 function! PDB_Init()
-    call PDB_MoveToDebugTab()
     call Pdb_comm_init()
-    call PDB_Map()
+    call PDB_MoveToDebugTab()
 endfunction
 
 function! PDB_GetCommand(feedback)
