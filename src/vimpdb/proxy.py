@@ -28,6 +28,9 @@ class ProxyToVim(object):
         self.setupRemote()
         self.foreground()
 
+    def closeSocket(self):
+        self.server.close()
+
     def setupRemote(self):
         if not self.isRemoteSetup():
             filename = os.path.join(getPackagePath(self), "vimpdb.vim")

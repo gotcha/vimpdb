@@ -1,4 +1,5 @@
 import bdb
+import pdb
 from pdb import Pdb
 import sys
 import StringIO
@@ -13,6 +14,7 @@ class VimPdb(Pdb):
         self.vim = ProxyToVim()
         self.mainpyfile = ''
         self._wait_for_mainpyfile = 0
+        self.switchToPdb = False
 
     def xxx_interaction(self, frame, traceback):
         self.setup(frame, traceback)
@@ -30,6 +32,16 @@ class VimPdb(Pdb):
             line = self.precmd(line)
             stop = self.onecmd(line)
             stop = self.postcmd(stop, line)
+        self.postloop()
+
+    def do_pdb(self, line):
+        self.vim.closeSocket()
+        self.switchToPdb = True
+        return 1
+
+    def postloop(self):
+        if self.switchToPdb:
+            pdb.set_trace()
 
     def getFileAndLine(self):
         frame, lineno = self.stack[self.curindex]
