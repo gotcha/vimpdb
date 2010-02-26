@@ -31,7 +31,6 @@ class VimPdb(Pdb):
             line = self.precmd(line)
             stop = self.onecmd(line)
             stop = self.postcmd(stop, line)
-            print stop
 
     def getFileAndLine(self):
         frame, lineno = self.stack[self.curindex]

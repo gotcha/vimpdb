@@ -30,8 +30,7 @@ class ProxyToVim(object):
         self.setupRemote()
 
     def setupRemote(self):
-        self.remoteVimAvailable = False
-        if self._remote_expr("exists('*PDB_Init')") == '0':
+        if not self.isRemoteSetup():
             filename = os.path.join(getPackagePath(self), "vimpdb.vim")
             command = "<C-\><C-N>:source %s<CR>" % filename
             self._send(command)
@@ -45,7 +44,7 @@ class ProxyToVim(object):
 
     def waitFor(self, pdb):
         (message, address) = self.server.recvfrom(self.BUFLEN)
-        #info("RCV: from %s: %s" % ( address, message))
+        print "command :", message
         return message
 
     def showFeedback(self, feedback):
@@ -61,7 +60,9 @@ class ProxyToVim(object):
     def _send(self, command):
         return_code = call([PROGRAM, '--servername', SERVERNAME,
                             '--remote-send', command])
-        self.remoteVimAvailable = return_code == 0
+        if return_code:
+            raise RemoteUnavailable()
+        print "sent :", command
 
     def _showFileAtLine(self, filename, lineno):
         command = ":view %(filename)s<CR>" % dict(filename=filename)
@@ -71,23 +72,29 @@ class ProxyToVim(object):
         self._expr("PDB_Map()")
 
     def _expr(self, expr):
+        print "expr :", expr
         self._checkRemote()
-        return self._remote_expr(expr)
+        result = self._remote_expr(expr)
+        print result
+        return result
 
     def _remote_expr(self, expr):
         p = Popen([PROGRAM, '--servername',
                    SERVERNAME, "--remote-expr", expr],
             stdin=PIPE, stdout=PIPE)
         return_code = p.wait()
-        self.remoteVimAvailable = return_code == 0
+        if return_code:
+            raise RemoteUnavailable()
         child_stdout = p.stdout
         output = child_stdout.read()
         return output.strip()
 
+    def isRemoteSetup(self):
+        status = self._remote_expr("exists('*PDB_Init')")
+        return status == '1'
+
     def _checkRemote(self):
         self.setupRemote()
-        if not self.remoteVimAvailable:
-            raise RemoteUnavailable()
 
 
 class RemoteUnavailable(Exception):
