@@ -24,6 +24,13 @@ function! PDB_GetCommand(feedback)
     return command
 endfunction
 
+function! PDB_ShowFileAtLine(filename, line)
+    execute "view " . a:filename
+    execute "normal " . a:line . "ggz."
+    setlocal cursorline
+    call PDB_Map()
+endfunction
+
 "---------------------------------------------------------------------
 " initialize PDB/Vim communication
 function! Pdb_comm_init()

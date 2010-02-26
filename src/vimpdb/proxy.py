@@ -7,8 +7,6 @@ from subprocess import call
 from subprocess import Popen
 from subprocess import PIPE
 
-VIM_KEYS = "%(lineno)dgg:setlocal cursorline<CR>zz"
-
 PROGRAM = os.environ.get("VIMPDB_VIMSCRIPT", "vimpdb")
 SERVERNAME = os.environ.get("VIMPDB_SERVERNAME", "VIMPDB")
 
@@ -36,7 +34,7 @@ class ProxyToVim(object):
             self._send(command)
 
     def foreground(self):
-        self._expr('foreground()')
+        self._send(':call foreground()<CR>')
 
     def getText(self, prompt):
         command = self._expr('PDB_GetCommand("%s")' % prompt)
@@ -51,7 +49,7 @@ class ProxyToVim(object):
         if not feedback:
             return
         feedback_list = feedback.splitlines()
-        self._expr('PDB_Feedback(%s)' % repr(feedback_list))
+        self._send(':call PDB_Feedback(%s)<CR>' % repr(feedback_list))
 
     def showFileAtLine(self, filename, lineno):
         if os.path.exists(filename):
@@ -65,11 +63,8 @@ class ProxyToVim(object):
         print "sent :", command
 
     def _showFileAtLine(self, filename, lineno):
-        command = ":view %(filename)s<CR>" % dict(filename=filename)
-        keys = VIM_KEYS % dict(lineno=lineno)
-        self._checkRemote()
-        self._send("%(command)s%(keys)s" % dict(command=command, keys=keys))
-        self._expr("PDB_Map()")
+        self._send(':call PDB_ShowFileAtLine("%s", "%d")<CR>'
+            % (filename, lineno))
 
     def _expr(self, expr):
         print "expr :", expr
