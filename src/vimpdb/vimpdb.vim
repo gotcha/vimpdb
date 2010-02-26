@@ -160,6 +160,10 @@ endif
 if !exists(":PDBArgs")
   command PDBArgs :call PDB_Command("a")
 endif
+if !exists("PDBWord")
+  command PDBWord :call PDB_Command(expand("<cword>"))
+endif  
+
 
 function! PDB_Map()
     noremap <buffer><silent> n :PDBNext<CR>
@@ -171,6 +175,7 @@ function! PDB_Map()
     noremap <buffer><silent> r :PDBReturn<CR>
     noremap <buffer><silent> x :PDBReset<CR>
     noremap <buffer><silent> a :PDBArgs<CR>
+    noremap <buffer><silent> w :PDBWord<CR>
 endfunction
 
 "---------------------------------------------------------------------
