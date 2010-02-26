@@ -78,14 +78,6 @@ def vimpdb_buffer_write(message):
         pdb_buffer.append(line)
     del pdb_buffer[0]
 
-    #from normal mode into insert mode
-    y, x = vim.current.window.cursor
-    if len(vim.current.line) > x + 1:
-        vim.command('normal l')
-        vim.command('startinsert')
-    else:
-        vim.command('startinsert!')
-
 def vimpdb_buffer_create():
     global pdb_buffer
     source_buffer = vim.current.buffer.name
