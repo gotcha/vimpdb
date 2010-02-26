@@ -31,24 +31,22 @@ class ProxyToVim(object):
 
     def setupRemote(self):
         self.remoteVimAvailable = False
-        # .vim file should initialize a value
-        # then instead of initializing each time
-        # we can use --remote-expr to evaluate if the vim server is initialized
-        filename = os.path.join(getPackagePath(self), "vimpdb.vim")
-        command = "<C-\><C-N>:source %s<CR>" % filename
-        self._send(command)
+        if self._remote_expr("exists('*PDB_Init')") == '0':
+            filename = os.path.join(getPackagePath(self), "vimpdb.vim")
+            command = "<C-\><C-N>:source %s<CR>" % filename
+            self._send(command)
 
     def foreground(self):
         self._expr('foreground()')
 
     def getText(self, prompt):
         command = self._expr('PDB_GetCommand("%s")' % prompt)
-        return command.strip()
+        return command
 
     def waitFor(self, pdb):
         (message, address) = self.server.recvfrom(self.BUFLEN)
         #info("RCV: from %s: %s" % ( address, message))
-        return message.strip()
+        return message
 
     def showFeedback(self, feedback):
         if not feedback:
@@ -74,13 +72,17 @@ class ProxyToVim(object):
 
     def _expr(self, expr):
         self._checkRemote()
+        return self._remote_expr(expr)
+
+    def _remote_expr(self, expr):
         p = Popen([PROGRAM, '--servername',
                    SERVERNAME, "--remote-expr", expr],
             stdin=PIPE, stdout=PIPE)
         return_code = p.wait()
         self.remoteVimAvailable = return_code == 0
         child_stdout = p.stdout
-        return child_stdout.read()
+        output = child_stdout.read()
+        return output.strip()
 
     def _checkRemote(self):
         self.setupRemote()
