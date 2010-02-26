@@ -26,6 +26,7 @@ class ProxyToVim(object):
             socket.IPPROTO_UDP)
         self.server.bind(('', self.PORT))
         self.setupRemote()
+        self.foreground()
 
     def setupRemote(self):
         if not self.isRemoteSetup():

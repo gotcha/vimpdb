@@ -11,7 +11,6 @@ class VimPdb(Pdb):
         bdb.Bdb.__init__(self)
         self.aliases = {}
         self.vim = ProxyToVim()
-        self.vim.foreground()
         self.mainpyfile = ''
         self._wait_for_mainpyfile = 0
 
