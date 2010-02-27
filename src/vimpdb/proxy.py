@@ -27,6 +27,10 @@ class ProxyToVim(object):
         self.server.bind(('', self.PORT))
         self.setupRemote()
         self.foreground()
+        self.comm_init()
+
+    def comm_init(self):
+        self._send(':call Pdb_comm_init()<CR>')
 
     def closeSocket(self):
         self.server.close()
@@ -144,95 +148,3 @@ class PDBIO(object):
 
     def exitVimPromptMode(self):
         self.vimprompt = False
-
-
-vim = None #ProxyToVim()
-io = None #PDBIO()
-
-
-def getFileAndLine(self):
-    frame, lineno = self.stack[self.curindex]
-    filename = self.canonic(frame.f_code.co_filename)
-    return filename, lineno
-
-
-def precmd(self, line):
-    vim.setupRemote()
-    return self._orig_precmd(line)
-
-
-def preloop(self):
-    filename, lineno = self.getFileAndLine()
-    vim.showFileAtLine(filename, lineno)
-    return self._orig_preloop()
-
-
-def default(self, line):
-    io.capture_stdout()
-    result = self._orig_default(line)
-    io.stop_capture()
-    return result
-
-
-def do_vimp(self, arg):
-    io.enterVimPromptMode()
-    io.stop_capture()
-    vim.foreground()
-    prompt = io.pop_output()
-    command = vim.getText(prompt)
-    if command == "pdb":
-        io.eat_stdin()
-        io.exitVimPromptMode()
-        return
-    elif command == "":
-        command = io.lastCommand
-    elif command in ["a", "args", "u", "up", "d", "down"]:
-        io.lastCommand = command
-        io.capture_stdout()
-    else:
-        io.lastCommand = command
-    self.cmdqueue.append(command)
-    self.cmdqueue.append('vimp')
-
-
-def do_vim(self, arg):
-    io.enterVimMode()
-    vim.foreground()
-    command = vim.waitFor(self)
-    if command == "pdb":
-        io.eat_stdin()
-        io.exitVimMode()
-        return
-    elif command in ["a", "args", "u", "up", "d", "down"]:
-        io.capture_stdout()
-    self.cmdqueue.append(command)
-    self.cmdqueue.append('vim')
-
-
-def postcmd(self, stop, line):
-    cmd = line.strip()
-    if cmd in ["a", "args", "u", "up", "d", "down"]:
-        io.stop_capture()
-        filename, lineno = self.getFileAndLine()
-        vim.showFileAtLine(filename, lineno)
-    vim.showFeedback(io.pop_output())
-    return self._orig_postcmd(stop, line)
-
-
-def setup(klass):
-
-    def setupMethod(klass, method):
-        name = method.__name__
-        orig = getattr(klass, name)
-        setattr(klass, '_orig_' + name, orig)
-        setattr(klass, name, method)
-
-    for function in [preloop, default, precmd, postcmd]:
-        setupMethod(klass, function)
-
-    klass.do_vim = do_vim
-    klass.do_vimp = do_vimp
-    klass.getFileAndLine = getFileAndLine
-
-
-#setup(pdb.Pdb)

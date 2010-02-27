@@ -1,4 +1,3 @@
-
 function! s:PDB_CreateDebugTab()
     execute "tabnew"
     let t:vimpdbhook = "vimpdbhook"
@@ -15,7 +14,6 @@ function! PDB_MoveToDebugTab()
 endfunction
 
 function! PDB_Init()
-    call Pdb_comm_init()
     call PDB_MoveToDebugTab()
 endfunction
 

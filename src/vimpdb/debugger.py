@@ -1,5 +1,4 @@
 import bdb
-import pdb
 from pdb import Pdb
 import sys
 import StringIO
@@ -21,6 +20,11 @@ class VimPdb(Pdb):
         self.cmdloop()
         self.forget()
 
+    def trace_dispatch(self, frame, event, arg):
+        if self.switchToPdb:
+            return
+        return Pdb.trace_dispatch(self, frame, event, arg)
+
     def execRcLines(self):
         pass
 
@@ -34,14 +38,9 @@ class VimPdb(Pdb):
             stop = self.postcmd(stop, line)
         self.postloop()
 
-    def do_pdb(self, line):
-        self.vim.closeSocket()
-        self.switchToPdb = True
-        return 1
-
     def postloop(self):
         if self.switchToPdb:
-            pdb.set_trace()
+            hooked_set_trace()
 
     def getFileAndLine(self):
         frame, lineno = self.stack[self.curindex]
@@ -83,6 +82,53 @@ class VimPdb(Pdb):
         stop = Pdb.postcmd(self, stop, line)
         return stop
 
+    def do_pdb(self, line):
+        self.vim.closeSocket()
+        self.switchToPdb = True
+        sys.set_trace = None
+        return 1
+
 
 def set_trace():
     VimPdb().set_trace(sys._getframe().f_back)
+
+# hook vimpdb  #
+################
+
+
+def trace_dispatch(self, frame, event, arg):
+    if hasattr(self, 'switchToVim'):
+        return
+    return self._orig_trace_dispatch(frame, event, arg)
+
+
+def do_vim(self, arg):
+    self.switchToVim = True
+    return 1
+
+
+def postloop(self):
+    if hasattr(self, 'switchToVim'):
+        set_trace()
+
+
+def hook(klass):
+
+    def setupMethod(klass, method):
+        name = method.__name__
+        orig = getattr(klass, name)
+        orig_attr = '_orig_' + name
+        if not hasattr(klass, orig_attr):
+            setattr(klass, '_orig_' + name, orig)
+            setattr(klass, name, method)
+
+    setupMethod(klass, trace_dispatch)
+    if not hasattr(klass, 'do_vim'):
+        klass.do_vim = do_vim
+        klass.postloop = postloop
+
+
+def hooked_set_trace():
+    hook(Pdb)
+    pdb_debugger = Pdb()
+    pdb_debugger.set_trace(sys._getframe().f_back)
