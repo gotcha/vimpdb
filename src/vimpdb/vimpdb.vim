@@ -118,7 +118,6 @@ endfunction
 
 function! PDB_Continue()
     call PDB_Command('c')
-    call Pdb_exit()
 endfunction
 
 function! PDB_Reset()
@@ -129,6 +128,12 @@ endfunction
 function! PDB_Quit()
     call PDB_Command('q')
     call Pdb_exit()
+endfunction
+
+function! PDB_Break()
+    let line = line('.')
+    let filename = expand('%:p')
+    call PDB_Command("b " . filename . ":" . line)
 endfunction
 
 if !exists(":PDBNext")
@@ -145,6 +150,9 @@ if !exists(":PDBReturn")
 endif
 if !exists(":PDBContinue")
   command PDBContinue :call PDB_Continue()
+endif
+if !exists(":PDBBreak")
+  command PDBBreak :call PDB_Break()
 endif
 if !exists(":PDBDown")
   command PDBDown :call PDB_Command("d")
@@ -174,6 +182,7 @@ function! PDB_Map()
     noremap <buffer><silent> x :PDBReset<CR>
     noremap <buffer><silent> a :PDBArgs<CR>
     noremap <buffer><silent> w :PDBWord<CR>
+    noremap <buffer><silent> b :PDBBreak<CR>
 endfunction
 
 "---------------------------------------------------------------------
