@@ -151,10 +151,8 @@ def set_trace_without_step(self, frame):
 
 
 def do_vim(self, arg):
-    """
-    'vim' command:
-    it switches to debugging with vimpdb
-    """
+    """v(im)
+switch to debugging with vimpdb"""
     self.vimpdb = VimPdb()
     self.vimpdb.set_trace_without_step(self.curframe)
     self.vimpdb.interaction(self.curframe, None)
