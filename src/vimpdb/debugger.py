@@ -119,6 +119,9 @@ class VimPdb(Pdb):
 
 
 def set_trace():
+    """
+    can be called like pdb.set_trace()
+    """
     VimPdb().set_trace(sys._getframe().f_back)
 
 
