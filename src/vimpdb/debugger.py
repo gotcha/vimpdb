@@ -5,6 +5,28 @@ import StringIO
 from vimpdb.proxy import ProxyToVim
 
 
+def captured(method):
+
+    def decorated(self, line):
+        self.capture_stdout()
+        stop = method(self, line)
+        self.stop_capture()
+        self.vim.showFeedback(self.pop_output())
+        return stop
+
+    return decorated
+
+
+def moved(method):
+
+    def decorated(self, line):
+        stop = method(self, line)
+        self.showFileAtLine()
+        return stop
+
+    return decorated
+
+
 class VimPdb(Pdb):
     """
     debugger integrated with Vim
@@ -41,20 +63,6 @@ class VimPdb(Pdb):
     def preloop(self):
         filename, lineno = self.getFileAndLine()
         self.vim.showFileAtLine(filename, lineno)
-
-    def onecmd(self, line):
-        self.capture_stdout()
-        stop = Pdb.onecmd(self, line)
-        self.stop_capture()
-        self.vim.showFeedback(self.pop_output())
-        return stop
-
-    def postcmd(self, stop, line):
-        cmd = line.strip()
-        if cmd in ["u", "up", "d", "down"]:
-            self.showFileAtLine()
-        stop = Pdb.postcmd(self, stop, line)
-        return stop
 
     def getFileAndLine(self):
         frame, lineno = self.stack[self.curindex]
@@ -98,6 +106,16 @@ class VimPdb(Pdb):
 
     def set_trace_without_step(self, frame):
         set_trace_without_step(self, frame)
+
+    do_u = do_up = moved(Pdb.do_up)
+    do_d = do_down = moved(Pdb.do_down)
+    do_a = do_args = captured(Pdb.do_args)
+    do_b = do_break = captured(Pdb.do_break)
+
+    @captured
+    def default(self, line):
+        print line, "=",
+        return Pdb.default(self, line)
 
 
 def set_trace():
