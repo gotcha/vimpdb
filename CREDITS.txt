@@ -1,8 +1,13 @@
 CREDITS
 -------
-Hacked with Jean-François Roche
+  * Godefroid Chapelle
 
+  * Jean-François Roche
 
-Code inspired by vimpdbhook written by Stefan Eletzhofer 
-http://code.google.com/p/vimpdbhook/
+  * Rewrite started when looking at ``vimpdbhook`` by Stefan Eletzhofer 
+    http://code.google.com/p/vimpdbhook/
 
+  * Some code taken from ``vimpdb`` 0.2.1 by Stefan Eletzhofer 
+
+  * Some code taken from ``VimPdb.vim`` by Yaron Budowski
+    http://www.vim.org/scripts/script.php?script_id=2043

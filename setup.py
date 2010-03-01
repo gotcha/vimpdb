@@ -5,8 +5,9 @@ version = '0.1'
 setup(name='vimpdb',
       version=version,
       description="Vim and Pdb integration",
-      long_description="""\
-""",
+      long_description=open("README.txt").read() + "\n" +
+                       open("CREDITS.txt").read() + "\n" +
+                       open("CHANGES.txt").read(),
       classifiers=[],
       keywords='',
       author='Godefroid Chapelle',
