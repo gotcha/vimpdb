@@ -97,8 +97,6 @@ class VimPdb(Pdb):
         switches back to debugging with (almost) standard pdb.Pdb
         except for added 'vim' command.
         """
-        self.stop_capture()
-        print self.pop_output()
         self.vim.closeSocket()
         self.pdb = get_hooked_pdb()
         self.pdb.set_trace_without_step(self.curframe)
