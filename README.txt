@@ -17,9 +17,17 @@ output. In the opposite case, you will see ``-clientserver`` or ``-python``.
 Setup
 -----
 
-You will need to setup ``VIMPDB_VIMSCRIPT`` environment variable. It should hold
+You might need to setup ``VIMPDB_VIMSCRIPT`` environment variable. It should hold
 the command used at the shell prompt to launch Vim supporting the options
-mentioned above.
+mentioned above. (Default value is ``vimpdb``).
+
+You might need to setup ``VIMPDB_SERVERNAME`` environment variable. It should hold
+the name of the Vim server you will be using. (Default value is ``VIMPDB``).
+
+When a Vim supporting ``clientserver`` option has started, you can find its name by issuing the
+following command at the Vim prompt:
+
+    :echo v:servername
 
 Debugging
 ---------
