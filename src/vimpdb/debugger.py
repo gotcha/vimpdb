@@ -5,7 +5,7 @@ import StringIO
 from vimpdb.proxy import ProxyToVim
 
 
-def captured(method):
+def capture(method):
 
     def decorated(self, line):
         self.capture_stdout()
@@ -17,7 +17,7 @@ def captured(method):
     return decorated
 
 
-def moved(method):
+def show_line(method):
 
     def decorated(self, line):
         stop = method(self, line)
@@ -34,6 +34,7 @@ class VimPdb(Pdb):
 
     def __init__(self):
         bdb.Bdb.__init__(self)
+        self.capturing = False
         # attributes needed to remain compatible with Pdb methods
         self.aliases = {}
         self.vim = ProxyToVim()
@@ -77,11 +78,11 @@ class VimPdb(Pdb):
     def capture_stdout(self):
         self.stdout = sys.stdout
         sys.stdout = StringIO.StringIO()
-        self.captured = True
+        self.capturing = True
 
     def stop_capture(self):
-        if self.captured:
-            self.captured = False
+        if self.capturing:
+            self.capturing = False
             self.textOutput = sys.stdout.getvalue()
             sys.stdout = self.stdout
 
@@ -107,12 +108,12 @@ class VimPdb(Pdb):
     def set_trace_without_step(self, frame):
         set_trace_without_step(self, frame)
 
-    do_u = do_up = moved(Pdb.do_up)
-    do_d = do_down = moved(Pdb.do_down)
-    do_a = do_args = captured(Pdb.do_args)
-    do_b = do_break = captured(Pdb.do_break)
+    do_u = do_up = show_line(Pdb.do_up)
+    do_d = do_down = show_line(Pdb.do_down)
+    do_a = do_args = capture(Pdb.do_args)
+    do_b = do_break = capture(Pdb.do_break)
 
-    @captured
+    @capture
     def default(self, line):
         print line, "=",
         return Pdb.default(self, line)
