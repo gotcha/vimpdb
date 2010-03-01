@@ -6,24 +6,24 @@ from vimpdb.proxy import ProxyToVim
 
 
 class VimPdb(Pdb):
+    """
+    debugger integrated with Vim
+    """
 
     def __init__(self):
         bdb.Bdb.__init__(self)
+        # attributes needed to remain compatible with Pdb methods
         self.aliases = {}
         self.vim = ProxyToVim()
         self.mainpyfile = ''
         self._wait_for_mainpyfile = 0
-        self.switchToPdb = False
-
-    def xxx_interaction(self, frame, traceback):
-        self.setup(frame, traceback)
-        self.cmdloop()
-        self.forget()
 
     def trace_dispatch(self, frame, event, arg):
-        if self.switchToPdb:
-            return
-        return Pdb.trace_dispatch(self, frame, event, arg)
+        """allow to switch to Pdb instance"""
+        if hasattr(self, 'pdb'):
+            return self.pdb.trace_dispatch(frame, event, arg)
+        else:
+            return Pdb.trace_dispatch(self, frame, event, arg)
 
     def execRcLines(self):
         pass
@@ -38,19 +38,34 @@ class VimPdb(Pdb):
             stop = self.postcmd(stop, line)
         self.postloop()
 
-    def postloop(self):
-        if self.switchToPdb:
-            hooked_set_trace()
+    def preloop(self):
+        filename, lineno = self.getFileAndLine()
+        self.vim.showFileAtLine(filename, lineno)
+
+    def onecmd(self, line):
+        self.capture_stdout()
+        stop = Pdb.onecmd(self, line)
+        self.stop_capture()
+        self.vim.showFeedback(self.pop_output())
+        return stop
+
+    def postcmd(self, stop, line):
+        cmd = line.strip()
+        if cmd in ["u", "up", "d", "down"]:
+            self.showFileAtLine()
+        stop = Pdb.postcmd(self, stop, line)
+        return stop
 
     def getFileAndLine(self):
         frame, lineno = self.stack[self.curindex]
         filename = self.canonic(frame.f_code.co_filename)
         return filename, lineno
 
-    def preloop(self):
+    def showFileAtLine(self):
         filename, lineno = self.getFileAndLine()
         self.vim.showFileAtLine(filename, lineno)
 
+    # stdout captures to send back to Vim
     def capture_stdout(self):
         self.stdout = sys.stdout
         sys.stdout = StringIO.StringIO()
@@ -67,52 +82,71 @@ class VimPdb(Pdb):
         self.textOutput = ''
         return result
 
-    def onecmd(self, line):
-        self.capture_stdout()
-        stop = Pdb.onecmd(self, line)
-        self.stop_capture()
-        self.vim.showFeedback(self.pop_output())
-        return stop
-
-    def postcmd(self, stop, line):
-        cmd = line.strip()
-        if cmd in ["a", "args", "u", "up", "d", "down"]:
-            filename, lineno = self.getFileAndLine()
-            self.vim.showFileAtLine(filename, lineno)
-        stop = Pdb.postcmd(self, stop, line)
-        return stop
-
     def do_pdb(self, line):
+        """
+        'pdb' command:
+        switches back to debugging with (almost) standard pdb.Pdb
+        except for added 'vim' command.
+        """
+        self.stop_capture()
+        print self.pop_output()
         self.vim.closeSocket()
-        self.switchToPdb = True
-        sys.set_trace = None
+        self.pdb = get_hooked_pdb()
+        self.pdb.set_trace_without_step(self.curframe)
+        self.pdb.interaction(self.curframe, None)
         return 1
+
+    def set_trace_without_step(self, frame):
+        set_trace_without_step(self, frame)
 
 
 def set_trace():
     VimPdb().set_trace(sys._getframe().f_back)
+
 
 # hook vimpdb  #
 ################
 
 
 def trace_dispatch(self, frame, event, arg):
-    if hasattr(self, 'switchToVim'):
-        return
-    return self._orig_trace_dispatch(frame, event, arg)
+    """allow to switch to Vimpdb instance"""
+    if hasattr(self, 'vimpdb'):
+        return self.vimpdb.trace_dispatch(frame, event, arg)
+    else:
+        return self._orig_trace_dispatch(frame, event, arg)
+
+
+def set_trace_without_step(self, frame):
+    """
+    set trace while switching from pdb to vimpdb
+    and vice versa
+    """
+    self.reset()
+    while frame:
+        frame.f_trace = self.trace_dispatch
+        self.botframe = frame
+        frame = frame.f_back
+    sys.settrace(self.trace_dispatch)
 
 
 def do_vim(self, arg):
-    self.switchToVim = True
+    """
+    'vim' command:
+    it switches to debugging with vimpdb
+    """
+    self.vimpdb = VimPdb()
+    self.vimpdb.set_trace_without_step(self.curframe)
+    self.vimpdb.interaction(self.curframe, None)
     return 1
 
 
-def postloop(self):
-    if hasattr(self, 'switchToVim'):
-        set_trace()
-
-
 def hook(klass):
+    """
+    monkey-patch pdb.Pdb class
+
+    adds a 'vim' (and 'v') command:
+    it switches to debugging with vimpdb
+    """
 
     def setupMethod(klass, method):
         name = method.__name__
@@ -124,11 +158,12 @@ def hook(klass):
 
     setupMethod(klass, trace_dispatch)
     if not hasattr(klass, 'do_vim'):
+        klass.set_trace_without_step = set_trace_without_step
         klass.do_vim = do_vim
-        klass.postloop = postloop
+        klass.do_v = do_vim
 
 
-def hooked_set_trace():
+def get_hooked_pdb():
     hook(Pdb)
-    pdb_debugger = Pdb()
-    pdb_debugger.set_trace(sys._getframe().f_back)
+    debugger = Pdb()
+    return debugger

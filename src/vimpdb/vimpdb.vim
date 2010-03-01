@@ -23,6 +23,7 @@ function! PDB_GetCommand(feedback)
 endfunction
 
 function! PDB_ShowFileAtLine(filename, line)
+    call PDB_MoveToDebugTab()
     execute "view " . a:filename
     execute "normal " . a:line . "ggz."
     setlocal cursorline

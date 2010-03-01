@@ -1,7 +1,5 @@
 import os
 import sys
-#import pdb
-import StringIO
 import socket
 from subprocess import call
 from subprocess import Popen
@@ -45,18 +43,20 @@ class ProxyToVim(object):
         self._send(':call foreground()<CR>')
 
     def getText(self, prompt):
+        self.setupRemote()
         command = self._expr('PDB_GetCommand("%s")' % prompt)
         return command
 
     def waitFor(self, pdb):
         (message, address) = self.server.recvfrom(self.BUFLEN)
-        print "command :", message
+        print "command:", message
         return message
 
     def showFeedback(self, feedback):
         if not feedback:
             return
         feedback_list = feedback.splitlines()
+        self.setupRemote()
         self._send(':call PDB_Feedback(%s)<CR>' % repr(feedback_list))
 
     def showFileAtLine(self, filename, lineno):
@@ -68,17 +68,17 @@ class ProxyToVim(object):
                             '--remote-send', command])
         if return_code:
             raise RemoteUnavailable()
-        print "sent :", command
+        print "sent:", command
 
     def _showFileAtLine(self, filename, lineno):
+        self.setupRemote()
         self._send(':call PDB_ShowFileAtLine("%s", "%d")<CR>'
             % (filename, lineno))
 
     def _expr(self, expr):
-        print "expr :", expr
-        self._checkRemote()
+        print "expr:", expr
         result = self._remote_expr(expr)
-        print result
+        print "result:", result
         return result
 
     def _remote_expr(self, expr):
@@ -96,55 +96,12 @@ class ProxyToVim(object):
         status = self._remote_expr("exists('*PDB_Init')")
         return status == '1'
 
-    def _checkRemote(self):
-        self.setupRemote()
-
 
 class RemoteUnavailable(Exception):
     pass
 
 
-class PDBIO(object):
-
-    def __init__(self):
-        self.textOutput = ''
-        self.captured = False
-        self.vimhttp = False
-        self.vimprompt = False
-
-    def eat_stdin(self):
-        sys.stdout.write('-- Type Ctrl-D to continue --\n')
-        sys.stdout.flush()
-        sys.stdin.readlines()
-
-    def capture_stdout(self):
-        self.stdout = sys.stdout
-        sys.stdout = StringIO.StringIO()
-        self.captured = True
-
-    def stop_capture(self):
-        if self.captured:
-            self.captured = False
-            self.textOutput = sys.stdout.getvalue()
-            sys.stdout = self.stdout
-
-    def pop_output(self):
-        result = self.textOutput
-        self.textOutput = ''
-        return result
-
-    def enterVimMode(self):
-        if not self.vimhttp:
-            print "Entering Vim mode"
-            self.vimhttp = True
-
-    def exitVimMode(self):
-        self.vimhttp = False
-
-    def enterVimPromptMode(self):
-        if not self.vimprompt:
-            print "Entering Vim mode"
-            self.vimprompt = True
-
-    def exitVimPromptMode(self):
-        self.vimprompt = False
+def eat_stdin(self):
+    sys.stdout.write('-- Type Ctrl-D to continue --\n')
+    sys.stdout.flush()
+    sys.stdin.readlines()
