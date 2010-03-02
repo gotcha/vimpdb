@@ -3,7 +3,7 @@ CREDITS
 
 - Godefroid Chapelle
 
-- Jean-François Roche
+- Jean-Francois Roche
 
 - Stefan Eletzhofer
 
