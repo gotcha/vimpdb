@@ -118,7 +118,8 @@ class VimPdb(Pdb):
 
     @capture
     def default(self, line):
-        print line, "=",
+        # first char should not be printed (it is the '!' needed to escape
+        print line[1:], "=",
         return Pdb.default(self, line)
 
 
