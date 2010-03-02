@@ -1,4 +1,3 @@
-import bdb
 from pdb import Pdb, line_prefix
 import sys
 import StringIO
@@ -33,14 +32,9 @@ class VimPdb(Pdb):
     """
 
     def __init__(self):
-        #bdb.Bdb.__init__(self)
         Pdb.__init__(self)
         self.capturing = False
-        # attributes needed to remain compatible with Pdb methods
-        self.aliases = {}
         self.vim = ProxyToVim()
-        self.mainpyfile = ''
-        self._wait_for_mainpyfile = 0
 
     def trace_dispatch(self, frame, event, arg):
         """allow to switch to Pdb instance"""
