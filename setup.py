@@ -1,13 +1,14 @@
 from setuptools import setup, find_packages
 
-version = '0.1'
+version = '0.3'
 
 setup(name='vimpdb',
       version=version,
       description="Vim and Pdb integration",
       long_description=open("README.txt").read() + "\n" +
                        open("CREDITS.txt").read() + "\n" +
-                       open("CHANGES.txt").read(),
+                       open("CHANGES.txt").read() + "\n" +
+                       open("TODO.txt").read(),
       classifiers=[],
       keywords='',
       author='Godefroid Chapelle',
