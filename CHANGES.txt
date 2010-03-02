@@ -1,7 +1,7 @@
 Changelog
 =========
 
-0.3 (unreleased)
+0.3 (2010-03-02)
 ----------------
 
   - fully rewritten
