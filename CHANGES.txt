@@ -1,27 +1,28 @@
 Changelog
 =========
 
-0.3.1 (unreleased)
+0.3.1 (2010-03-02)
 ------------------
 
-- Nothing changed yet.
+- fix setup.py metadata so that it does not hold non ascii chars.
+  This avoided actual release to PyPI
 
 
 0.3 (2010-03-02)
 ----------------
 
-  - fully rewritten
+- fully rewritten
 
 
 0.2.1 (2008-06-27)
 ------------------
 
-  - added ``vimpdb`` script
+- added ``vimpdb`` script
 
-  - added "exit" callback
+- added "exit" callback
 
 0.2 (2008-06-17)
 ----------------
 
-  - first release to PyPi
+- first release to PyPi
 
