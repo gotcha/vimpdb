@@ -168,7 +168,7 @@ if !exists(":PDBArgs")
   command PDBArgs :call PDB_Command("a")
 endif
 if !exists("PDBWord")
-  command PDBWord :call PDB_Command(expand("<cword>"))
+  command PDBWord :call PDB_Command("!".expand("<cword>"))
 endif  
 
 
