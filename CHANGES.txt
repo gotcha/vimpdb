@@ -1,20 +1,21 @@
 Changelog
----------
+=========
 
 0.3 (unreleased)
-================
+----------------
 
   - fully rewritten
 
+
 0.2.1 (2008-06-27)
-==================
+----------------
 
   - added ``vimpdb`` script
 
   - added "exit" callback
 
 0.2 (2008-06-17)
-================
+----------------
 
   - first release to PyPi
 

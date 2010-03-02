@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-version = '0.1'
+version = '0.3dev'
 
 setup(name='vimpdb',
       version=version,
@@ -12,8 +12,8 @@ setup(name='vimpdb',
       keywords='',
       author='Godefroid Chapelle',
       author_email='gotcha@bubblenet.be',
-      url='',
-      license='GPL',
+      url='http://github.com/gotcha/vimpdb',
+      license='MIT',
       packages=find_packages('src'),
       package_dir={'': 'src'},
       include_package_data=True,
