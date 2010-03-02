@@ -1,5 +1,5 @@
 import bdb
-from pdb import Pdb
+from pdb import Pdb, line_prefix
 import sys
 import StringIO
 from vimpdb.proxy import ProxyToVim
@@ -33,7 +33,8 @@ class VimPdb(Pdb):
     """
 
     def __init__(self):
-        bdb.Bdb.__init__(self)
+        #bdb.Bdb.__init__(self)
+        Pdb.__init__(self)
         self.capturing = False
         # attributes needed to remain compatible with Pdb methods
         self.aliases = {}
@@ -110,6 +111,10 @@ class VimPdb(Pdb):
     do_d = do_down = show_line(Pdb.do_down)
     do_a = do_args = capture(Pdb.do_args)
     do_b = do_break = capture(Pdb.do_break)
+
+    @capture
+    def print_stack_entry(self, frame_lineno, prompt_prefix=line_prefix):
+        return Pdb.print_stack_entry(self, frame_lineno, prompt_prefix)
 
     @capture
     def default(self, line):
