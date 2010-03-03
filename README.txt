@@ -102,7 +102,31 @@ Now you'll be able to use the following commands:
     b , Sets a breakpoint at the line on which the cursor is sitting.
     w , Displays the value of the word on which the cursor is sitting.
     x , Switch to debugging with standard Pdb.
-    v , In plain Pdb, switch back to VimPdb
+    v , Switch back to VimPdb from plain Pdb.
 
+Standard Pdb hook
+=================
+
+If you find it hard to change habits and keep on typing 
+
+::
+
+    import pdb; pdb.set_trace()
+
+you can add the following line to the  ``.pdbrc`` file sitting in your home
+folder::
+
+    import vimpdb; vimpdb.hookPdb()
+
+This way, the command ``v(im)`` mentioned above is added to your standard Pdb
+and you can switch to **vimpdb** at any time.
+
+Known issues
+============
+
+* Currently, when you stop debugging, the buffers which you debugged with are
+  left in an inconvenient state : the keys mapped to Pdb commands are still
+  mapped. In other words, switching from debugging to fixing code is not
+  convenient.
 
 ..  vim: set ft=rst ts=4 sw=4 expandtab tw=78 : 
