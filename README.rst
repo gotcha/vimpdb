@@ -20,8 +20,8 @@ Find out if it is the case by issuing the following command at the VIM prompt::
 If the options are supported, you will see ``+clientserver`` and ``+python`` in the
 output. In the opposite case, you will see ``-clientserver`` or ``-python``.
 
-For Mac OS X, you'll want to use MacVIM_, for Linux and Windows the default build
-should be already server-enabled.  MacVIM_ has python compiled in by default, also.
+On Linux and Windows, the default VIM build should be already server-enabled.
+On Mac OS X, you'll want to use MacVIM_. MacVIM has also python compiled in by default.
 
 .. _MacVIM: http://code.google.com/p/macvim/
 
@@ -63,7 +63,7 @@ Note that the default ``servername`` is ``VIM``
 Starting a VIM Server for Debugging
 -----------------------------------
 
-You may start a VIM server for debugging like so::
+To start a VIM server for debugging, issue following command on the shell::
 
     $ vim --servername VIMPDB
 
@@ -86,7 +86,7 @@ Using **vimpdb** is easy -- just call ``set_trace`` as usual::
 Now, when the python interpreter hits that line, VIM will get the focus and
 load the source file.
 
-Now you'll be able to use the following commands:
+You may now use the following commands:
 
 .. csv-table:: VimPDB Commands
     :header-rows: 1
