@@ -5,7 +5,7 @@ version = '0.3.3dev'
 setup(name='vimpdb',
       version=version,
       description="Vim and Pdb integration",
-      long_description=open("README.txt").read() + "\n" +
+      long_description=open("README.rst").read() + "\n" +
                        open("CREDITS.txt").read() + "\n" +
                        open("CHANGES.txt").read() + "\n" +
                        open("TODO.txt").read(),
