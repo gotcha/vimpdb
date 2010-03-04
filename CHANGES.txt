@@ -1,7 +1,7 @@
 Changelog
 =========
 
-0.3.3 (unreleased)
+0.3.3 (2010-03-04)
 ------------------
 
 - avoid leaving mappings in debugged buffers
