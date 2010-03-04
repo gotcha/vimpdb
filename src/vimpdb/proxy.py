@@ -28,7 +28,7 @@ class ProxyToVim(object):
         self.comm_init()
 
     def comm_init(self):
-        self._send(':call Pdb_comm_init()<CR>')
+        self._send(':call PDB_comm_init()<CR>')
 
     def closeSocket(self):
         self.server.close()
@@ -44,7 +44,7 @@ class ProxyToVim(object):
 
     def getText(self, prompt):
         self.setupRemote()
-        command = self._expr('PDB_GetCommand("%s")' % prompt)
+        command = self._expr('PDB_get_command("%s")' % prompt)
         return command
 
     def waitFor(self, pdb):
@@ -57,7 +57,7 @@ class ProxyToVim(object):
             return
         feedback_list = feedback.splitlines()
         self.setupRemote()
-        self._send(':call PDB_Feedback(%s)<CR>' % repr(feedback_list))
+        self._send(':call PDB_display_feedback(%s)<CR>' % repr(feedback_list))
 
     def showFileAtLine(self, filename, lineno):
         if os.path.exists(filename):
@@ -72,7 +72,7 @@ class ProxyToVim(object):
 
     def _showFileAtLine(self, filename, lineno):
         self.setupRemote()
-        self._send(':call PDB_ShowFileAtLine("%s", "%d")<CR>'
+        self._send(':call PDB_show_file_at_line("%s", "%d")<CR>'
             % (filename, lineno))
 
     def _expr(self, expr):
@@ -93,7 +93,7 @@ class ProxyToVim(object):
         return output.strip()
 
     def isRemoteSetup(self):
-        status = self._remote_expr("exists('*PDB_Init')")
+        status = self._remote_expr("exists('*PDB_init')")
         return status == '1'
 
 

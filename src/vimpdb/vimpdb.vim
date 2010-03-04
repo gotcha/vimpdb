@@ -1,39 +1,39 @@
-function! s:PDB_CreateDebugTab()
+function! s:PDB_create_debug_tab()
     execute "tabnew"
     let t:vimpdbhook = "vimpdbhook"
 endfunction
 
-function! PDB_MoveToDebugTab()
+function! PDB_move_to_debug_tab()
     for i in range(tabpagenr('$'))
         exe i+1 "tabnext"
         if exists("t:vimpdbhook") == 1
             return
         endif
     endfor
-    call s:PDB_CreateDebugTab()
+    call s:PDB_create_debug_tab()
 endfunction
 
-function! PDB_Init()
-    call PDB_MoveToDebugTab()
+function! PDB_init()
+    call PDB_move_to_debug_tab()
 endfunction
 
-function! PDB_GetCommand(feedback)
+function! PDB_get_command(feedback)
     let command = input(a:feedback . " Pdb:")
     return command
 endfunction
 
-function! PDB_ShowFileAtLine(filename, line)
-    call PDB_MoveToDebugTab()
+function! PDB_show_file_at_line(filename, line)
+    call PDB_move_to_debug_tab()
     call PDB_reset_original_map()
     execute "view " . a:filename
     execute "normal " . a:line . "ggz."
     setlocal cursorline
-    call PDB_Map()
+    call PDB_map()
 endfunction
 
 "---------------------------------------------------------------------
 " initialize PDB/Vim communication
-function! Pdb_comm_init()
+function! PDB_comm_init()
 python <<EOT
 import vim
 import socket
@@ -50,7 +50,7 @@ endfunction
 
 "---------------------------------------------------------------------
 " deinitialize PDB/vim communication
-function! Pdb_comm_deinit()
+function! PDB_comm_deinit()
 python <<EOT
 try:
     pdb_server.close()
@@ -62,15 +62,15 @@ endfunction
 
 "---------------------------------------------------------------------
 " send a message to the PDB server
-function! Pdb_send(message)
+function! PDB_send(message)
 python <<EOT
 _message = vim.eval("a:message")
 pdb_server.sendto(_message, (PDB_SERVER_ADDRESS, PDB_SERVER_PORT))
 EOT
 endfunction
 
-function! PDB_Command(command)
-    call Pdb_send(a:command)
+function! PDB_send_command(command)
+    call PDB_send(a:command)
 endfunction
 
 python <<EOT
@@ -111,65 +111,65 @@ def vimpdb_buffer_exist():
     return False
 EOT
 
-function! PDB_Feedback(message)
+function! PDB_display_feedback(message)
 python <<EOT
 _message = vim.eval("a:message")
 vimpdb_buffer_write(_message)
 EOT
 endfunction
 
-function! PDB_Continue()
-    call PDB_Command('c')
+function! PDB_continue()
+    call PDB_send_command('c')
 endfunction
 
-function! PDB_Reset()
-    call PDB_Command('pdb')
-    call Pdb_exit()
+function! PDB_reset()
+    call PDB_send_command('pdb')
+    call PDB_exit()
 endfunction
 
-function! PDB_Quit()
-    call PDB_Command('q')
-    call Pdb_exit()
+function! PDB_quit()
+    call PDB_send_command('q')
+    call PDB_exit()
 endfunction
 
-function! PDB_Break()
+function! PDB_break()
     let line = line('.')
     let filename = expand('%:p')
-    call PDB_Command("b " . filename . ":" . line)
+    call PDB_send_command("b " . filename . ":" . line)
 endfunction
 
 if !exists(":PDBNext")
-  command! PDBNext :call PDB_Command("n")
+  command! PDBNext :call PDB_send_command("n")
 endif
 if !exists(":PDBQuit")
-  command! PDBQuit :call PDB_Command("q")
+  command! PDBQuit :call PDB_quit()
 endif
 if !exists(":PDBStep")
-  command! PDBStep :call PDB_Command("s")
+  command! PDBStep :call PDB_send_command("s")
 endif
 if !exists(":PDBReturn")
-  command! PDBReturn :call PDB_Command("r")
+  command! PDBReturn :call PDB_send_command("r")
 endif
 if !exists(":PDBContinue")
-  command! PDBContinue :call PDB_Continue()
+  command! PDBContinue :call PDB_continue()
 endif
 if !exists(":PDBBreak")
-  command! PDBBreak :call PDB_Break()
+  command! PDBBreak :call PDB_break()
 endif
 if !exists(":PDBDown")
-  command! PDBDown :call PDB_Command("d")
+  command! PDBDown :call PDB_send_command("d")
 endif
 if !exists(":PDBUp")
-  command! PDBUp :call PDB_Command("u")
+  command! PDBUp :call PDB_send_command("u")
 endif
 if !exists(":PDBReset")
-  command! PDBReset :call PDB_Reset()
+  command! PDBReset :call PDB_reset()
 endif
 if !exists(":PDBArgs")
-  command! PDBArgs :call PDB_Command("a")
+  command! PDBArgs :call PDB_send_command("a")
 endif
 if !exists("PDBWord")
-  command! PDBWord :call PDB_Command("!".expand("<cword>"))
+  command! PDBWord :call PDB_send_command("!".expand("<cword>"))
 endif  
 
 let s:pdb_map = {}
@@ -185,7 +185,7 @@ let s:pdb_map["a"] = "PDBArgs"
 let s:pdb_map["w"] = "PDBWord"
 let s:pdb_map["b"] = "PDBBreak"
 
-function! PDB_Map()
+function! PDB_map()
     if !exists("b:pdb_mapped")
         let b:pdb_mapped = 0
     endif
@@ -222,8 +222,8 @@ function! PDB_reset_original_map()
 endfunction
 "---------------------------------------------------------------------
 " PDB Exit
-function! Pdb_exit()
-    call Pdb_comm_deinit()
+function! PDB_exit()
+    call PDB_comm_deinit()
     call PDB_reset_original_map()
 python <<EOT
 vimpdb_buffer_write(["Switch back to shell."])   
@@ -231,4 +231,4 @@ EOT
 endfunction
 
 
-call PDB_Init()
+call PDB_init()
