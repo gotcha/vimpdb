@@ -24,6 +24,7 @@ endfunction
 
 function! PDB_ShowFileAtLine(filename, line)
     call PDB_MoveToDebugTab()
+    call PDB_reset_original_map()
     execute "view " . a:filename
     execute "normal " . a:line . "ggz."
     setlocal cursorline
@@ -185,26 +186,45 @@ let s:pdb_map["w"] = "PDBWord"
 let s:pdb_map["b"] = "PDBBreak"
 
 function! PDB_Map()
-    call PDB_store_original_map()
-    for key in keys(s:pdb_map)
-        let command = s:pdb_map[key]
-        execute "nmap <buffer> " . key . " :" . command . "<CR>"
-    endfor
-endfunction
-
-function! PDB_store_original_map()
-    if !exists("b:pdb_original_map")
-        let b:pdb_original_map = {}
+    if !exists("b:pdb_mapped")
+        let b:pdb_mapped = 0
+    endif
+    if ! b:pdb_mapped
+        call PDB_store_original_map()
         for key in keys(s:pdb_map)
-            let b:pdb_original_map[key] = maparg("@" . key, "n")
+            let command = s:pdb_map[key]
+            execute "nmap <buffer> " . key . " :" . command . "<CR>"
         endfor
+        let b:pdb_mapped = 1
     endif
 endfunction
 
+function! PDB_store_original_map()
+    let b:pdb_original_map = {}
+    for key in keys(s:pdb_map)
+        let b:pdb_original_map[key] = maparg(key, "@n")
+    endfor
+endfunction
+
+function! PDB_reset_original_map()
+    if exists("b:pdb_mapped")
+        if b:pdb_mapped
+            for key in keys(b:pdb_original_map)
+                execute "unmap <buffer> " . key 
+                let value = b:pdb_original_map[key]
+                if value != ""
+                    execute "nmap <buffer> " . key . " " . value
+                endif
+            endfor
+            let b:pdb_mapped = 0
+        endif
+    endif
+endfunction
 "---------------------------------------------------------------------
 " PDB Exit
 function! Pdb_exit()
     call Pdb_comm_deinit()
+    call PDB_reset_original_map()
 python <<EOT
 vimpdb_buffer_write(["Switch back to shell."])   
 EOT
