@@ -138,37 +138,37 @@ function! PDB_Break()
 endfunction
 
 if !exists(":PDBNext")
-  command PDBNext :call PDB_Command("n")
+  command! PDBNext :call PDB_Command("n")
 endif
 if !exists(":PDBQuit")
-  command PDBQuit :call PDB_Command("q")
+  command! PDBQuit :call PDB_Command("q")
 endif
 if !exists(":PDBStep")
-  command PDBStep :call PDB_Command("s")
+  command! PDBStep :call PDB_Command("s")
 endif
 if !exists(":PDBReturn")
-  command PDBReturn :call PDB_Command("r")
+  command! PDBReturn :call PDB_Command("r")
 endif
 if !exists(":PDBContinue")
-  command PDBContinue :call PDB_Continue()
+  command! PDBContinue :call PDB_Continue()
 endif
 if !exists(":PDBBreak")
-  command PDBBreak :call PDB_Break()
+  command! PDBBreak :call PDB_Break()
 endif
 if !exists(":PDBDown")
-  command PDBDown :call PDB_Command("d")
+  command! PDBDown :call PDB_Command("d")
 endif
 if !exists(":PDBUp")
-  command PDBUp :call PDB_Command("u")
+  command! PDBUp :call PDB_Command("u")
 endif
 if !exists(":PDBReset")
-  command PDBReset :call PDB_Reset()
+  command! PDBReset :call PDB_Reset()
 endif
 if !exists(":PDBArgs")
-  command PDBArgs :call PDB_Command("a")
+  command! PDBArgs :call PDB_Command("a")
 endif
 if !exists("PDBWord")
-  command PDBWord :call PDB_Command("!".expand("<cword>"))
+  command! PDBWord :call PDB_Command("!".expand("<cword>"))
 endif  
 
 
