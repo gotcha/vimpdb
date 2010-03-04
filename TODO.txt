@@ -11,9 +11,6 @@ TODO
 
 - check and complain if Vim does not support the right options
 
-- add command to set/reset key mappings/readonly state to allow to switch to
-  editing mode
-
 - register menu
 
 - and much more...
