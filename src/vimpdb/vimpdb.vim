@@ -171,19 +171,34 @@ if !exists("PDBWord")
   command! PDBWord :call PDB_Command("!".expand("<cword>"))
 endif  
 
+let s:pdb_map = {}
+let s:pdb_map["n"] = "PDBNext"
+let s:pdb_map["s"] = "PDBStep"
+let s:pdb_map["c"] = "PDBContinue"
+let s:pdb_map["q"] = "PDBQuit"
+let s:pdb_map["d"] = "PDBDown"
+let s:pdb_map["u"] = "PDBUp"
+let s:pdb_map["r"] = "PDBReturn"
+let s:pdb_map["x"] = "PDBReset"
+let s:pdb_map["a"] = "PDBArgs"
+let s:pdb_map["w"] = "PDBWord"
+let s:pdb_map["b"] = "PDBBreak"
 
 function! PDB_Map()
-    noremap <buffer><silent> n :PDBNext<CR>
-    noremap <buffer><silent> s :PDBStep<CR>
-    noremap <buffer><silent> c :PDBContinue<CR>
-    noremap <buffer><silent> q :PDBQuit<CR>
-    noremap <buffer><silent> d :PDBDown<CR>
-    noremap <buffer><silent> u :PDBUp<CR>
-    noremap <buffer><silent> r :PDBReturn<CR>
-    noremap <buffer><silent> x :PDBReset<CR>
-    noremap <buffer><silent> a :PDBArgs<CR>
-    noremap <buffer><silent> w :PDBWord<CR>
-    noremap <buffer><silent> b :PDBBreak<CR>
+    call PDB_store_original_map()
+    for key in keys(s:pdb_map)
+        let command = s:pdb_map[key]
+        execute "nmap <buffer> " . key . " :" . command . "<CR>"
+    endfor
+endfunction
+
+function! PDB_store_original_map()
+    if !exists("b:pdb_original_map")
+        let b:pdb_original_map = {}
+        for key in keys(s:pdb_map)
+            let b:pdb_original_map[key] = maparg("@" . key, "n")
+        endfor
+    endif
 endfunction
 
 "---------------------------------------------------------------------
