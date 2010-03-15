@@ -1,7 +1,7 @@
 Changelog
 =========
 
-0.3.4 (unreleased)
+0.3.4 (2010-03-15)
 ------------------
 
 - close socket to allow debugging session to start again
