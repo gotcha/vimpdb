@@ -13,4 +13,8 @@ TODO
 
 - register menu
 
+- register mapping to call PDB_reset_original_mapping
+
+- switch from read-only to edit when changing buffer
+
 - and much more...
