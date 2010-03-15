@@ -26,6 +26,16 @@ def show_line(method):
     return decorated
 
 
+def close_socket(method):
+
+    def decorated(self, line):
+        stop = method(self, line)
+        self.vim.closeSocket()
+        return stop
+
+    return decorated
+
+
 class VimPdb(Pdb):
     """
     debugger integrated with Vim
@@ -105,6 +115,7 @@ class VimPdb(Pdb):
     do_d = do_down = show_line(Pdb.do_down)
     do_a = do_args = capture(Pdb.do_args)
     do_b = do_break = capture(Pdb.do_break)
+    do_c = do_continue = close_socket(Pdb.do_continue)
 
     @capture
     def print_stack_entry(self, frame_lineno, prompt_prefix=line_prefix):
