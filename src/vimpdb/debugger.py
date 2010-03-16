@@ -29,7 +29,6 @@ def show_line(method):
 def close_socket(method):
 
     def decorated(self, line):
-        print 'close socket'
         result = method(self, line)
         self.vim.closeSocket()
         return result
