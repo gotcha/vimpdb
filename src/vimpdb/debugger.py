@@ -8,10 +8,10 @@ def capture(method):
 
     def decorated(self, line):
         self.capture_stdout()
-        stop = method(self, line)
+        result = method(self, line)
         self.stop_capture()
         self.vim.showFeedback(self.pop_output())
-        return stop
+        return result
 
     return decorated
 
@@ -19,9 +19,9 @@ def capture(method):
 def show_line(method):
 
     def decorated(self, line):
-        stop = method(self, line)
+        result = method(self, line)
         self.showFileAtLine()
-        return stop
+        return result
 
     return decorated
 
@@ -29,9 +29,10 @@ def show_line(method):
 def close_socket(method):
 
     def decorated(self, line):
-        stop = method(self, line)
+        print 'close socket'
+        result = method(self, line)
         self.vim.closeSocket()
-        return stop
+        return result
 
     return decorated
 
