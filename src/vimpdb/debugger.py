@@ -4,18 +4,37 @@ import StringIO
 from vimpdb.proxy import ProxyToVim
 
 PYTHON_25_OR_BIGGER = sys.version_info >= (2, 5)
+PYTHON_26_OR_BIGGER = sys.version_info >= (2, 6)
 
 
-def capture(method):
+def capture_sys_stdout(method):
 
     def decorated(self, line):
-        self.capture_stdout()
+        self.capture_sys_stdout()
         result = method(self, line)
-        self.stop_capture()
+        self.stop_capture_sys_stdout()
         self.vim.showFeedback(self.pop_output())
         return result
 
     return decorated
+
+
+def capture_self_stdout(method):
+
+    def decorated(self, line):
+        self.capture_self_stdout()
+        result = method(self, line)
+        self.stop_capture_self_stdout()
+        self.vim.showFeedback(self.pop_output())
+        return result
+
+    return decorated
+
+
+if PYTHON_25_OR_BIGGER:
+    capture = capture_self_stdout
+else:
+    capture = capture_sys_stdout
 
 
 def show_line(method):
@@ -83,35 +102,28 @@ class VimPdb(Pdb):
         self.vim.showFileAtLine(filename, lineno)
 
     # stdout captures to send back to Vim
-    def capture_stdout24(self):
+    def capture_sys_stdout(self):
         self.stdout = sys.stdout
         sys.stdout = StringIO.StringIO()
         self.capturing = True
 
-    def stop_capture24(self):
+    def stop_capture_sys_stdout(self):
         if self.capturing:
             self.capturing = False
             self.push_output(sys.stdout.getvalue())
             sys.stdout = self.stdout
 
     # stdout captures to send back to Vim
-    def capture_stdout25(self):
+    def capture_self_stdout(self):
         self.initial_stdout = self.stdout
         self.stdout = StringIO.StringIO()
         self.capturing = True
 
-    def stop_capture25(self):
+    def stop_capture_self_stdout(self):
         if self.capturing:
             self.capturing = False
             self.push_output(self.stdout.getvalue())
             self.stdout = self.initial_stdout
-
-    if PYTHON_25_OR_BIGGER:
-        capture_stdout = capture_stdout25
-        stop_capture = stop_capture25
-    else:
-        capture_stdout = capture_stdout24
-        stop_capture = stop_capture24
 
     def push_output(self, text):
         self._textOutput += text
@@ -146,11 +158,15 @@ class VimPdb(Pdb):
     def print_stack_entry(self, frame_lineno, prompt_prefix=line_prefix):
         return Pdb.print_stack_entry(self, frame_lineno, prompt_prefix)
 
-    @capture
     def default(self, line):
         # first char should not be output (it is the '!' needed to escape)
         self.push_output(line[1:] + " = ")
         return Pdb.default(self, line)
+
+if PYTHON_26_OR_BIGGER:
+    VimPdb.default = capture_self_stdout(VimPdb.default)
+else:
+    VimPdb.default = capture_sys_stdout(VimPdb.default)
 
 
 def set_trace():
