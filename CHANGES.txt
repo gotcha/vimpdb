@@ -4,9 +4,9 @@ Changelog
 0.3.5 (unreleased)
 ------------------
 
-- more documentation for Windows
+- better documentation, especially for Windows
 
-- fix output capture for Python >= 2.5
+- fix capture of output that was broken for Python 2.5 and 2.6
 
 - Windows compatibility (at least XP)
 

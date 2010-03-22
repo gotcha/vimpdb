@@ -11,7 +11,13 @@ VIM editor.
 Requirements
 ============
 
-**vimpdb** requires a VIM that supports both ``python`` and ``clientserver`` options.
+**vimpdb** has been used successfully under Linux, Mac OSX and Windows.
+
+It **is compatible** with Python 2.6, 2.5 and 2.4. It is not known if it does work
+with Python 3.0 (let us know).
+
+**vimpdb** requires an installation of VIM that supports both ``python`` and
+``clientserver`` options.
 
 Find out if it is the case by issuing the following command at the VIM prompt::
 
@@ -20,8 +26,16 @@ Find out if it is the case by issuing the following command at the VIM prompt::
 If the options are supported, you will see ``+clientserver`` and ``+python`` in the
 output. In the opposite case, you will see ``-clientserver`` or ``-python``.
 
-On Linux and Windows, the default VIM build should be already server-enabled.
-On Mac OS X, you'll want to use MacVIM_. MacVIM has also python compiled in by default.
+On Linux and Windows, the default VIM build should already be server-enabled.
+
+On Windows, the ``python`` option compiled in VIM depends on a specific Python
+version. Find out if that specific version is installed and works in VIM by
+issuing the following command at the VIM prompt::
+
+    :python import sys; print sys.version
+
+On Mac OSX, you'll want to use MacVIM_. MacVIM also has the ``python`` option 
+compiled in by default.
 
 .. _MacVIM: http://code.google.com/p/macvim/
 
