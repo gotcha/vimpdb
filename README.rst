@@ -131,6 +131,8 @@ and you can switch to **vimpdb** at any time.
 Known issues
 ============
 
+* Fixed in 0.3.5 : broken on Windows.
+
 * Fixed in 0.3.3 : when you stop debugging, the buffers which you debugged with are
   left in an inconvenient state : the keys mapped to Pdb commands are still
   mapped. In other words, switching from debugging to fixing code is not
