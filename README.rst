@@ -32,12 +32,19 @@ Just install this package using ``easy_install`` or similar::
 
     $ easy_install vimpdb
 
+If you look inside the package, you will see a VIM script file: ``vimpdb.vim``.
+Do **not** move it to VIM configuration directory (like ``~/.vim/plugin``).
+
 Configuration
 =============
 
 You might need to setup the ``VIMPDB_VIMSCRIPT`` environment variable. It should hold
 the command used at the shell prompt to launch a VIM supporting the options
 mentioned above. (Default value is ``vimpdb``).
+
+On Windows, it should hold the path to ``vim.exe``, **not** to ``gvim.exe``.
+Furthermore, do **not** include quotes in the enviromnent variable to take care
+of whitespace in the path.
 
 This script should also set the ``--servername`` option to specify a server
 name.  You can think of this as a "window name" which is used to send remote
