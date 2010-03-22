@@ -3,6 +3,8 @@ import sys
 import StringIO
 from vimpdb.proxy import ProxyToVim
 
+PYTHON_25_OR_BIGGER = sys.version_info >= (2, 5)
+
 
 def capture(method):
 
@@ -45,6 +47,7 @@ class VimPdb(Pdb):
         Pdb.__init__(self)
         self.capturing = False
         self.vim = ProxyToVim()
+        self._textOutput = ''
 
     def trace_dispatch(self, frame, event, arg):
         """allow to switch to Pdb instance"""
@@ -80,20 +83,42 @@ class VimPdb(Pdb):
         self.vim.showFileAtLine(filename, lineno)
 
     # stdout captures to send back to Vim
-    def capture_stdout(self):
+    def capture_stdout24(self):
         self.stdout = sys.stdout
         sys.stdout = StringIO.StringIO()
         self.capturing = True
 
-    def stop_capture(self):
+    def stop_capture24(self):
         if self.capturing:
             self.capturing = False
-            self.textOutput = sys.stdout.getvalue()
+            self.push_output(sys.stdout.getvalue())
             sys.stdout = self.stdout
 
+    # stdout captures to send back to Vim
+    def capture_stdout25(self):
+        self.initial_stdout = self.stdout
+        self.stdout = StringIO.StringIO()
+        self.capturing = True
+
+    def stop_capture25(self):
+        if self.capturing:
+            self.capturing = False
+            self.push_output(self.stdout.getvalue())
+            self.stdout = self.initial_stdout
+
+    if PYTHON_25_OR_BIGGER:
+        capture_stdout = capture_stdout25
+        stop_capture = stop_capture25
+    else:
+        capture_stdout = capture_stdout24
+        stop_capture = stop_capture24
+
+    def push_output(self, text):
+        self._textOutput += text
+
     def pop_output(self):
-        result = self.textOutput
-        self.textOutput = ''
+        result = self._textOutput
+        self._textOutput = ''
         return result
 
     def do_pdb(self, line):
@@ -123,8 +148,8 @@ class VimPdb(Pdb):
 
     @capture
     def default(self, line):
-        # first char should not be printed (it is the '!' needed to escape
-        print line[1:], "=",
+        # first char should not be output (it is the '!' needed to escape)
+        self.push_output(line[1:] + " = ")
         return Pdb.default(self, line)
 
 
