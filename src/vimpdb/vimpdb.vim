@@ -1,12 +1,12 @@
 function! s:PDB_create_debug_tab()
     execute "tabnew"
-    let t:vimpdbhook = "vimpdbhook"
+    let t:vimpdb = "vimpdb"
 endfunction
 
 function! PDB_move_to_debug_tab()
     for i in range(tabpagenr('$'))
         exe i+1 "tabnext"
-        if exists("t:vimpdbhook") == 1
+        if exists("t:vimpdb") == 1
             return
         endif
     endfor
@@ -90,7 +90,7 @@ def vimpdb_buffer_write(message):
 def vimpdb_buffer_create():
     global pdb_buffer
     source_buffer = vim.current.buffer.name
-    vim.command('silent rightbelow 5new -PDBVim-')
+    vim.command('silent rightbelow 5new -vimpdb-')
     vim.command('set buftype=nofile')
     vim.command('set noswapfile')
     vim.command('set nonumber')
@@ -102,12 +102,12 @@ def vimpdb_buffer_create():
             break
 
 def vimpdb_buffer_close():
-    vim.command('silent! bwipeout -PDBVim-')
+    vim.command('silent! bwipeout -vimpdb-')
 
 def vimpdb_buffer_exist():
     for win in vim.windows:
         try:                 #FIXME: Error while new a unnamed buffer
-            if 'PDBVim' in win.buffer.name:
+            if '-vimpdb-' in win.buffer.name:
                 return True
         except: pass
     return False
