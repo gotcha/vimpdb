@@ -72,6 +72,10 @@ class ProxyToVim(object):
 
     def _showFileAtLine(self, filename, lineno):
         self.setupRemote()
+	# Windows compatibility: 
+	# Command-line does not play well with backslash in filename.
+	# So turn backslash to slash; Vim knows how to translate them back.
+	filename = filename.replace('\\', '/')
         self._send(':call PDB_show_file_at_line("%s", "%d")<CR>'
             % (filename, lineno))
 
