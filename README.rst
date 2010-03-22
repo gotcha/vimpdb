@@ -131,6 +131,11 @@ and you can switch to **vimpdb** at any time.
 Known issues
 ============
 
+* No convenient way to evaluate a Python expression.
+
+Fixed issues
+============
+
 * Fixed in 0.3.5 : broken on Windows.
 
 * Fixed in 0.3.3 : when you stop debugging, the buffers which you debugged with are
