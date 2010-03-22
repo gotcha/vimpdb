@@ -15,6 +15,8 @@ endfunction
 
 function! PDB_init()
     call PDB_move_to_debug_tab()
+    " avoid "Press Enter to continue"
+    execute "set cmdheight=2"
 endfunction
 
 function! PDB_get_command(feedback)
