@@ -50,9 +50,8 @@ def show_line(method):
 def close_socket(method):
 
     def decorated(self, line):
-        result = method(self, line)
         self.vim.closeSocket()
-        return result
+        return method(self, line)
 
     return decorated
 
