@@ -20,9 +20,8 @@ class ProxyToVim(object):
     BUFLEN = 512
 
     def __init__(self):
-        self.server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM,
-            socket.IPPROTO_UDP)
-        self.server.bind(('', self.PORT))
+        self.socket_inactive = True
+        self.bindSocket()
         self.setupRemote()
         self.foreground()
         self.comm_init()
@@ -30,8 +29,16 @@ class ProxyToVim(object):
     def comm_init(self):
         self._send(':call PDB_comm_init()<CR>')
 
+    def bindSocket(self):
+        if self.socket_inactive:
+            self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM,
+                socket.IPPROTO_UDP)
+            self.socket.bind(('', self.PORT))
+            self.socket_inactive = False
+
     def closeSocket(self):
-        self.server.close()
+        self.socket.close()
+        self.socket_inactive = True
 
     def setupRemote(self):
         if not self.isRemoteSetup():
@@ -48,7 +55,8 @@ class ProxyToVim(object):
         return command
 
     def waitFor(self, pdb):
-        (message, address) = self.server.recvfrom(self.BUFLEN)
+        self.bindSocket()
+        (message, address) = self.socket.recvfrom(self.BUFLEN)
         print "command:", message
         return message
 
@@ -72,10 +80,10 @@ class ProxyToVim(object):
 
     def _showFileAtLine(self, filename, lineno):
         self.setupRemote()
-	# Windows compatibility: 
-	# Command-line does not play well with backslash in filename.
-	# So turn backslash to slash; Vim knows how to translate them back.
-	filename = filename.replace('\\', '/')
+        # Windows compatibility:
+        # Command-line does not play well with backslash in filename.
+        # So turn backslash to slash; Vim knows how to translate them back.
+        filename = filename.replace('\\', '/')
         self._send(':call PDB_show_file_at_line("%s", "%d")<CR>'
             % (filename, lineno))
 
