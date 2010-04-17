@@ -4,15 +4,18 @@ Changelog
 0.3.6 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- fix: "continue" command was broken after breakpoint has been set
+  (http://github.com/gotcha/vimpdb/issues/issue/3)
 
+- fix: Key mappings were left broken after "continue" command.
+  (http://github.com/gotcha/vimpdb/issues/issue/2)
 
 0.3.5 (2010-03-22)
 ------------------
 
 - better documentation, especially for Windows
 
-- fix capture of output that was broken for Python 2.5 and 2.6
+- fix: capture of output was broken for Python 2.5 and 2.6
 
 - Windows compatibility (at least XP)
 
