@@ -1,9 +1,11 @@
-import vimpdb; vimpdb.set_trace()
+def output(arg):
+    print "MANUAL: arg=", arg
 
 
-def out(a):
-    print a
+def main():
+    import vimpdb; vimpdb.set_trace()
+    for abc in range(10):
+        output(abc)
 
-
-for abc in range(10):
-    out(abc)
+if __name__ == "__main__":
+    main()
