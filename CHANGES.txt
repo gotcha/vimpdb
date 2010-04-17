@@ -1,7 +1,7 @@
 Changelog
 =========
 
-0.3.6 (unreleased)
+0.3.6 (2010-04-17)
 ------------------
 
 - fix: "continue" command was broken after breakpoint has been set
