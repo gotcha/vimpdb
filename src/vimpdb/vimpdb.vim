@@ -121,6 +121,7 @@ EOT
 endfunction
 
 function! PDB_continue()
+    call PDB_reset_original_map()
     call PDB_send_command('c')
 endfunction
 
@@ -204,7 +205,7 @@ endfunction
 function! PDB_store_original_map()
     let b:pdb_original_map = {}
     for key in keys(s:pdb_map)
-        let b:pdb_original_map[key] = maparg(key, "@n")
+        let b:pdb_original_map[key] = maparg(key, "n")
     endfor
 endfunction
 
