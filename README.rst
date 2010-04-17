@@ -154,6 +154,6 @@ Fixed issues
 
 See changelog_
 
-.. _changelog: http://pypi.python.org/pypi/vimpdb#changelog 
+.. _changelog: http://pypi.python.org/pypi/vimpdb#id1
 
 ..  vim: set ft=rst ts=4 sw=4 expandtab tw=78 : 
