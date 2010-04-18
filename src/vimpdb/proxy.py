@@ -17,10 +17,10 @@ def getPackagePath(instance):
 class ProxyToVim(object):
 
     def __init__(self):
-        self.setupRemote()
         self.comm_init()
 
     def comm_init(self):
+        self.setupRemote()
         self._send(':call PDB_comm_init()<CR>')
 
     def setupRemote(self):
