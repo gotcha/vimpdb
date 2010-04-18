@@ -43,44 +43,38 @@ endfunction
 
 "---------------------------------------------------------------------
 " pdb to vim communication
-function! PDB_comm_init()
-python <<EOT
-import vim
-import socket
- 
-PDB_SERVER_ADDRESS = '127.0.0.1'
-PDB_SERVER_PORT = 6666
-try:
-    pdb_server.close()
-except:
-    pass
-pdb_server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-EOT
-endfunction
-
-function! PDB_comm_deinit()
-python <<EOT
-try:
-    pdb_server.close()
-except:
-    pass
-EOT
-endfunction
-
-function! PDB_send(message)
-python <<EOT
-_message = vim.eval("a:message")
-pdb_server.sendto(_message, (PDB_SERVER_ADDRESS, PDB_SERVER_PORT))
-EOT
-endfunction
-
 function! PDB_send_command(command)
-    call PDB_send(a:command)
+python <<EOT
+_command = vim.eval("a:command")
+vimpdb_socket_send(_command)
+EOT
 endfunction
 
-"---------------------------------------------------------------------
-" vimpdb feedback buffer
 python <<EOT
+import socket
+
+def vimpdb_socket_get():
+    try:
+        return socket_to_pdb
+    except NameError:
+        socket_to_pdb = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+        return socket_to_pdb
+
+def vimpdb_socket_send(message):
+    PDB_ADDRESS = '127.0.0.1'
+    PDB_PORT = 6666
+    send_socket = vimpdb_socket_get()
+    send_socket.sendto(message, (PDB_ADDRESS, PDB_PORT))
+
+def vimpdb_socket_close(message):
+    try:
+        socket_to_pdb.close()
+        del socket_to_pdb
+    except NameError:
+        pass
+
+#---------------------------------------------------------------------
+# vimpdb feedback buffer
 def vimpdb_buffer_write(message):
 
     if not vimpdb_buffer_exist():
@@ -200,9 +194,9 @@ function! PDB_break()
 endfunction
 
 function! PDB_exit()
-    call PDB_comm_deinit()
     call PDB_reset_original_map()
 python <<EOT
+vimpdb_socket_close()
 vimpdb_buffer_write(["Switch back to shell."])   
 EOT
 endfunction

@@ -16,13 +16,6 @@ def getPackagePath(instance):
 
 class ProxyToVim(object):
 
-    def __init__(self):
-        self.comm_init()
-
-    def comm_init(self):
-        self.setupRemote()
-        self._send(':call PDB_comm_init()<CR>')
-
     def setupRemote(self):
         if not self.isRemoteSetup():
             filename = os.path.join(getPackagePath(self), "vimpdb.vim")
