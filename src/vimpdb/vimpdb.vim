@@ -66,7 +66,7 @@ def vimpdb_socket_send(message):
     send_socket = vimpdb_socket_get()
     send_socket.sendto(message, (PDB_ADDRESS, PDB_PORT))
 
-def vimpdb_socket_close(message):
+def vimpdb_socket_close():
     try:
         socket_to_pdb.close()
         del socket_to_pdb
