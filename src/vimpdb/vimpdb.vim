@@ -60,7 +60,6 @@ try:
 except:
     pass
 EOT
-    call foreground()
 endfunction
 
 
@@ -120,6 +119,7 @@ python <<EOT
 _message = vim.eval("a:message")
 vimpdb_buffer_write(_message)
 EOT
+    call foreground()
 endfunction
 
 function! PDB_continue()
