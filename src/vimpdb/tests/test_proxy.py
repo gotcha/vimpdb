@@ -40,6 +40,29 @@ return: None
 """)
 
 
+def test_ProxyToVim_showFeedback_empty():
+    from vimpdb.testing import ProxyToVimForTests
+    to_vim = ProxyToVimForTests()
+    to_vim.setState(to_vim.IS_REMOTE_SETUP_IS_TRUE)
+    to_vim.showFeedback('')
+    assert (to_vim.logged() ==
+"""
+""")
+
+
+def test_ProxyToVim_showFeedback_content():
+    from vimpdb.testing import ProxyToVimForTests
+    to_vim = ProxyToVimForTests()
+    to_vim.setState(to_vim.IS_REMOTE_SETUP_IS_TRUE)
+    to_vim.showFeedback('first\nsecond')
+    assert (to_vim.logged() ==
+"""
+expr: exists('*PDB_init')
+return: '1'
+send: :call PDB_show_feedback(['first', 'second'])<CR>
+""")
+
+
 def test_ProxyFromVim_instantiation():
     from vimpdb.proxy import ProxyFromVim
     from_vim = ProxyFromVim()
