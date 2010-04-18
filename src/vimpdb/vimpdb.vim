@@ -1,3 +1,31 @@
+function! PDB_init()
+    call PDB_move_to_debug_tab()
+    " avoid "Press Enter to continue"
+    execute "set cmdheight=2"
+endfunction
+
+function! PDB_show_file_at_line(filename, line)
+    call PDB_move_to_debug_tab()
+    call PDB_reset_original_map()
+    execute "view " . a:filename
+    execute "normal " . a:line . "ggz."
+    setlocal cursorline
+    call PDB_map()
+    call foreground()
+endfunction
+
+function! PDB_show_feedback(message)
+python <<EOT
+_message = vim.eval("a:message")
+vimpdb_buffer_write(_message)
+EOT
+    call foreground()
+endfunction
+
+"---------------------------------------------------------------------
+" debug tab support
+"
+" We use a separate debug tab.
 function! s:PDB_create_debug_tab()
     execute "tabnew"
     let t:vimpdb = "vimpdb"
@@ -13,29 +41,8 @@ function! PDB_move_to_debug_tab()
     call s:PDB_create_debug_tab()
 endfunction
 
-function! PDB_init()
-    call PDB_move_to_debug_tab()
-    " avoid "Press Enter to continue"
-    execute "set cmdheight=2"
-endfunction
-
-function! PDB_get_command(feedback)
-    let command = input(a:feedback . " Pdb:")
-    return command
-endfunction
-
-function! PDB_show_file_at_line(filename, line)
-    call PDB_move_to_debug_tab()
-    call PDB_reset_original_map()
-    execute "view " . a:filename
-    execute "normal " . a:line . "ggz."
-    setlocal cursorline
-    call PDB_map()
-    call foreground()
-endfunction
-
 "---------------------------------------------------------------------
-" initialize PDB/Vim communication
+" pdb to vim communication
 function! PDB_comm_init()
 python <<EOT
 import vim
@@ -51,8 +58,6 @@ pdb_server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP
 EOT
 endfunction
 
-"---------------------------------------------------------------------
-" deinitialize PDB/vim communication
 function! PDB_comm_deinit()
 python <<EOT
 try:
@@ -62,9 +67,6 @@ except:
 EOT
 endfunction
 
-
-"---------------------------------------------------------------------
-" send a message to the PDB server
 function! PDB_send(message)
 python <<EOT
 _message = vim.eval("a:message")
@@ -76,6 +78,8 @@ function! PDB_send_command(command)
     call PDB_send(a:command)
 endfunction
 
+"---------------------------------------------------------------------
+" vimpdb feedback buffer
 python <<EOT
 def vimpdb_buffer_write(message):
 
@@ -114,69 +118,8 @@ def vimpdb_buffer_exist():
     return False
 EOT
 
-function! PDB_show_feedback(message)
-python <<EOT
-_message = vim.eval("a:message")
-vimpdb_buffer_write(_message)
-EOT
-    call foreground()
-endfunction
-
-function! PDB_continue()
-    call PDB_reset_original_map()
-    call PDB_send_command('c')
-endfunction
-
-function! PDB_reset()
-    call PDB_send_command('pdb')
-    call PDB_exit()
-endfunction
-
-function! PDB_quit()
-    call PDB_send_command('q')
-    call PDB_exit()
-endfunction
-
-function! PDB_break()
-    let line = line('.')
-    let filename = expand('%:p')
-    call PDB_send_command("b " . filename . ":" . line)
-endfunction
-
-if !exists(":PDBNext")
-  command! PDBNext :call PDB_send_command("n")
-endif
-if !exists(":PDBQuit")
-  command! PDBQuit :call PDB_quit()
-endif
-if !exists(":PDBStep")
-  command! PDBStep :call PDB_send_command("s")
-endif
-if !exists(":PDBReturn")
-  command! PDBReturn :call PDB_send_command("r")
-endif
-if !exists(":PDBContinue")
-  command! PDBContinue :call PDB_continue()
-endif
-if !exists(":PDBBreak")
-  command! PDBBreak :call PDB_break()
-endif
-if !exists(":PDBDown")
-  command! PDBDown :call PDB_send_command("d")
-endif
-if !exists(":PDBUp")
-  command! PDBUp :call PDB_send_command("u")
-endif
-if !exists(":PDBReset")
-  command! PDBReset :call PDB_reset()
-endif
-if !exists(":PDBArgs")
-  command! PDBArgs :call PDB_send_command("a")
-endif
-if !exists("PDBWord")
-  command! PDBWord :call PDB_send_command("!".expand("<cword>"))
-endif  
-
+"---------------------------------------------------------------------
+" Keyboard mapping management
 let s:pdb_map = {}
 let s:pdb_map["n"] = "PDBNext"
 let s:pdb_map["s"] = "PDBStep"
@@ -225,8 +168,37 @@ function! PDB_reset_original_map()
         endif
     endif
 endfunction
+
 "---------------------------------------------------------------------
-" PDB Exit
+" code leftover from hacking period
+function! PDB_get_command(feedback)
+    let command = input(a:feedback . " Pdb:")
+    return command
+endfunction
+
+"---------------------------------------------------------------------
+" ex mode commands support
+function! PDB_continue()
+    call PDB_send_command('c')
+    call PDB_reset_original_map()
+endfunction
+
+function! PDB_reset()
+    call PDB_send_command('pdb')
+    call PDB_exit()
+endfunction
+
+function! PDB_quit()
+    call PDB_send_command('q')
+    call PDB_exit()
+endfunction
+
+function! PDB_break()
+    let line = line('.')
+    let filename = expand('%:p')
+    call PDB_send_command("b " . filename . ":" . line)
+endfunction
+
 function! PDB_exit()
     call PDB_comm_deinit()
     call PDB_reset_original_map()
@@ -235,5 +207,40 @@ vimpdb_buffer_write(["Switch back to shell."])
 EOT
 endfunction
 
+"---------------------------------------------------------------------
+" ex mode commands
+if !exists(":PDBNext")
+  command! PDBNext :call PDB_send_command("n")
+endif
+if !exists(":PDBQuit")
+  command! PDBQuit :call PDB_quit()
+endif
+if !exists(":PDBStep")
+  command! PDBStep :call PDB_send_command("s")
+endif
+if !exists(":PDBReturn")
+  command! PDBReturn :call PDB_send_command("r")
+endif
+if !exists(":PDBContinue")
+  command! PDBContinue :call PDB_continue()
+endif
+if !exists(":PDBBreak")
+  command! PDBBreak :call PDB_break()
+endif
+if !exists(":PDBDown")
+  command! PDBDown :call PDB_send_command("d")
+endif
+if !exists(":PDBUp")
+  command! PDBUp :call PDB_send_command("u")
+endif
+if !exists(":PDBReset")
+  command! PDBReset :call PDB_reset()
+endif
+if !exists(":PDBArgs")
+  command! PDBArgs :call PDB_send_command("a")
+endif
+if !exists("PDBWord")
+  command! PDBWord :call PDB_send_command("!".expand("<cword>"))
+endif  
 
 call PDB_init()
