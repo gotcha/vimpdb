@@ -16,29 +16,13 @@ def getPackagePath(instance):
 
 class ProxyToVim(object):
 
-    PORT = 6666
-    BUFLEN = 512
-
     def __init__(self):
-        self.socket_inactive = True
-        self.bindSocket()
         self.setupRemote()
         self.foreground()
         self.comm_init()
 
     def comm_init(self):
         self._send(':call PDB_comm_init()<CR>')
-
-    def bindSocket(self):
-        if self.socket_inactive:
-            self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM,
-                socket.IPPROTO_UDP)
-            self.socket.bind(('', self.PORT))
-            self.socket_inactive = False
-
-    def closeSocket(self):
-        self.socket.close()
-        self.socket_inactive = True
 
     def setupRemote(self):
         if not self.isRemoteSetup():
@@ -53,12 +37,6 @@ class ProxyToVim(object):
         self.setupRemote()
         command = self._expr('PDB_get_command("%s")' % prompt)
         return command
-
-    def waitFor(self, pdb):
-        self.bindSocket()
-        (message, address) = self.socket.recvfrom(self.BUFLEN)
-        print "command:", message
-        return message
 
     def showFeedback(self, feedback):
         if not feedback:
@@ -107,6 +85,32 @@ class ProxyToVim(object):
     def isRemoteSetup(self):
         status = self._remote_expr("exists('*PDB_init')")
         return status == '1'
+
+
+class ProxyFromVim(object):
+
+    PORT = 6666
+    BUFLEN = 512
+
+    def __init__(self):
+        self.socket_inactive = True
+
+    def bindSocket(self):
+        if self.socket_inactive:
+            self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM,
+                socket.IPPROTO_UDP)
+            self.socket.bind(('', self.PORT))
+            self.socket_inactive = False
+
+    def closeSocket(self):
+        self.socket.close()
+        self.socket_inactive = True
+
+    def waitFor(self, pdb):
+        self.bindSocket()
+        (message, address) = self.socket.recvfrom(self.BUFLEN)
+        print "command:", message
+        return message
 
 
 class RemoteUnavailable(Exception):

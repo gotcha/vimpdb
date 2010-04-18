@@ -2,6 +2,7 @@ from pdb import Pdb, line_prefix
 import sys
 import StringIO
 from vimpdb.proxy import ProxyToVim
+from vimpdb.proxy import ProxyFromVim
 
 PYTHON_25_OR_BIGGER = sys.version_info >= (2, 5)
 PYTHON_26_OR_BIGGER = sys.version_info >= (2, 6)
@@ -13,7 +14,7 @@ def capture_sys_stdout(method):
         self.capture_sys_stdout()
         result = method(self, line)
         self.stop_capture_sys_stdout()
-        self.vim.showFeedback(self.pop_output())
+        self.to_vim.showFeedback(self.pop_output())
         return result
 
     return decorated
@@ -25,7 +26,7 @@ def capture_self_stdout(method):
         self.capture_self_stdout()
         result = method(self, line)
         self.stop_capture_self_stdout()
-        self.vim.showFeedback(self.pop_output())
+        self.to_vim.showFeedback(self.pop_output())
         return result
 
     return decorated
@@ -50,7 +51,7 @@ def show_line(method):
 def close_socket(method):
 
     def decorated(self, line):
-        self.vim.closeSocket()
+        self.from_vim.closeSocket()
         return method(self, line)
 
     return decorated
@@ -64,7 +65,8 @@ class VimPdb(Pdb):
     def __init__(self):
         Pdb.__init__(self)
         self.capturing = False
-        self.vim = ProxyToVim()
+        self.to_vim = ProxyToVim()
+        self.from_vim = ProxyFromVim()
         self._textOutput = ''
 
     def trace_dispatch(self, frame, event, arg):
@@ -81,7 +83,7 @@ class VimPdb(Pdb):
         stop = None
         self.preloop()
         while not stop:
-            line = self.vim.waitFor(self)
+            line = self.from_vim.waitFor(self)
             line = self.precmd(line)
             stop = self.onecmd(line)
             stop = self.postcmd(stop, line)
@@ -89,7 +91,7 @@ class VimPdb(Pdb):
 
     def preloop(self):
         filename, lineno = self.getFileAndLine()
-        self.vim.showFileAtLine(filename, lineno)
+        self.to_vim.showFileAtLine(filename, lineno)
 
     def getFileAndLine(self):
         frame, lineno = self.stack[self.curindex]
@@ -98,7 +100,7 @@ class VimPdb(Pdb):
 
     def showFileAtLine(self):
         filename, lineno = self.getFileAndLine()
-        self.vim.showFileAtLine(filename, lineno)
+        self.to_vim.showFileAtLine(filename, lineno)
 
     # stdout captures to send back to Vim
     def capture_sys_stdout(self):
@@ -138,7 +140,7 @@ class VimPdb(Pdb):
         switches back to debugging with (almost) standard pdb.Pdb
         except for added 'vim' command.
         """
-        self.vim.closeSocket()
+        self.from_vim.closeSocket()
         self.pdb = get_hooked_pdb()
         self.pdb.set_trace_without_step(self.curframe)
         self.pdb.interaction(self.curframe, None)
