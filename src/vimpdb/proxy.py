@@ -18,7 +18,6 @@ class ProxyToVim(object):
 
     def __init__(self):
         self.setupRemote()
-        self.foreground()
         self.comm_init()
 
     def comm_init(self):
@@ -29,9 +28,6 @@ class ProxyToVim(object):
             filename = os.path.join(getPackagePath(self), "vimpdb.vim")
             command = "<C-\><C-N>:source %s<CR>" % filename
             self._send(command)
-
-    def foreground(self):
-        self._send(':call foreground()<CR>')
 
     def getText(self, prompt):
         self.setupRemote()

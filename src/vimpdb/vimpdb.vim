@@ -31,6 +31,7 @@ function! PDB_show_file_at_line(filename, line)
     execute "normal " . a:line . "ggz."
     setlocal cursorline
     call PDB_map()
+    call foreground()
 endfunction
 
 "---------------------------------------------------------------------
@@ -59,6 +60,7 @@ try:
 except:
     pass
 EOT
+    call foreground()
 endfunction
 
 
