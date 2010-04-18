@@ -1,25 +1,25 @@
-function! PDB_init()
+function! PDB_init_display()
+    call PDB_move_to_debug_tab()
     " avoid "Press Enter to continue"
     execute "set cmdheight=2"
+    call foreground()
 endfunction
 
 function! PDB_show_file_at_line(filename, line)
-    call PDB_move_to_debug_tab()
+    call PDB_init_display()
     call PDB_reset_original_map()
     execute "view " . a:filename
     execute "normal " . a:line . "ggz."
     setlocal cursorline
     call PDB_map()
-    call foreground()
 endfunction
 
 function! PDB_show_feedback(message)
-    call PDB_move_to_debug_tab()
+    call PDB_init_display()
 python <<EOT
 _message = vim.eval("a:message")
 vimpdb_buffer_write(_message)
 EOT
-    call foreground()
 endfunction
 
 "---------------------------------------------------------------------
@@ -242,5 +242,3 @@ endif
 if !exists("PDBWord")
   command! PDBWord :call PDB_send_command("!".expand("<cword>"))
 endif  
-
-call PDB_init()
