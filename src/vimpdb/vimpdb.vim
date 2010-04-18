@@ -1,5 +1,4 @@
 function! PDB_init()
-    call PDB_move_to_debug_tab()
     " avoid "Press Enter to continue"
     execute "set cmdheight=2"
 endfunction
@@ -15,6 +14,7 @@ function! PDB_show_file_at_line(filename, line)
 endfunction
 
 function! PDB_show_feedback(message)
+    call PDB_move_to_debug_tab()
 python <<EOT
 _message = vim.eval("a:message")
 vimpdb_buffer_write(_message)
