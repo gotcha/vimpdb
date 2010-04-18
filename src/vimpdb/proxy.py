@@ -39,7 +39,7 @@ class ProxyToVim(object):
             return
         feedback_list = feedback.splitlines()
         self.setupRemote()
-        self._send(':call PDB_display_feedback(%s)<CR>' % repr(feedback_list))
+        self._send(':call PDB_show_feedback(%s)<CR>' % repr(feedback_list))
 
     def showFileAtLine(self, filename, lineno):
         if os.path.exists(filename):

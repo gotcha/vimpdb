@@ -115,7 +115,7 @@ def vimpdb_buffer_exist():
     return False
 EOT
 
-function! PDB_display_feedback(message)
+function! PDB_show_feedback(message)
 python <<EOT
 _message = vim.eval("a:message")
 vimpdb_buffer_write(_message)
