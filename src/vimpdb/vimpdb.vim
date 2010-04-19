@@ -42,7 +42,7 @@ function! PDB_move_to_debug_tab()
 endfunction
 
 "---------------------------------------------------------------------
-" pdb to vim communication
+" vim to pdb communication
 function! PDB_send_command(command)
 python <<EOT
 _command = vim.eval("a:command")
