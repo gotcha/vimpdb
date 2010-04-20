@@ -5,7 +5,7 @@ from subprocess import call
 from subprocess import Popen
 from subprocess import PIPE
 
-PROGRAM = os.environ.get("VIMPDB_VIMSCRIPT", "vimpdb")
+PROGRAM = os.environ.get("VIMPDB_VIMSCRIPT", "vim")
 SERVERNAME = os.environ.get("VIMPDB_SERVERNAME", "VIMPDB")
 
 
