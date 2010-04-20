@@ -54,24 +54,33 @@ Do **not** move it to VIM configuration directory (like ``~/.vim/plugin``).
 Configuration
 =============
 
-You might need to setup the ``VIMPDB_VIMSCRIPT`` environment variable. It should hold
-the command used at the shell prompt to launch a VIM supporting the options
-mentioned above. (Default value is ``vimpdb``).
+VIM script
+----------
+
+To communicate with the VIM instance where debugging happens,
+**vimpdb** needs to launch another VIM instance in client mode. 
+
+By default, **vimpdb** uses the ``vim`` script to start that VIM instance with 
+clientserver support. If there exists such a ``vim`` script on your path, you are ok.
+
+You can configure another script with the ``VIMPDB_VIMSCRIPT`` environment variable.
+It must hold the script that **vimpdb** should use to launch a VIM instance 
+with clientserver support.
 
 On Windows, it should hold the path to ``vim.exe``, **not** to ``gvim.exe``.
 Furthermore, do **not** include quotes in the enviromnent variable to take care
 of whitespace in the path.
 
-This script should also set the ``--servername`` option to specify a server
-name.  You can think of this as a "window name" which is used to send remote
-commands to -- this is how **vimpdb** communicates with a certain VIM instance.
-
 Server Name
 -----------
+By default, **vimpdb** speaks to the server named ``VIMPDB``.  
+Note that the default ``servername`` used by VIM is ``VIM``.
 
-You might need to setup the ``VIMPDB_SERVERNAME`` environment variable. It should hold
-the name of the VIM server you will be using. (Default value is ``VIMPDB``).  You may
-list the currently running VIM servers using::
+If want **vimpdb** to use another server name, you need to setup the 
+``VIMPDB_SERVERNAME`` environment variable. It should hold the name of the VIM
+server you will be using for debugging. 
+
+You may list the currently running VIM servers using::
 
     $ vim --serverlist
     VIM
@@ -81,12 +90,19 @@ Or, on a Mac::
     $ /Applications/MacVim.app/Contents/MacOS/Vim --serverlist
     VIM
 
-Note that the default ``servername`` is ``VIM``
+When a VIM instance with ``clientserver`` support is running, you can find its name by issuing the
+following command at the VIM prompt::
 
-Starting a VIM Server for Debugging
------------------------------------
+    :echo v:servername
 
-To start a VIM server for debugging, issue following command on the shell::
+
+Usage
+=====
+
+Starting VIM
+------------
+
+To start a VIM instance for debugging, issue the following command on the shell::
 
     $ vim --servername VIMPDB
 
@@ -94,22 +110,23 @@ Or, on a Mac, if you installed the ``mvim`` script::
 
     $ mvim --servername VIMPDB
 
-When a VIM supporting ``clientserver`` option has started, you can find its name by issuing the
-following command at the VIM prompt:
+Python code
+-----------
 
-    :echo v:servername
-
-Using
-=====
-
-Using **vimpdb** is easy -- just call ``set_trace`` as usual::
+Using **vimpdb** is easy -- just insert a call to ``set_trace`` in your code
+almost as usual::
 
     import vimpdb; vimpdb.set_trace() 
 
-Now, when the python interpreter hits that line, VIM will get the focus and
-load the source file.
+Then start your python application/script.
 
-You may now use the following commands:
+When the python interpreter hits that line, VIM will get the focus and
+load the source file at the right line.
+
+VIM commands
+------------
+
+In VIM, you may now use the following commands:
 
 .. csv-table:: VimPDB Commands
     :header-rows: 1
@@ -124,7 +141,7 @@ You may now use the following commands:
     c , Continue
     b , Sets a breakpoint at the line on which the cursor is sitting.
     w , Displays the value of the word on which the cursor is sitting.
-    x , Switch to debugging with standard Pdb.
+    x , Switch to debugging in shell with standard Pdb.
     v , Switch back to VimPdb from plain Pdb.
 
 Standard Pdb hook
