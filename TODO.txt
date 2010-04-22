@@ -1,20 +1,24 @@
 TODO
 ====
 
-- add option to allow other network settings
-  (instead of hardcoded)
+In priority order:
+
+- document the PDBxx commands in Ex mode
+
+- when switching to vimpdb from pdb, if the Remove VIM is unavailable,
+  log a message and keep pdb running.
 
 - try to start Vim server if it is not started
 
-- try to guess Vim server name to avoid use of
+- try to guess Vim server name to avoid need of
   ``VIMPDB_SERVERNAME``
 
 - check and complain if Vim does not support the right options
 
-- register menu
+- register command to call PDB_reset_original_mapping
 
-- register mapping to call PDB_reset_original_mapping
+- add option to allow other network settings
+  (instead of hardcoded)
 
-- switch from read-only to edit when changing buffer
 
-- and much more...
+and much more...
