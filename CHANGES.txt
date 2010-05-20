@@ -1,7 +1,7 @@
 Changelog
 =========
 
-0.3.7 (unreleased)
+0.3.7 (2010-05-20)
 ------------------
 
 - fix: could not go "down" after switching from pdb to
