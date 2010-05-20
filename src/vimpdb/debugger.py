@@ -57,7 +57,30 @@ def close_socket(method):
     return decorated
 
 
-class VimPdb(Pdb):
+class Switcher:
+    """
+    Helper for switching from pdb to vimpdb
+    and vice versa
+    """
+
+    def set_trace_without_step(self, frame):
+        self.reset()
+        while frame:
+            frame.f_trace = self.trace_dispatch
+            self.botframe = frame
+            frame = frame.f_back
+        sys.settrace(self.trace_dispatch)
+
+    def update_state(self, other):
+        self.stack = other.stack
+        self.curindex = other.curindex
+        self.curframe = other.curframe
+
+    def has_gone_up(self):
+        return self.curindex + 1 != len(self.stack)
+
+
+class VimPdb(Pdb, Switcher):
     """
     debugger integrated with Vim
     """
@@ -143,17 +166,12 @@ class VimPdb(Pdb):
         self.from_vim.closeSocket()
         self.pdb = get_hooked_pdb()
         self.pdb.set_trace_without_step(self.botframe)
-        if self.curindex + 1 != len(self.stack):
-            self.pdb.stack = self.stack
-            self.pdb.curindex = self.curindex
-            self.pdb.curframe = self.curframe
+        if self.has_gone_up():
+            self.pdb.update_state(self)
             self.pdb.cmdloop()
         else:
             self.pdb.interaction(self.curframe, None)
         return 1
-
-    def set_trace_without_step(self, frame):
-        set_trace_without_step(self, frame)
 
     do_u = do_up = show_line(Pdb.do_up)
     do_d = do_down = show_line(Pdb.do_down)
@@ -195,34 +213,24 @@ def trace_dispatch(self, frame, event, arg):
         return self._orig_trace_dispatch(frame, event, arg)
 
 
-def set_trace_without_step(self, frame):
+class VimpdbSwitcher(Switcher):
     """
-    set trace while switching from pdb to vimpdb
-    and vice versa
+    with vim command
     """
-    self.reset()
-    while frame:
-        frame.f_trace = self.trace_dispatch
-        self.botframe = frame
-        frame = frame.f_back
-    sys.settrace(self.trace_dispatch)
 
+    def do_vim(self, arg):
+        """v(im)
+    switch to debugging with vimpdb"""
+        self.vimpdb = VimPdb()
+        self.vimpdb.set_trace_without_step(self.botframe)
+        if self.has_gone_up():
+            self.vimpdb.update_state(self)
+            self.vimpdb.cmdloop()
+        else:
+            self.vimpdb.interaction(self.curframe, None)
+        return 1
 
-def do_vim(self, arg):
-    """v(im)
-switch to debugging with vimpdb"""
-    self.vimpdb = VimPdb()
-    self.vimpdb.set_trace_without_step(self.botframe)
-    self.vimpdb.curindex = self.curindex
-    self.vimpdb.curframe = self.curframe
-    if self.curindex + 1 != len(self.stack):
-        self.vimpdb.stack = self.stack
-        self.vimpdb.curindex = self.curindex
-        self.vimpdb.curframe = self.curframe
-        self.vimpdb.cmdloop()
-    else:
-        self.vimpdb.interaction(self.curframe, None)
-    return 1
+    do_v = do_vim
 
 
 def hook(klass):
@@ -241,11 +249,9 @@ def hook(klass):
             setattr(klass, '_orig_' + name, orig)
             setattr(klass, name, method)
 
-    setupMethod(klass, trace_dispatch)
     if not hasattr(klass, 'do_vim'):
-        klass.set_trace_without_step = set_trace_without_step
-        klass.do_vim = do_vim
-        klass.do_v = do_vim
+        setupMethod(klass, trace_dispatch)
+        klass.__bases__ += (VimpdbSwitcher, )
 
 
 def get_hooked_pdb():
