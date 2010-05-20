@@ -142,8 +142,14 @@ class VimPdb(Pdb):
         """
         self.from_vim.closeSocket()
         self.pdb = get_hooked_pdb()
-        self.pdb.set_trace_without_step(self.curframe)
-        self.pdb.interaction(self.curframe, None)
+        self.pdb.set_trace_without_step(self.botframe)
+        if self.curindex + 1 != len(self.stack):
+            self.pdb.stack = self.stack
+            self.pdb.curindex = self.curindex
+            self.pdb.curframe = self.curframe
+            self.pdb.cmdloop()
+        else:
+            self.pdb.interaction(self.curframe, None)
         return 1
 
     def set_trace_without_step(self, frame):
@@ -206,8 +212,16 @@ def do_vim(self, arg):
     """v(im)
 switch to debugging with vimpdb"""
     self.vimpdb = VimPdb()
-    self.vimpdb.set_trace_without_step(self.curframe)
-    self.vimpdb.interaction(self.curframe, None)
+    self.vimpdb.set_trace_without_step(self.botframe)
+    self.vimpdb.curindex = self.curindex
+    self.vimpdb.curframe = self.curframe
+    if self.curindex + 1 != len(self.stack):
+        self.vimpdb.stack = self.stack
+        self.vimpdb.curindex = self.curindex
+        self.vimpdb.curframe = self.curframe
+        self.vimpdb.cmdloop()
+    else:
+        self.vimpdb.interaction(self.curframe, None)
     return 1
 
 
