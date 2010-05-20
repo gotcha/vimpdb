@@ -4,8 +4,9 @@ Changelog
 0.3.7 (unreleased)
 ------------------
 
-- Nothing changed yet.
-
+- fix: could not go "down" after switching from pdb to
+  vimpdb after having gone "up"
+  (http://github.com/gotcha/vimpdb/issues/issue/4)
 
 0.3.6 (2010-04-17)
 ------------------
