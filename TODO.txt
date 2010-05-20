@@ -5,8 +5,12 @@ In priority order:
 
 - document the PDBxx commands in Ex mode
 
-- when switching to vimpdb from pdb, if the Remove VIM is unavailable,
+- when switching to vimpdb from pdb, if the remote VIM is unavailable,
   log a message and keep pdb running.
+
+- when switching to vimpdb from pdb, copy the call stack.
+
+- when resetting, close vimpdb buffer and issue message
 
 - try to start Vim server if it is not started
 
