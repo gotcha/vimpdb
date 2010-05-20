@@ -168,6 +168,7 @@ class VimPdb(Pdb, Switcher):
         self.pdb.set_trace_without_step(self.botframe)
         if self.has_gone_up():
             self.pdb.update_state(self)
+            self.pdb.print_current_stack_entry()
             self.pdb.cmdloop()
         else:
             self.pdb.interaction(self.curframe, None)
@@ -231,6 +232,9 @@ class VimpdbSwitcher(Switcher):
         return 1
 
     do_v = do_vim
+
+    def print_current_stack_entry(self):
+        self.print_stack_entry(self.stack[self.curindex])
 
 
 def hook(klass):
