@@ -10,7 +10,7 @@ setup(name='vimpdb',
                        open("CHANGES.txt").read() + "\n" +
                        open("TODO.txt").read(),
       classifiers=[],
-      keywords='',
+      keywords='pdb vim',
       author='Godefroid Chapelle',
       author_email='gotcha@bubblenet.be',
       url='http://github.com/gotcha/vimpdb',
