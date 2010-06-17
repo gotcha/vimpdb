@@ -1,3 +1,6 @@
+" some versions of VIM need explicit import
+python import vim
+
 function! PDB_init_display()
     call PDB_move_to_debug_tab()
     " avoid "Press Enter to continue"
