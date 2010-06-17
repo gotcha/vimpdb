@@ -4,7 +4,9 @@ Changelog
 0.3.8 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- fix: some versions of VIM need explicite import
+  even though most don't.
+  (http://github.com/gotcha/vimpdb/issues/issue/5)
 
 
 0.3.7 (2010-05-20)
