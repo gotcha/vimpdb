@@ -10,7 +10,7 @@ Changelog
 0.3.8 (2010-06-17)
 ------------------
 
-- fix: some versions of VIM need explicite import
+- fix: some versions of VIM need explicit import of vim module
   even though most don't.
   (http://github.com/gotcha/vimpdb/issues/issue/5)
 
