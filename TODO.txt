@@ -5,12 +5,12 @@ In priority order:
 
 - document the PDBxx commands in Ex mode
 
-- when switching to vimpdb from pdb, if the remote VIM is unavailable,
+- when switching from pdb to vimpdb, if the remote VIM is unavailable,
   log a message and keep pdb running.
 
-- when switching to vimpdb from pdb, copy the call stack.
-
 - when resetting, close vimpdb buffer and issue message
+
+- key bindings in vimpdb buffer
 
 - try to start Vim server if it is not started
 
@@ -18,8 +18,6 @@ In priority order:
   ``VIMPDB_SERVERNAME``
 
 - check and complain if Vim does not support the right options
-
-- register command to call PDB_reset_original_mapping
 
 - add option to allow other network settings
   (instead of hardcoded)
