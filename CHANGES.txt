@@ -1,7 +1,7 @@
 Changelog
 =========
 
-0.3.8 (unreleased)
+0.3.8 (2010-06-17)
 ------------------
 
 - fix: some versions of VIM need explicite import
