@@ -4,9 +4,9 @@ import ConfigParser
 
 RCNAME = os.path.expanduser('~/.vimpdbrc')
 
-PROGRAM = os.environ.get("VIMPDB_VIMSCRIPT", "vim")
-SERVERNAME = os.environ.get("VIMPDB_SERVERNAME", "VIMPDB")
-PORT = 6666
+DEFAULT_SCRIPT = os.environ.get("VIMPDB_VIMSCRIPT", "vim")
+DEFAULT_SERVERNAME = os.environ.get("VIMPDB_SERVERNAME", "VIMPDB")
+DEFAULT_PORT = 6666
 
 
 class BadConfiguration(Exception):
@@ -45,9 +45,9 @@ class Config(object):
     def write_to_file(self):
         parser = ConfigParser.RawConfigParser()
         parser.add_section('vimpdb')
-        parser.set('vimpdb', 'script', PROGRAM)
-        parser.set('vimpdb', 'server_name', SERVERNAME)
-        parser.set('vimpdb', 'port', PORT)
+        parser.set('vimpdb', 'script', DEFAULT_SCRIPT)
+        parser.set('vimpdb', 'server_name', DEFAULT_SERVERNAME)
+        parser.set('vimpdb', 'port', DEFAULT_PORT)
         rcfile = open(self.filename, 'w')
         parser.write(rcfile)
         rcfile.close()
