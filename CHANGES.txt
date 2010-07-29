@@ -4,6 +4,8 @@ Changelog
 0.4.0 (unreleased)
 ------------------
 
+- tested with Python 2.7.
+
 - UDP port is now an option.
 
 - configuration through ~/.vimpdbrc instead of environment variables.

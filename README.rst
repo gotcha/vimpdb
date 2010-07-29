@@ -15,8 +15,8 @@ Requirements
 
 **vimpdb** has been used successfully under Linux, Mac OSX and Windows.
 
-It **is compatible** with Python 2.6, 2.5 and 2.4. It is not known if it does work
-with Python 3.0 (let us know).
+It **is compatible** with Python 2.7, 2.6, 2.5 and 2.4. 
+It **is not compatible** with Python 3.1 (it should be the same for 3.0).
 
 **vimpdb** requires an installation of VIM that supports both ``python`` and
 ``clientserver`` options.
