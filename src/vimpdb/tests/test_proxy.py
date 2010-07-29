@@ -3,7 +3,8 @@ import os
 
 def test_ProxyToVim_instantiation():
     from vimpdb.proxy import ProxyToVim
-    to_vim = ProxyToVim()
+    from vimpdb.testing import config
+    to_vim = ProxyToVim(config)
     assert isinstance(to_vim, ProxyToVim)
 
 
@@ -111,5 +112,6 @@ def test_ProxyToVim_showFileAtLine_existing_file_windows():
 
 def test_ProxyFromVim_instantiation():
     from vimpdb.proxy import ProxyFromVim
-    from_vim = ProxyFromVim()
+    from vimpdb.testing import config
+    from_vim = ProxyFromVim(config)
     assert isinstance(from_vim, ProxyFromVim)

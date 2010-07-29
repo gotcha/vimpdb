@@ -5,9 +5,6 @@ from subprocess import call
 from subprocess import Popen
 from subprocess import PIPE
 
-PROGRAM = os.environ.get("VIMPDB_VIMSCRIPT", "vim")
-SERVERNAME = os.environ.get("VIMPDB_SERVERNAME", "VIMPDB")
-
 
 def getPackagePath(instance):
     module = sys.modules[instance.__module__]
@@ -20,9 +17,13 @@ class ProxyToVim(object):
     to communicate with Vim instance used for debugging.
     """
 
+    def __init__(self, config):
+        self.script = config.script
+        self.server_name = config.server_name
+
     def _remote_expr(self, expr):
-        p = Popen([PROGRAM, '--servername',
-                   SERVERNAME, "--remote-expr", expr],
+        p = Popen([self.script, '--servername',
+                   self.server_name, "--remote-expr", expr],
             stdin=PIPE, stdout=PIPE)
         return_code = p.wait()
         if return_code:
@@ -32,7 +33,7 @@ class ProxyToVim(object):
         return output.strip()
 
     def _send(self, command):
-        return_code = call([PROGRAM, '--servername', SERVERNAME,
+        return_code = call([self.script, '--servername', self.server_name,
                             '--remote-send', command])
         if return_code:
             raise RemoteUnavailable()
@@ -83,17 +84,17 @@ class ProxyToVim(object):
 
 class ProxyFromVim(object):
 
-    PORT = 6666
     BUFLEN = 512
 
-    def __init__(self):
+    def __init__(self, config):
         self.socket_inactive = True
+        self.port = config.port
 
     def bindSocket(self):
         if self.socket_inactive:
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM,
                 socket.IPPROTO_UDP)
-            self.socket.bind(('', self.PORT))
+            self.socket.bind(('', self.port))
             self.socket_inactive = False
 
     def closeSocket(self):

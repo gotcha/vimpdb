@@ -30,3 +30,13 @@ class ProxyToVimForTests(ProxyToVim):
 
     def logged(self):
         return self.log.getvalue()
+
+
+class Config(object):
+
+    def __init__(self):
+        self.script = 'script'
+        self.server_name = 'servername'
+        self.port = 6666
+
+config = Config()
