@@ -110,17 +110,17 @@ name by issuing the following command at the VIM prompt::
 
 Port
 ----
-**vimpdb** communicates to VIM through a UDP socket. 
+VIM communicates to **vimpdb** through a UDP socket. 
 By default, the socket is opened on port 6666.
 
-If that socket is not available in your system, you can modify the
-``port`` option to point to another available port.
+If that socket is not available in your system, you can specify an available
+port number in the ``port`` option.
 
 
 Backward Compatibility
 ----------------------
 
-Before version 4.0, configuration was done through environment variables.
+Before version 4.0, **vimpdb** was configured through environment variables.
 If you had a working configuration, you should have no problem.
 The values of ``VIMPDB_SERVERNAME`` and ``VIMPDB_VIMSCRIPT`` environment
 variables are setup in the RC file (``~/.vimpdbrc``). 
