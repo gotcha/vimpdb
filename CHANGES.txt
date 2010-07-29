@@ -1,10 +1,12 @@
 Changelog
 =========
 
-0.3.9 (unreleased)
+0.4.0 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- UDP port is now an option.
+
+- configuration through ~/.vimpdbrc instead of environment variables.
 
 
 0.3.8 (2010-06-17)
@@ -19,13 +21,13 @@ Changelog
 ------------------
 
 - fix: could not go "down" after switching from pdb to
-  vimpdb after having gone "up"
+  vimpdb after having gone "up".
   (http://github.com/gotcha/vimpdb/issues/issue/4)
 
 0.3.6 (2010-04-17)
 ------------------
 
-- fix: "continue" command was broken after breakpoint has been set
+- fix: "continue" command was broken after breakpoint has been set.
   (http://github.com/gotcha/vimpdb/issues/issue/3)
 
 - fix: Key mappings were left broken after "continue" command.

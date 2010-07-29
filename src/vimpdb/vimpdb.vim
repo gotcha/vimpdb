@@ -1,6 +1,17 @@
 " some versions of VIM need explicit import
 python import vim
 
+function! PDB_setup_egg(path)
+python <<EOT
+import sys
+egg_path = vim.eval("a:path")
+sys.path.insert(0, egg_path)
+from vimpdb.config import getConfiguration
+config = getConfiguration()
+PDB_PORT = config.port
+EOT
+endfunction
+
 function! PDB_init_display()
     call PDB_move_to_debug_tab()
     " avoid "Press Enter to continue"
@@ -55,6 +66,7 @@ endfunction
 
 python <<EOT
 import socket
+    
 
 def vimpdb_socket_get():
     try:
@@ -65,7 +77,6 @@ def vimpdb_socket_get():
 
 def vimpdb_socket_send(message):
     PDB_ADDRESS = '127.0.0.1'
-    PDB_PORT = 6666
     send_socket = vimpdb_socket_get()
     send_socket.sendto(message, (PDB_ADDRESS, PDB_PORT))
 

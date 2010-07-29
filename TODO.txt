@@ -19,8 +19,5 @@ In priority order:
 
 - check and complain if Vim does not support the right options
 
-- add option to allow other network settings
-  (instead of hardcoded)
-
 
 and much more...

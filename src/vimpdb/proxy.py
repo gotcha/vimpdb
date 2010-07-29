@@ -41,9 +41,12 @@ class ProxyToVim(object):
 
     def setupRemote(self):
         if not self.isRemoteSetup():
-            filename = os.path.join(getPackagePath(self), "vimpdb.vim")
+            package_path = getPackagePath(self)
+            filename = os.path.join(package_path, "vimpdb.vim")
             command = "<C-\><C-N>:source %s<CR>" % filename
             self._send(command)
+            egg_path = os.path.dirname(package_path)
+            self._send(':call PDB_setup_egg(%s)<CR>' % repr(egg_path))
 
     def isRemoteSetup(self):
         status = self._remote_expr("exists('*PDB_init')")

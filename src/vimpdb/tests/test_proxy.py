@@ -14,11 +14,13 @@ def test_ProxyToVim_setupRemote():
     to_vim.setState(to_vim.IS_REMOTE_SETUP_IS_FALSE)
     to_vim.setupRemote()
     lines = to_vim.logged().splitlines()
-    assert len(lines) == 4
+    assert len(lines) == 5
     assert lines[1] == "expr: exists('*PDB_init')"
     assert lines[2] == "return: '0'"
     assert lines[3].startswith('send: <C-\\><C-N>:source ')
     assert lines[3].endswith('vimpdb/vimpdb.vim<CR>')
+    assert lines[4].startswith('send: :call PDB_setup_egg(')
+    assert 'vimpdb' in lines[4]
 
 
 def test_ProxyToVim_setupRemote_does_nothing():

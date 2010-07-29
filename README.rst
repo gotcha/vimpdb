@@ -50,9 +50,22 @@ Just install this package using ``easy_install`` or similar::
 
 If you look inside the package, you will see a VIM script file: ``vimpdb.vim``.
 Do **not** move it to VIM configuration directory (like ``~/.vim/plugin``).
+**vimpdb** knows how to make the script available to VIM.
 
 Configuration
 =============
+
+**vimpdb** is configured through its RC file : ``~/.vimpdbrc``.
+The options are found in the ``[vimpdb]`` section.
+
+When **vimpdb** is started, it looks for that RC file.
+If it does not find it, **vimpdb** creates that file for you from default values.
+
+If the default values do not work for you, you should modify the RC file.
+See below for details about the options.
+
+You should not remove any of the options. If you do, **vimpdb** will break and 
+complain accordingly.
 
 VIM script
 ----------
@@ -63,7 +76,7 @@ To communicate with the VIM instance where debugging happens,
 By default, **vimpdb** uses the ``vim`` script to start that VIM instance with 
 clientserver support. If there exists such a ``vim`` script on your path, you are ok.
 
-You can configure another script with the ``VIMPDB_VIMSCRIPT`` environment variable.
+You can configure another script with the ``script`` option.
 It must hold the script that **vimpdb** should use to launch a VIM instance 
 with clientserver support.
 
@@ -76,8 +89,8 @@ Server Name
 By default, **vimpdb** speaks to the server named ``VIMPDB``.  
 Note that the default ``servername`` used by VIM is ``VIM``.
 
-If want **vimpdb** to use another server name, you need to setup the 
-``VIMPDB_SERVERNAME`` environment variable. It should hold the name of the VIM
+If you want **vimpdb** to use another server name, modify the 
+``server_name`` option. It should hold the name of the VIM
 server you will be using for debugging. 
 
 You may list the currently running VIM servers using::
@@ -90,11 +103,28 @@ Or, on a Mac::
     $ /Applications/MacVim.app/Contents/MacOS/Vim --serverlist
     VIM
 
-When a VIM instance with ``clientserver`` support is running, you can find its name by issuing the
-following command at the VIM prompt::
+When a VIM instance with ``clientserver`` support is running, you can find its 
+name by issuing the following command at the VIM prompt::
 
     :echo v:servername
 
+Port
+----
+**vimpdb** communicates to VIM through a UDP socket. 
+By default, the socket is opened on port 6666.
+
+If that socket is not available in your system, you can modify the
+``port`` option to point to another available port.
+
+
+Backward Compatibility
+----------------------
+
+Before version 4.0, configuration was done through environment variables.
+If you had a working configuration, you should have no problem.
+The values of ``VIMPDB_SERVERNAME`` and ``VIMPDB_VIMSCRIPT`` environment
+variables are setup in the RC file (``~/.vimpdbrc``). 
+They are put respectively in ``server_name`` and ``script`` options.
 
 Usage
 =====
