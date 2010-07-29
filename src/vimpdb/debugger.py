@@ -1,12 +1,16 @@
 from pdb import Pdb, line_prefix
 import sys
-import StringIO
 from vimpdb.proxy import ProxyToVim
 from vimpdb.proxy import ProxyFromVim
 from vimpdb.config import getConfiguration
+from vimpdb.config import PYTHON_26_OR_BIGGER
+from vimpdb.config import PYTHON_25_OR_BIGGER
+from vimpdb.config import PYTHON_31_OR_BIGGER
 
-PYTHON_25_OR_BIGGER = sys.version_info >= (2, 5)
-PYTHON_26_OR_BIGGER = sys.version_info >= (2, 6)
+if PYTHON_31_OR_BIGGER:
+    from io import StringIO
+else:
+    from StringIO import StringIO
 
 
 def capture_sys_stdout(method):
@@ -130,7 +134,7 @@ class VimPdb(Pdb, Switcher):
     # stdout captures to send back to Vim
     def capture_sys_stdout(self):
         self.stdout = sys.stdout
-        sys.stdout = StringIO.StringIO()
+        sys.stdout = StringIO()
         self.capturing = True
 
     def stop_capture_sys_stdout(self):
@@ -142,7 +146,7 @@ class VimPdb(Pdb, Switcher):
     # stdout captures to send back to Vim
     def capture_self_stdout(self):
         self.initial_stdout = self.stdout
-        self.stdout = StringIO.StringIO()
+        self.stdout = StringIO()
         self.capturing = True
 
     def stop_capture_self_stdout(self):

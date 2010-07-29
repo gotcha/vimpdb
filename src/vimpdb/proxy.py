@@ -37,7 +37,7 @@ class ProxyToVim(object):
                             '--remote-send', command])
         if return_code:
             raise RemoteUnavailable()
-        print "sent:", command
+        print("sent:", command)
 
     def setupRemote(self):
         if not self.isRemoteSetup():
@@ -79,9 +79,9 @@ class ProxyToVim(object):
         return command
 
     def _expr(self, expr):
-        print "expr:", expr
+        print("expr:", expr)
         result = self._remote_expr(expr)
-        print "result:", result
+        print("result:", result)
         return result
 
 
@@ -107,7 +107,7 @@ class ProxyFromVim(object):
     def waitFor(self, pdb):
         self.bindSocket()
         (message, address) = self.socket.recvfrom(self.BUFLEN)
-        print "command:", message
+        print("command:", message)
         return message
 
 

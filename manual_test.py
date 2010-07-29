@@ -1,5 +1,11 @@
+import sys
+
+if sys.version_info[0] == 2:
+    def print(*args):
+        print *args
+
 def output(arg):
-    print "MANUAL: arg=", arg
+    print("MANUAL: arg=", arg)
 
 
 def main():

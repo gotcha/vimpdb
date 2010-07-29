@@ -1,6 +1,15 @@
+import sys
 import os
 import os.path
-import ConfigParser
+
+PYTHON_25_OR_BIGGER = sys.version_info >= (2, 5)
+PYTHON_26_OR_BIGGER = sys.version_info >= (2, 6)
+PYTHON_31_OR_BIGGER = sys.version_info >= (3, 1)
+
+if PYTHON_31_OR_BIGGER:
+    from configparser import RawConfigParser
+else:
+    from ConfigParser import RawConfigParser
 
 RCNAME = os.path.expanduser('~/.vimpdbrc')
 
@@ -22,7 +31,7 @@ class Config(object):
     def read_from_file(self):
         if not os.path.exists(self.filename):
             self.write_to_file()
-        parser = ConfigParser.RawConfigParser()
+        parser = RawConfigParser()
         parser.read(self.filename)
         if not parser.has_section('vimpdb'):
             raise BadConfiguration('[vimpdb] section is missing in "%s"' %
@@ -43,7 +52,7 @@ class Config(object):
             raise BadConfiguration(error_msg % 'port')
 
     def write_to_file(self):
-        parser = ConfigParser.RawConfigParser()
+        parser = RawConfigParser()
         parser.add_section('vimpdb')
         parser.set('vimpdb', 'script', DEFAULT_SCRIPT)
         parser.set('vimpdb', 'server_name', DEFAULT_SERVERNAME)
