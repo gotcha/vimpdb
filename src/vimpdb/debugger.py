@@ -3,6 +3,7 @@ import sys
 import StringIO
 from vimpdb.proxy import ProxyToVim
 from vimpdb.proxy import ProxyFromVim
+from vimpdb.config import Detector
 from vimpdb.config import getConfiguration
 
 PYTHON_25_OR_BIGGER = sys.version_info >= (2, 5)
@@ -89,7 +90,7 @@ class VimPdb(Pdb, Switcher):
     def __init__(self):
         Pdb.__init__(self)
         self.capturing = False
-        config = getConfiguration()
+        config = Detector(getConfiguration())
         self.to_vim = ProxyToVim(config)
         self.from_vim = ProxyFromVim(config)
         self._textOutput = ''
