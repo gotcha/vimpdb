@@ -74,7 +74,9 @@ def getCommandOutput(parts):
     return output.strip()
 
 NO_SERVER_SUPPORT = "'%s' launches a VIM instance without server support."
+NO_PYTHON_SUPPORT = "'%s' launches a VIM instance without python support."
 NOT_VIM_SCRIPT = "'%s' is not a script that launches a VIM instance."
+WRONG_SCRIPT = "'%s' is a script that does not support --version option."
 
 
 class Detector(object):
@@ -83,19 +85,27 @@ class Detector(object):
         self.script = config.script
         self.server_name = config.server_name
         self.port = config.port
-        if not self.check_serversupport():
-            raise ValueError(NO_SERVER_SUPPORT % self.script)
+
+    def checkConfiguration(self):
+        self.check_serversupport()
         self.check_serverlist()
+        self.check_pythonsupport()
 
     def launch(self):
-        command = [self.script, '--servername', self.server_name]
+        command = self.build_command('--servername', self.server_name)
         return_code = call(command)
         if return_code:
             raise ReturnCodeError(" ".join(command))
 
+    def build_command(self, *args):
+        command = self.script.split()
+        command.extend(*args)
+        return command
+
     def get_serverlist(self):
         try:
-            return getCommandOutput([self.script, '--serverlist'])
+            command = self.build_command('--serverlist')
+            return getCommandOutput(command)
         except ReturnCodeError:
             raise ValueError(NO_SERVER_SUPPORT % self.script)
 
@@ -105,16 +115,35 @@ class Detector(object):
             self.launch()
         while not serverlist:
             serverlist = self.get_serverlist()
-        if self.server_name not in serverlist.lower():
+        if self.server_name.lower() not in serverlist.lower():
             msg = "'%s' server name not available in server list."
             raise ValueError(msg % self.server_name)
 
-    def check_serversupport(self):
+    def get_vimversion(self):
         try:
-            version = getCommandOutput([self.script, '--version'])
+            command = self.build_command('--version')
+            version = getCommandOutput(command)
         except ReturnCodeError:
+            raise ValueError(WRONG_SCRIPT % self.script)
+        return version
+
+    def check_serversupport(self):
+        version = self.get_vimversion()
+        if '+clientserver' in version:
+            return
+        elif '-clientserver' in version:
+            raise ValueError(NO_SERVER_SUPPORT % self.script)
+        else:
             raise ValueError(NOT_VIM_SCRIPT % self.script)
-        return '+clientserver' in version
+
+    def check_pythonsupport(self):
+        version = self.get_vimversion()
+        if '+python' in version:
+            return
+        elif '-python' in version:
+            raise ValueError(NO_PYTHON_SUPPORT % self.script)
+        else:
+            raise ValueError(NOT_VIM_SCRIPT % self.script)
 
 
 if __name__ == '__main__':

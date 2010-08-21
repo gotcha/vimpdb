@@ -1,4 +1,5 @@
 import os
+import sys
 import py
 
 
@@ -103,3 +104,52 @@ def test_file_creation():
     assert config.script == DEFAULT_SCRIPT
     assert config.server_name == DEFAULT_SERVERNAME
     os.remove(name)
+
+
+def build_script(script):
+    from vimpdb.proxy import getPackagePath
+    tests_path = getPackagePath(build_script)
+    script_path = sys.executable + " " + os.path.sep.join([tests_path,
+        'scripts', script])
+    return script_path
+
+
+def test_detect_compatible():
+    from vimpdb.config import Detector
+    from vimpdb.testing import Config
+    script = build_script('compatiblevim.py')
+    config = Config(script=script)
+    detect = Detector(config)
+    detect.check_serversupport()
+    detect.check_pythonsupport()
+
+
+def test_detect_incompatible():
+    from vimpdb.config import Detector
+    from vimpdb.testing import Config
+    script = build_script('incompatiblevim.py')
+    config = Config(script=script)
+    detect = Detector(config)
+    py.test.raises(ValueError, detect.check_serversupport)
+    py.test.raises(ValueError, detect.check_pythonsupport)
+
+
+def test_detect_rightserverlist():
+    from vimpdb.config import Detector
+    from vimpdb.testing import Config
+    script = build_script('rightserverlist.py')
+    config = Config(script=script, server_name="VIM")
+    detect = Detector(config)
+    assert 'VIM' in detect.get_serverlist()
+    assert 'VIM' == detect.server_name
+    detect.check_serverlist()
+
+
+def test_detect_wrongserverlist():
+    from vimpdb.config import Detector
+    from vimpdb.testing import Config
+    script = build_script('wrongserverlist.py')
+    config = Config(script=script)
+    detect = Detector(config)
+    assert 'WRONG' in detect.get_serverlist()
+    py.test.raises(ValueError, detect.check_serverlist)

@@ -90,7 +90,7 @@ class VimPdb(Pdb, Switcher):
     def __init__(self):
         Pdb.__init__(self)
         self.capturing = False
-        config = Detector(getConfiguration())
+        config = Detector(getConfiguration()).checkConfiguration()
         self.to_vim = ProxyToVim(config)
         self.from_vim = ProxyFromVim(config)
         self._textOutput = ''
