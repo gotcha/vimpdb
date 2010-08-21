@@ -90,6 +90,7 @@ class Detector(object):
         self.check_serversupport()
         self.check_serverlist()
         self.check_pythonsupport()
+        return self
 
     def launch(self):
         command = self.build_command('--servername', self.server_name)
@@ -99,7 +100,7 @@ class Detector(object):
 
     def build_command(self, *args):
         command = self.script.split()
-        command.extend(*args)
+        command.extend(args)
         return command
 
     def get_serverlist(self):
