@@ -73,6 +73,7 @@ def getCommandOutput(parts):
     output = child_stdout.read()
     return output.strip()
 
+
 NO_SERVER_SUPPORT = "'%s' launches a VIM instance without server support."
 NO_PYTHON_SUPPORT = "'%s' launches a VIM instance without python support."
 NOT_VIM_SCRIPT = "'%s' is not a script that launches a VIM instance."
@@ -87,9 +88,9 @@ class Detector(object):
         self.port = config.port
 
     def checkConfiguration(self):
+        self.check_python_support()
         self.check_server_support()
         self.check_serverlist()
-        self.check_python_support()
         return self
 
     def launch(self):
