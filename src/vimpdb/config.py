@@ -1,3 +1,4 @@
+import sys
 import os
 import os.path
 import ConfigParser
@@ -7,7 +8,14 @@ from subprocess import PIPE
 
 RCNAME = os.path.expanduser('~/.vimpdbrc')
 
-DEFAULT_SCRIPT = os.environ.get("VIMPDB_VIMSCRIPT", "vim")
+if sys.platform == 'darwin':
+    PLATFORM_SCRIPT = 'mvim'
+elif sys.platform == 'windows':
+    PLATFORM_SCRIPT = 'vim.exe'
+else:
+    PLATFORM_SCRIPT = 'mvim'
+
+DEFAULT_SCRIPT = os.environ.get("VIMPDB_VIMSCRIPT", PLATFORM_SCRIPT)
 DEFAULT_SERVERNAME = os.environ.get("VIMPDB_SERVERNAME", "VIMPDB")
 DEFAULT_PORT = 6666
 
@@ -24,7 +32,8 @@ class Config(object):
 
     def read_from_file(self):
         if not os.path.exists(self.filename):
-            self.write_to_file()
+            self.write_to_file(
+                DEFAULT_SCRIPT, DEFAULT_SERVERNAME, DEFAULT_PORT)
         parser = ConfigParser.RawConfigParser()
         parser.read(self.filename)
         if not parser.has_section('vimpdb'):
@@ -45,12 +54,12 @@ class Config(object):
         else:
             raise BadConfiguration(error_msg % 'port')
 
-    def write_to_file(self):
+    def write_to_file(self, script, server_name, port):
         parser = ConfigParser.RawConfigParser()
         parser.add_section('vimpdb')
-        parser.set('vimpdb', 'script', DEFAULT_SCRIPT)
-        parser.set('vimpdb', 'server_name', DEFAULT_SERVERNAME)
-        parser.set('vimpdb', 'port', DEFAULT_PORT)
+        parser.set('vimpdb', 'script', script)
+        parser.set('vimpdb', 'server_name', server_name)
+        parser.set('vimpdb', 'port', port)
         rcfile = open(self.filename, 'w')
         parser.write(rcfile)
         rcfile.close()
@@ -61,6 +70,10 @@ def getConfiguration():
 
 
 class ReturnCodeError(Exception):
+    pass
+
+
+class NoWorkingConfigurationError(Exception):
     pass
 
 
@@ -88,10 +101,40 @@ class Detector(object):
         self.port = config.port
 
     def checkConfiguration(self):
-        self.check_python_support()
-        self.check_server_support()
-        self.check_serverlist()
+        while not self._checkConfiguration():
+            pass
+        self.store_config()
         return self
+
+    def _checkConfiguration(self):
+        try:
+            self.check_python_support()
+        except OSError, e:
+            print e.args[1]
+            if self.script == DEFAULT_SCRIPT:
+                print "with the default script (%s)." % self.script
+            else:
+                print ("with the script from the configuration (%s)."
+                    % self.script)
+            self.query_script()
+            return False
+        except ValueError, e:
+            print e.args[0]
+            self.query_script()
+            return False
+        try:
+            self.check_server_support()
+        except ValueError, e:
+            print e.args[0]
+            self.query_script()
+            return False
+        try:
+            self.check_serverlist()
+        except ValueError, e:
+            print e.args[0]
+            self.query_servername()
+            return False
+        return True
 
     def launch(self):
         command = self.build_command('--servername', self.server_name)
@@ -118,8 +161,8 @@ class Detector(object):
         while not serverlist:
             serverlist = self.get_serverlist()
         if self.server_name.lower() not in serverlist.lower():
-            msg = "'%s' server name not available in server list."
-            raise ValueError(msg % self.server_name)
+            msg = "'%s' server name not available in server list.\n%s"
+            raise ValueError(msg % (self.server_name, serverlist))
 
     def get_vim_version(self):
         try:
@@ -146,6 +189,26 @@ class Detector(object):
             raise ValueError(NO_PYTHON_SUPPORT % self.script)
         else:
             raise ValueError(NOT_VIM_SCRIPT % self.script)
+
+    def query_script(self):
+        question = "Input another script (leave empty to abort): "
+        answer = raw_input(question)
+        if answer == '':
+            raise NoWorkingConfigurationError
+        else:
+            self.script = answer
+
+    def query_servername(self):
+        question = "Input another server name (leave empty to abort): "
+        answer = raw_input(question)
+        if answer == '':
+            raise NoWorkingConfigurationError
+        else:
+            self.server_name = answer
+
+    def store_config(self):
+        config = getConfiguration()
+        config.write_to_file(self.script, self.server_name, self.port)
 
 
 if __name__ == '__main__':
