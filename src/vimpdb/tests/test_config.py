@@ -141,7 +141,6 @@ def test_detect_rightserverlist():
     config = Config(script=script, server_name="VIM")
     detect = Detector(config)
     assert 'VIM' in detect.get_serverlist()
-    assert 'VIM' == detect.server_name
     detect.check_serverlist()
 
 
