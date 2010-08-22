@@ -120,8 +120,8 @@ def test_detect_compatible():
     script = build_script('compatiblevim.py')
     config = Config(script=script)
     detect = Detector(config)
-    detect.check_serversupport()
-    detect.check_pythonsupport()
+    detect.check_server_support()
+    detect.check_python_support()
 
 
 def test_detect_incompatible():
@@ -130,8 +130,8 @@ def test_detect_incompatible():
     script = build_script('incompatiblevim.py')
     config = Config(script=script)
     detect = Detector(config)
-    py.test.raises(ValueError, detect.check_serversupport)
-    py.test.raises(ValueError, detect.check_pythonsupport)
+    py.test.raises(ValueError, detect.check_server_support)
+    py.test.raises(ValueError, detect.check_python_support)
 
 
 def test_detect_rightserverlist():

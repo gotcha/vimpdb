@@ -87,9 +87,9 @@ class Detector(object):
         self.port = config.port
 
     def checkConfiguration(self):
-        self.check_serversupport()
+        self.check_server_support()
         self.check_serverlist()
-        self.check_pythonsupport()
+        self.check_python_support()
         return self
 
     def launch(self):
@@ -120,7 +120,7 @@ class Detector(object):
             msg = "'%s' server name not available in server list."
             raise ValueError(msg % self.server_name)
 
-    def get_vimversion(self):
+    def get_vim_version(self):
         try:
             command = self.build_command('--version')
             version = getCommandOutput(command)
@@ -128,8 +128,8 @@ class Detector(object):
             raise ValueError(WRONG_SCRIPT % self.script)
         return version
 
-    def check_serversupport(self):
-        version = self.get_vimversion()
+    def check_server_support(self):
+        version = self.get_vim_version()
         if '+clientserver' in version:
             return
         elif '-clientserver' in version:
@@ -137,8 +137,8 @@ class Detector(object):
         else:
             raise ValueError(NOT_VIM_SCRIPT % self.script)
 
-    def check_pythonsupport(self):
-        version = self.get_vimversion()
+    def check_python_support(self):
+        version = self.get_vim_version()
         if '+python' in version:
             return
         elif '-python' in version:
