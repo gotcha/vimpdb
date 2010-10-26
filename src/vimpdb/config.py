@@ -64,6 +64,10 @@ class Config(object):
         parser.write(rcfile)
         rcfile.close()
 
+    def __repr__(self):
+        return ("<vimpdb Config : Script %s; Server name %s, Port %s>" %
+          (self.script, self.server_name, self.port))
+
 
 def getConfiguration():
     return Config(RCNAME)
@@ -95,15 +99,16 @@ WRONG_SCRIPT = "'%s' is a script that does not support --version option."
 
 class Detector(object):
 
-    def __init__(self, config):
+    def __init__(self, config, commandParser=getCommandOutput):
         self.script = config.script
         self.server_name = config.server_name
         self.port = config.port
+        self.commandParser = commandParser
 
     def checkConfiguration(self):
         while not self._checkConfiguration():
             pass
-        self.store_config()
+        self.config = self.store_config()
         return self
 
     def _checkConfiguration(self):
@@ -150,7 +155,7 @@ class Detector(object):
     def get_serverlist(self):
         try:
             command = self.build_command('--serverlist')
-            return getCommandOutput(command)
+            return self.commandParser(command)
         except ReturnCodeError:
             raise ValueError(NO_SERVER_SUPPORT % self.script)
 
@@ -167,7 +172,7 @@ class Detector(object):
     def get_vim_version(self):
         try:
             command = self.build_command('--version')
-            version = getCommandOutput(command)
+            version = self.commandParser(command)
         except ReturnCodeError:
             raise ValueError(WRONG_SCRIPT % self.script)
         return version
@@ -209,7 +214,10 @@ class Detector(object):
     def store_config(self):
         config = getConfiguration()
         config.write_to_file(self.script, self.server_name, self.port)
+        return config
 
 
 if __name__ == '__main__':
     detector = Detector(getConfiguration())
+    detector.checkConfiguration()
+    print detector.config

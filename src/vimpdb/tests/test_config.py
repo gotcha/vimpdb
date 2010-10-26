@@ -152,3 +152,23 @@ def test_detect_wrongserverlist():
     detect = Detector(config)
     assert 'WRONG' in detect.get_serverlist()
     py.test.raises(ValueError, detect.check_serverlist)
+
+
+def test_detector_instantiation():
+    from vimpdb.config import Detector
+    from vimpdb.testing import Config
+    config = Config()
+    detector = Detector(config)
+    assert detector.port == config.port
+    assert detector.script == config.script
+    assert detector.server_name == config.server_name
+
+
+def test_detector_build_command():
+    from vimpdb.config import Detector
+    from vimpdb.testing import Config
+    config = Config()
+    detector = Detector(config)
+    result = detector.build_command("test")
+    assert result[-1] == "test"
+    assert result[0:-1] == config.script.split()
