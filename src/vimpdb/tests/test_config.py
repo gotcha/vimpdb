@@ -303,7 +303,7 @@ def test_detector_launch_bad_script():
     from vimpdb.testing import Config
     config = Config(server_name="VIM")
     detector = Detector(config)
-    info = py.test.raises(ReturnCodeError, detector.launch)
+    info = py.test.raises(ReturnCodeError, detector.launch_vim_server)
     assert info.value.args[0] == 1
     assert info.value.args[1] == 'script --servername VIM'
 

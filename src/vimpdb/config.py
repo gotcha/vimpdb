@@ -144,7 +144,7 @@ class Detector(object):
             return False
         return True
 
-    def launch(self):
+    def launch_vim_server(self):
         command = self.build_command('--servername', self.server_name)
         return_code = call(command)
         if return_code:
@@ -168,7 +168,7 @@ class Detector(object):
     def check_serverlist(self):
         serverlist = self.get_serverlist()
         if len(serverlist) == 0:
-            self.launch()
+            self.launch_vim_server()
         while not serverlist:
             serverlist = self.get_serverlist()
         if self.server_name.lower() not in serverlist.lower():
