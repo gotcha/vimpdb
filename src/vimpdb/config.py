@@ -15,9 +15,16 @@ elif sys.platform == 'windows':
 else:
     PLATFORM_SCRIPT = 'mvim'
 
-DEFAULT_SCRIPT = os.environ.get("VIMPDB_VIMSCRIPT", PLATFORM_SCRIPT)
+DEFAULT_CLIENT_SCRIPT = os.environ.get("VIMPDB_VIMSCRIPT", PLATFORM_SCRIPT)
+if sys.platform == 'windows':
+    DEFAULT_SERVER_SCRIPT = ''
+else:
+    DEFAULT_SERVER_SCRIPT = DEFAULT_CLIENT_SCRIPT
 DEFAULT_SERVERNAME = os.environ.get("VIMPDB_SERVERNAME", "VIMPDB")
 DEFAULT_PORT = 6666
+
+CLIENT = 'CLIENT'
+SERVER = 'SERVER'
 
 
 class BadConfiguration(Exception):
@@ -33,7 +40,8 @@ class Config(object):
     def read_from_file(self):
         if not os.path.exists(self.filename):
             self.write_to_file(
-                DEFAULT_SCRIPT, DEFAULT_SERVERNAME, DEFAULT_PORT)
+                DEFAULT_CLIENT_SCRIPT, DEFAULT_SERVER_SCRIPT,
+                DEFAULT_SERVERNAME, DEFAULT_PORT)
         parser = ConfigParser.RawConfigParser()
         parser.read(self.filename)
         if not parser.has_section('vimpdb'):
@@ -55,11 +63,18 @@ class Config(object):
             self.port = parser.getint('vimpdb', 'port')
         else:
             raise BadConfiguration(error_msg % 'port')
+        if parser.has_option('vimpdb', 'vim_server_script'):
+            self.vim_server_script = parser.get('vimpdb', 'vim_server_script')
+        else:
+            self.vim_server_script = self.vim_client_script
 
-    def write_to_file(self, vim_client_script, server_name, port):
+    def write_to_file(self, vim_client_script, vim_server_script, server_name,
+        port):
         parser = ConfigParser.RawConfigParser()
         parser.add_section('vimpdb')
         parser.set('vimpdb', 'vim_client_script', vim_client_script)
+        if vim_client_script != vim_server_script:
+            parser.set('vimpdb', 'vim_server_script', vim_server_script)
         parser.set('vimpdb', 'server_name', server_name)
         parser.set('vimpdb', 'port', port)
         rcfile = open(self.filename, 'w')
@@ -106,6 +121,7 @@ class Detector(object):
 
     def __init__(self, config, commandParser=getCommandOutput):
         self.vim_client_script = config.vim_client_script
+        self.vim_server_script = config.vim_server_script
         self.server_name = config.server_name
         self.port = config.port
         self.commandParser = commandParser
@@ -121,7 +137,7 @@ class Detector(object):
             self.check_python_support()
         except OSError, e:
             print e.args[1]
-            if self.vim_client_script == DEFAULT_SCRIPT:
+            if self.vim_client_script == DEFAULT_CLIENT_SCRIPT:
                 print ("with the default VIM client script (%s)."
                     % self.vim_client_script)
             else:
@@ -148,19 +164,26 @@ class Detector(object):
         return True
 
     def launch_vim_server(self):
-        command = self.build_command('--servername', self.server_name)
+        command = self.build_command(SERVER, '--servername', self.server_name)
         return_code = call(command)
         if return_code:
             raise ReturnCodeError(return_code, " ".join(command))
         return True
 
-    def build_command(self, *args):
-        command = self.vim_client_script.split()
+    def build_command(self, type, *args):
+        if type == CLIENT:
+            script = self.vim_client_script
+        elif type == SERVER:
+            script = self.vim_server_script
+        else:
+            raise ValueError("'type' argument of method 'build_command' must "
+                "be or 'CLIENT' or 'SERVER'")
+        command = script.split()
         command.extend(args)
         return command
 
     def get_serverlist(self):
-        command = self.build_command('--serverlist')
+        command = self.build_command(CLIENT, '--serverlist')
         try:
             return self.commandParser(command)
         except ReturnCodeError, e:
@@ -187,7 +210,7 @@ class Detector(object):
 
     def get_vim_version(self):
         try:
-            command = self.build_command('--version')
+            command = self.build_command(CLIENT, '--version')
             return self.commandParser(command)
         except ReturnCodeError, e:
             return_code = e.args[0]
@@ -230,8 +253,8 @@ class Detector(object):
 
     def store_config(self):
         config = getConfiguration()
-        config.write_to_file(self.vim_client_script, self.server_name,
-            self.port)
+        config.write_to_file(self.vim_client_script, self.vim_server_script,
+            self.server_name, self.port)
         return config
 
 

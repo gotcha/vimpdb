@@ -34,9 +34,13 @@ class ProxyToVimForTests(ProxyToVim):
 
 class Config(object):
 
-    def __init__(self, vim_client_script,
-        server_name='servername', port=6666):
+    def __init__(self, vim_client_script, vim_server_script="server_script",
+        server_name='server_name', port=6666):
         self.vim_client_script = vim_client_script
+        if vim_server_script is None:
+            self.vim_server_script = vim_client_script
+        else:
+            self.vim_server_script = vim_server_script
         self.server_name = server_name
         self.port = port
 
