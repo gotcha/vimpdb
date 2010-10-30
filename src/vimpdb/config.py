@@ -169,6 +169,7 @@ class Detector(object):
         serverlist = self.get_serverlist()
         if len(serverlist) == 0:
             self.launch_vim_server()
+        # XXX add a timeout to the loop
         while not serverlist:
             serverlist = self.get_serverlist()
         if self.server_name.lower() not in serverlist.lower():
