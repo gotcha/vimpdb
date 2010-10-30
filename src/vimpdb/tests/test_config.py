@@ -133,44 +133,37 @@ def build_script(vim_client_script):
     return script_path
 
 
-def test_detect_compatible():
+def makeDetector(vim_client_script, **kwargs):
     from vimpdb.config import Detector
     from vimpdb.testing import Config
-    vim_client_script = build_script('compatiblevim.py')
-    config = Config(vim_client_script=vim_client_script)
-    detect = Detector(config)
-    detect.check_server_support()
-    detect.check_python_support()
+    vim_client_script = build_script(vim_client_script)
+    config = Config(vim_client_script=vim_client_script, **kwargs)
+    return Detector(config)
+
+
+def test_detect_compatible():
+    detector = makeDetector(vim_client_script='compatiblevim.py')
+    detector.check_server_support()
+    detector.check_python_support()
 
 
 def test_detect_incompatible():
-    from vimpdb.config import Detector
-    from vimpdb.testing import Config
-    vim_client_script = build_script('incompatiblevim.py')
-    config = Config(vim_client_script=vim_client_script)
-    detect = Detector(config)
-    py.test.raises(ValueError, detect.check_server_support)
-    py.test.raises(ValueError, detect.check_python_support)
+    detector = makeDetector(vim_client_script='incompatiblevim.py')
+    py.test.raises(ValueError, detector.check_server_support)
+    py.test.raises(ValueError, detector.check_python_support)
 
 
 def test_detect_rightserverlist():
-    from vimpdb.config import Detector
-    from vimpdb.testing import Config
-    vim_client_script = build_script('rightserverlist.py')
-    config = Config(vim_client_script=vim_client_script, server_name="VIM")
-    detect = Detector(config)
-    assert 'VIM' in detect.get_serverlist()
-    detect.check_serverlist()
+    detector = makeDetector(vim_client_script='rightserverlist.py',
+        server_name="VIM")
+    assert 'VIM' in detector.get_serverlist()
+    detector.check_serverlist()
 
 
 def test_detect_wrongserverlist():
-    from vimpdb.config import Detector
-    from vimpdb.testing import Config
-    vim_client_script = build_script('wrongserverlist.py')
-    config = Config(vim_client_script=vim_client_script)
-    detect = Detector(config)
-    assert 'WRONG' in detect.get_serverlist()
-    py.test.raises(ValueError, detect.check_serverlist)
+    detector = makeDetector(vim_client_script='wrongserverlist.py')
+    assert 'WRONG' in detector.get_serverlist()
+    py.test.raises(ValueError, detector.check_serverlist)
 
 
 def test_detector_instantiation():
@@ -191,89 +184,52 @@ def test_detector_build_command():
     assert result[0:-1] == config.vim_client_script.split()
 
 
-def getConfig(vim_client_script, **kwargs):
-    from vimpdb.testing import Config
-    vim_client_script = build_script(vim_client_script)
-    config = Config(vim_client_script=vim_client_script, **kwargs)
-    return config
-
-
 def test_detector_get_vim_version_bad_script():
-    from vimpdb.config import Detector
-    config = getConfig(vim_client_script="returncode.py")
-    detector = Detector(config)
+    detector = makeDetector(vim_client_script="returncode.py")
     info = py.test.raises(ValueError, detector.get_vim_version)
     assert (info.value.args[0].endswith(
         "returncode.py --version' returned exit code '1'."))
 
 
 def test_detector_get_vim_version_good_script():
-    from vimpdb.config import Detector
-    from vimpdb.testing import Config
-    vim_client_script = build_script('compatiblevim.py')
-    config = Config(vim_client_script=vim_client_script)
-    detector = Detector(config)
+    detector = makeDetector(vim_client_script='compatiblevim.py')
     version = detector.get_vim_version()
     assert version == '+clientserver +python'
 
 
 def test_detector_check_python_support():
-    from vimpdb.config import Detector
-    from vimpdb.testing import Config
-    vim_client_script = build_script('compatiblevim.py')
-    config = Config(vim_client_script=vim_client_script)
-    detector = Detector(config)
+    detector = makeDetector(vim_client_script='compatiblevim.py')
     assert detector.check_python_support()
 
 
 def test_detector_no_python_support():
-    from vimpdb.config import Detector
-    from vimpdb.testing import Config
-    vim_client_script = build_script('nopython.py')
-    config = Config(vim_client_script=vim_client_script)
-    detector = Detector(config)
+    detector = makeDetector(vim_client_script='nopython.py')
     info = py.test.raises(ValueError, detector.check_python_support)
     assert info.value.args[0].endswith(
         "' launches a VIM instance without python support.")
 
 
 def test_detector_no_python_in_version():
-    from vimpdb.config import Detector
-    from vimpdb.testing import Config
-    vim_client_script = build_script('rightserverlist.py')
-    config = Config(vim_client_script=vim_client_script)
-    detector = Detector(config)
+    detector = makeDetector(vim_client_script='rightserverlist.py')
     info = py.test.raises(ValueError, detector.check_python_support)
     assert (info.value.args[0] ==
       'Calling --version returned no information about python support:\n VIM')
 
 
 def test_detector_check_server_support():
-    from vimpdb.config import Detector
-    from vimpdb.testing import Config
-    vim_client_script = build_script('compatiblevim.py')
-    config = Config(vim_client_script=vim_client_script)
-    detector = Detector(config)
+    detector = makeDetector(vim_client_script='compatiblevim.py')
     assert detector.check_server_support()
 
 
 def test_detector_no_server_support():
-    from vimpdb.config import Detector
-    from vimpdb.testing import Config
-    vim_client_script = build_script('noserver.py')
-    config = Config(vim_client_script=vim_client_script)
-    detector = Detector(config)
+    detector = makeDetector(vim_client_script='noserver.py')
     info = py.test.raises(ValueError, detector.check_server_support)
     assert info.value.args[0].endswith(
         "' launches a VIM instance without server support.")
 
 
 def test_detector_no_clientserver_in_version():
-    from vimpdb.config import Detector
-    from vimpdb.testing import Config
-    vim_client_script = build_script('rightserverlist.py')
-    config = Config(vim_client_script=vim_client_script)
-    detector = Detector(config)
+    detector = makeDetector(vim_client_script='rightserverlist.py')
     info = py.test.raises(ValueError, detector.check_server_support)
     assert (info.value.args[0] ==
         ('Calling --version returned no information about clientserver '
@@ -281,30 +237,21 @@ def test_detector_no_clientserver_in_version():
 
 
 def test_detector_get_serverlist():
-    from vimpdb.config import Detector
-    from vimpdb.testing import Config
-    vim_client_script = build_script('rightserverlist.py')
-    config = Config(vim_client_script=vim_client_script)
-    detector = Detector(config)
+    detector = makeDetector(vim_client_script='rightserverlist.py')
     serverlist = detector.get_serverlist()
     assert serverlist == "VIM"
 
 
 def test_detector_get_serverlist_bad_script():
-    from vimpdb.config import Detector
-    config = getConfig(vim_client_script="returncode.py")
-    detector = Detector(config)
+    detector = makeDetector(vim_client_script="returncode.py")
     info = py.test.raises(ValueError, detector.get_serverlist)
     assert (info.value.args[0].endswith(
         "returncode.py --serverlist' returned exit code '1'."))
 
 
 def test_detector_check_serverlist():
-    from vimpdb.config import Detector
-    from vimpdb.testing import Config
-    vim_client_script = build_script('rightserverlist.py')
-    config = Config(vim_client_script=vim_client_script, server_name='VIM')
-    detector = Detector(config)
+    detector = makeDetector(vim_client_script='rightserverlist.py',
+        server_name='VIM')
     assert detector.check_serverlist()
 
 
@@ -321,10 +268,9 @@ def test_detector_server_not_available():
 
 
 def test_detector_launch_bad_script():
-    from vimpdb.config import Detector
     from vimpdb.config import ReturnCodeError
-    config = getConfig(vim_client_script="returncode.py", server_name="VIM")
-    detector = Detector(config)
+    detector = makeDetector(vim_client_script="returncode.py",
+        server_name="VIM")
     info = py.test.raises(ReturnCodeError, detector.launch_vim_server)
     assert info.value.args[0] == 1
     assert info.value.args[1].endswith('returncode.py --servername VIM')
