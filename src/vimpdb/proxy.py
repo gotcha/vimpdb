@@ -18,11 +18,11 @@ class ProxyToVim(object):
     """
 
     def __init__(self, config):
-        self.script = config.script
+        self.vim_client_script = config.vim_client_script
         self.server_name = config.server_name
 
     def _remote_expr(self, expr):
-        p = Popen([self.script, '--servername',
+        p = Popen([self.vim_client_script, '--servername',
                    self.server_name, "--remote-expr", expr],
             stdin=PIPE, stdout=PIPE)
         return_code = p.wait()
@@ -33,8 +33,8 @@ class ProxyToVim(object):
         return output.strip()
 
     def _send(self, command):
-        return_code = call([self.script, '--servername', self.server_name,
-                            '--remote-send', command])
+        return_code = call([self.vim_client_script, '--servername',
+            self.server_name, '--remote-send', command])
         if return_code:
             raise RemoteUnavailable()
         print "sent:", command

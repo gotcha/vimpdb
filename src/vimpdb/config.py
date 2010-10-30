@@ -42,9 +42,11 @@ class Config(object):
         error_msg = ("'%s' option is missing from section [vimpdb] in "
             + "'" + self.filename + "'.")
         if parser.has_option('vimpdb', 'script'):
-            self.script = parser.get('vimpdb', 'script')
+            self.vim_client_script = parser.get('vimpdb', 'script')
+        elif parser.has_option('vimpdb', 'vim_client_script'):
+            self.vim_client_script = parser.get('vimpdb', 'vim_client_script')
         else:
-            raise BadConfiguration(error_msg % 'script')
+            raise BadConfiguration(error_msg % "script' or 'vim_client_script")
         if parser.has_option('vimpdb', 'server_name'):
             self.server_name = parser.get('vimpdb', 'server_name')
         else:
@@ -54,10 +56,10 @@ class Config(object):
         else:
             raise BadConfiguration(error_msg % 'port')
 
-    def write_to_file(self, script, server_name, port):
+    def write_to_file(self, vim_client_script, server_name, port):
         parser = ConfigParser.RawConfigParser()
         parser.add_section('vimpdb')
-        parser.set('vimpdb', 'script', script)
+        parser.set('vimpdb', 'vim_client_script', vim_client_script)
         parser.set('vimpdb', 'server_name', server_name)
         parser.set('vimpdb', 'port', port)
         rcfile = open(self.filename, 'w')
@@ -66,7 +68,7 @@ class Config(object):
 
     def __repr__(self):
         return ("<vimpdb Config : Script %s; Server name %s, Port %s>" %
-          (self.script, self.server_name, self.port))
+          (self.vim_client_script, self.server_name, self.port))
 
 
 def getConfiguration():
@@ -103,7 +105,7 @@ RETURN_CODE = "'%s' returned exit code '%d'."
 class Detector(object):
 
     def __init__(self, config, commandParser=getCommandOutput):
-        self.script = config.script
+        self.vim_client_script = config.vim_client_script
         self.server_name = config.server_name
         self.port = config.port
         self.commandParser = commandParser
@@ -119,11 +121,12 @@ class Detector(object):
             self.check_python_support()
         except OSError, e:
             print e.args[1]
-            if self.script == DEFAULT_SCRIPT:
-                print "with the default script (%s)." % self.script
+            if self.vim_client_script == DEFAULT_SCRIPT:
+                print ("with the default VIM client script (%s)."
+                    % self.vim_client_script)
             else:
-                print ("with the script from the configuration (%s)."
-                    % self.script)
+                print ("with the VIM client script from the configuration "
+                    "(%s)." % self.vim_client_script)
             self.query_script()
             return False
         except ValueError, e:
@@ -152,7 +155,7 @@ class Detector(object):
         return True
 
     def build_command(self, *args):
-        command = self.script.split()
+        command = self.vim_client_script.split()
         command.extend(args)
         return command
 
@@ -168,7 +171,12 @@ class Detector(object):
     def check_serverlist(self):
         serverlist = self.get_serverlist()
         if len(serverlist) == 0:
-            self.launch_vim_server()
+            try:
+                self.launch_vim_server()
+            except ReturnCodeError, e:
+                return_code = e.args[0]
+                command = e.args[1]
+                raise ValueError(RETURN_CODE % (command, return_code))
         # XXX add a timeout to the loop
         while not serverlist:
             serverlist = self.get_serverlist()
@@ -191,7 +199,7 @@ class Detector(object):
         if '+clientserver' in version:
             return True
         elif '-clientserver' in version:
-            raise ValueError(NO_SERVER_SUPPORT % self.script)
+            raise ValueError(NO_SERVER_SUPPORT % self.vim_client_script)
         else:
             raise ValueError(NO_CLIENTSERVER_IN_VERSION % version)
 
@@ -200,17 +208,17 @@ class Detector(object):
         if '+python' in version:
             return True
         elif '-python' in version:
-            raise ValueError(NO_PYTHON_SUPPORT % self.script)
+            raise ValueError(NO_PYTHON_SUPPORT % self.vim_client_script)
         else:
             raise ValueError(NO_PYTHON_IN_VERSION % version)
 
     def query_script(self):
-        question = "Input another script (leave empty to abort): "
+        question = "Input another VIM client script (leave empty to abort): "
         answer = raw_input(question)
         if answer == '':
             raise NoWorkingConfigurationError
         else:
-            self.script = answer
+            self.vim_client_script = answer
 
     def query_servername(self):
         question = "Input another server name (leave empty to abort): "
@@ -222,7 +230,8 @@ class Detector(object):
 
     def store_config(self):
         config = getConfiguration()
-        config.write_to_file(self.script, self.server_name, self.port)
+        config.write_to_file(self.vim_client_script, self.server_name,
+            self.port)
         return config
 
 
