@@ -20,7 +20,7 @@ if sys.platform == 'windows':
     DEFAULT_SERVER_SCRIPT = 'gvim.exe'
 else:
     DEFAULT_SERVER_SCRIPT = DEFAULT_CLIENT_SCRIPT
-DEFAULT_SERVERNAME = os.environ.get("VIMPDB_SERVERNAME", "VIMPDB")
+DEFAULT_SERVER_NAME = os.environ.get("VIMPDB_SERVERNAME", "VIMPDB")
 DEFAULT_PORT = 6666
 
 CLIENT = 'CLIENT'
@@ -41,7 +41,7 @@ class Config(object):
         if not os.path.exists(self.filename):
             self.write_to_file(
                 DEFAULT_CLIENT_SCRIPT, DEFAULT_SERVER_SCRIPT,
-                DEFAULT_SERVERNAME, DEFAULT_PORT)
+                DEFAULT_SERVER_NAME, DEFAULT_PORT)
         parser = ConfigParser.RawConfigParser()
         parser.read(self.filename)
         if not parser.has_section('vimpdb'):

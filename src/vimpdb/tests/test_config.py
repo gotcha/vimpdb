@@ -139,13 +139,13 @@ def test_file_creation():
     from vimpdb.config import DEFAULT_PORT
     from vimpdb.config import DEFAULT_CLIENT_SCRIPT
     from vimpdb.config import DEFAULT_SERVER_SCRIPT
-    from vimpdb.config import DEFAULT_SERVERNAME
+    from vimpdb.config import DEFAULT_SERVER_NAME
     config = Config(name)
     assert os.path.exists(name)
     assert config.port == DEFAULT_PORT
     assert config.vim_client_script == DEFAULT_CLIENT_SCRIPT
     assert config.vim_server_script == DEFAULT_SERVER_SCRIPT
-    assert config.server_name == DEFAULT_SERVERNAME
+    assert config.server_name == DEFAULT_SERVER_NAME
     config_file = open(name)
     content = config_file.read()
     if config.vim_server_script == config.vim_client_script:
