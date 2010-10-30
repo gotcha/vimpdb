@@ -85,7 +85,7 @@ def getCommandOutput(parts):
     p = Popen(parts, stdin=PIPE, stdout=PIPE)
     return_code = p.wait()
     if return_code:
-        raise ReturnCodeError()
+        raise ReturnCodeError(return_code, " ".join(parts))
     child_stdout = p.stdout
     output = child_stdout.read()
     return output.strip()
@@ -93,8 +93,11 @@ def getCommandOutput(parts):
 
 NO_SERVER_SUPPORT = "'%s' launches a VIM instance without server support."
 NO_PYTHON_SUPPORT = "'%s' launches a VIM instance without python support."
-NOT_VIM_SCRIPT = "'%s' is not a script that launches a VIM instance."
-WRONG_SCRIPT = "'%s' is a script that does not support --version option."
+NO_PYTHON_IN_VERSION = ("Calling --version returned no information "
+    "about python support:\n %s")
+NO_CLIENTSERVER_IN_VERSION = ("Calling --version returned no information "
+    "about clientserver support:\n %s")
+RETURN_CODE = "'%s' returned exit code '%d'."
 
 
 class Detector(object):
@@ -145,7 +148,8 @@ class Detector(object):
         command = self.build_command('--servername', self.server_name)
         return_code = call(command)
         if return_code:
-            raise ReturnCodeError(" ".join(command))
+            raise ReturnCodeError(return_code, " ".join(command))
+        return True
 
     def build_command(self, *args):
         command = self.script.split()
@@ -153,11 +157,13 @@ class Detector(object):
         return command
 
     def get_serverlist(self):
+        command = self.build_command('--serverlist')
         try:
-            command = self.build_command('--serverlist')
             return self.commandParser(command)
-        except ReturnCodeError:
-            raise ValueError(NO_SERVER_SUPPORT % self.script)
+        except ReturnCodeError, e:
+            return_code = e.args[0]
+            command = e.args[1]
+            raise ValueError(RETURN_CODE % (command, return_code))
 
     def check_serverlist(self):
         serverlist = self.get_serverlist()
@@ -166,34 +172,36 @@ class Detector(object):
         while not serverlist:
             serverlist = self.get_serverlist()
         if self.server_name.lower() not in serverlist.lower():
-            msg = "'%s' server name not available in server list.\n%s"
+            msg = "'%s' server name not available in server list:\n%s"
             raise ValueError(msg % (self.server_name, serverlist))
+        return True
 
     def get_vim_version(self):
         try:
             command = self.build_command('--version')
-            version = self.commandParser(command)
-        except ReturnCodeError:
-            raise ValueError(WRONG_SCRIPT % self.script)
-        return version
+            return self.commandParser(command)
+        except ReturnCodeError, e:
+            return_code = e.args[0]
+            command = e.args[1]
+            raise ValueError(RETURN_CODE % (command, return_code))
 
     def check_server_support(self):
         version = self.get_vim_version()
         if '+clientserver' in version:
-            return
+            return True
         elif '-clientserver' in version:
             raise ValueError(NO_SERVER_SUPPORT % self.script)
         else:
-            raise ValueError(NOT_VIM_SCRIPT % self.script)
+            raise ValueError(NO_CLIENTSERVER_IN_VERSION % version)
 
     def check_python_support(self):
         version = self.get_vim_version()
         if '+python' in version:
-            return
+            return True
         elif '-python' in version:
             raise ValueError(NO_PYTHON_SUPPORT % self.script)
         else:
-            raise ValueError(NOT_VIM_SCRIPT % self.script)
+            raise ValueError(NO_PYTHON_IN_VERSION % version)
 
     def query_script(self):
         question = "Input another script (leave empty to abort): "
