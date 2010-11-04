@@ -327,6 +327,12 @@ def test_detector_server_not_available():
         "'SERVERNAME' server name not available in server list:\nVIM")
 
 
+def test_detector_launch_server():
+    detector = makeDetector(vim_client_script="compatiblevim.py",
+        vim_server_script="compatiblevim.py", server_name="VIM")
+    assert detector.launch_vim_server()
+
+
 def test_detector_launch_server_bad_script():
     from vimpdb.config import ReturnCodeError
     detector = makeDetector(vim_client_script="compatiblevim.py",

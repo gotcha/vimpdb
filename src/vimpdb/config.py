@@ -150,13 +150,13 @@ class Detector(object):
             return False
         except ValueError, e:
             print e.args[0]
-            self.query_script()
+            self.query_script(SERVER)
             return False
         try:
             self.check_server_support(SERVER)
         except ValueError, e:
             print e.args[0]
-            self.query_script()
+            self.query_script(SERVER)
             return False
         try:
             self.check_server_support(CLIENT)
