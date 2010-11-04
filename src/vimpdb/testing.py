@@ -1,6 +1,9 @@
 from proxy import ProxyToVim
 from StringIO import StringIO
 
+from vimpdb.config import CLIENT
+from vimpdb.config import SERVER
+
 
 class ProxyToVimForTests(ProxyToVim):
 
@@ -36,11 +39,12 @@ class Config(object):
 
     def __init__(self, vim_client_script, vim_server_script="server_script",
         server_name='server_name', port=6666):
-        self.vim_client_script = vim_client_script
+        self.scripts = dict()
+        self.scripts[CLIENT] = vim_client_script
         if vim_server_script is None:
-            self.vim_server_script = vim_client_script
+            self.scripts[SERVER] = vim_client_script
         else:
-            self.vim_server_script = vim_server_script
+            self.scripts[SERVER] = vim_server_script
         self.server_name = server_name
         self.port = port
 

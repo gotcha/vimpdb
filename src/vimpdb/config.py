@@ -35,6 +35,7 @@ class Config(object):
 
     def __init__(self, filename):
         self.filename = filename
+        self.scripts = dict()
         self.read_from_file()
 
     def read_from_file(self):
@@ -50,9 +51,9 @@ class Config(object):
         error_msg = ("'%s' option is missing from section [vimpdb] in "
             + "'" + self.filename + "'.")
         if parser.has_option('vimpdb', 'script'):
-            self.vim_client_script = parser.get('vimpdb', 'script')
+            self.scripts[CLIENT] = parser.get('vimpdb', 'script')
         elif parser.has_option('vimpdb', 'vim_client_script'):
-            self.vim_client_script = parser.get('vimpdb', 'vim_client_script')
+            self.scripts[CLIENT] = parser.get('vimpdb', 'vim_client_script')
         else:
             raise BadConfiguration(error_msg % "vim_client_script")
         if parser.has_option('vimpdb', 'server_name'):
@@ -64,9 +65,9 @@ class Config(object):
         else:
             raise BadConfiguration(error_msg % 'port')
         if parser.has_option('vimpdb', 'vim_server_script'):
-            self.vim_server_script = parser.get('vimpdb', 'vim_server_script')
+            self.scripts[SERVER] = parser.get('vimpdb', 'vim_server_script')
         elif parser.has_option('vimpdb', 'script'):
-            self.vim_server_script = self.vim_client_script
+            self.scripts[SERVER] = self.scripts[CLIENT]
         else:
             raise BadConfiguration(error_msg % "vim_server_script")
 
@@ -84,7 +85,7 @@ class Config(object):
 
     def __repr__(self):
         return ("<vimpdb Config : Script %s; Server name %s, Port %s>" %
-          (self.vim_client_script, self.server_name, self.port))
+          (self.scripts[CLIENT], self.server_name, self.port))
 
 
 def getConfiguration():
@@ -122,8 +123,8 @@ class Detector(object):
 
     def __init__(self, config, commandParser=getCommandOutput):
         self.scripts = dict()
-        self.scripts[CLIENT] = config.vim_client_script
-        self.scripts[SERVER] = config.vim_server_script
+        self.scripts[CLIENT] = config.scripts[CLIENT]
+        self.scripts[SERVER] = config.scripts[SERVER]
         self.server_name = config.server_name
         self.port = config.port
         self.commandParser = commandParser
@@ -261,7 +262,7 @@ class Detector(object):
 
     def store_config(self):
         config = getConfiguration()
-        config.write_to_file(self.vim_client_script, self.vim_server_script,
+        config.write_to_file(self.scripts[CLIENT], self.scripts[SERVER],
             self.server_name, self.port)
         return config
 

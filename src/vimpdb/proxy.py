@@ -5,6 +5,8 @@ from subprocess import call
 from subprocess import Popen
 from subprocess import PIPE
 
+from vimpdb.config import CLIENT
+
 
 def getPackagePath(instance):
     module = sys.modules[instance.__module__]
@@ -18,7 +20,7 @@ class ProxyToVim(object):
     """
 
     def __init__(self, config):
-        self.vim_client_script = config.vim_client_script
+        self.vim_client_script = config.scripts[CLIENT]
         self.server_name = config.server_name
 
     def _remote_expr(self, expr):
