@@ -154,13 +154,13 @@ class Detector(object):
             self.query_script(SERVER)
             return False
         try:
-            self.check_server_support(SERVER)
+            self.check_clientserver_support(SERVER)
         except ValueError, e:
             print e.args[0]
             self.query_script(SERVER)
             return False
         try:
-            self.check_server_support(CLIENT)
+            self.check_clientserver_support(CLIENT)
         except ValueError, e:
             print e.args[0]
             self.query_script(CLIENT)
@@ -221,7 +221,7 @@ class Detector(object):
             command = e.args[1]
             raise ValueError(RETURN_CODE % (command, return_code))
 
-    def check_server_support(self, script_type):
+    def check_clientserver_support(self, script_type):
         version = self.get_vim_version(script_type)
         if '+clientserver' in version:
             return True

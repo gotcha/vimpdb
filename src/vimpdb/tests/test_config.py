@@ -198,15 +198,15 @@ def test_detect_compatible():
     from vimpdb.config import CLIENT
     detector = makeDetector(vim_client_script='compatiblevim.py',
     vim_server_script='compatiblevim.py')
-    detector.check_server_support(SERVER)
-    detector.check_server_support(CLIENT)
+    detector.check_clientserver_support(SERVER)
+    detector.check_clientserver_support(CLIENT)
     detector.check_python_support()
 
 
 def test_detect_incompatible():
     from vimpdb.config import SERVER
     detector = makeDetector(vim_server_script='incompatiblevim.py')
-    py.test.raises(ValueError, detector.check_server_support, SERVER)
+    py.test.raises(ValueError, detector.check_clientserver_support, SERVER)
     py.test.raises(ValueError, detector.check_python_support)
 
 
@@ -279,16 +279,17 @@ def test_detector_no_python_in_version():
       'Calling --version returned no information about python support:\n VIM')
 
 
-def test_detector_check_server_support():
+def test_detector_check_clientserver_support():
     from vimpdb.config import CLIENT
     detector = makeDetector(vim_client_script='compatiblevim.py')
-    assert detector.check_server_support(CLIENT)
+    assert detector.check_clientserver_support(CLIENT)
 
 
-def test_detector_no_server_support():
+def test_detector_no_clientserver_support():
     from vimpdb.config import CLIENT
     detector = makeDetector(vim_client_script='noserver.py')
-    info = py.test.raises(ValueError, detector.check_server_support, CLIENT)
+    info = py.test.raises(ValueError, detector.check_clientserver_support,
+        CLIENT)
     assert info.value.args[0].endswith(
         "' launches a VIM instance without server support.")
 
@@ -296,7 +297,8 @@ def test_detector_no_server_support():
 def test_detector_no_clientserver_in_version():
     from vimpdb.config import CLIENT
     detector = makeDetector(vim_client_script='rightserverlist.py')
-    info = py.test.raises(ValueError, detector.check_server_support, CLIENT)
+    info = py.test.raises(ValueError, detector.check_clientserver_support,
+        CLIENT)
     assert (info.value.args[0] ==
         ('Calling --version returned no information about clientserver '
         'support:\n VIM'))
