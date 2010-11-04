@@ -54,7 +54,7 @@ class Config(object):
         elif parser.has_option('vimpdb', 'vim_client_script'):
             self.vim_client_script = parser.get('vimpdb', 'vim_client_script')
         else:
-            raise BadConfiguration(error_msg % "script' or 'vim_client_script")
+            raise BadConfiguration(error_msg % "vim_client_script")
         if parser.has_option('vimpdb', 'server_name'):
             self.server_name = parser.get('vimpdb', 'server_name')
         else:
@@ -65,16 +65,17 @@ class Config(object):
             raise BadConfiguration(error_msg % 'port')
         if parser.has_option('vimpdb', 'vim_server_script'):
             self.vim_server_script = parser.get('vimpdb', 'vim_server_script')
-        else:
+        elif parser.has_option('vimpdb', 'script'):
             self.vim_server_script = self.vim_client_script
+        else:
+            raise BadConfiguration(error_msg % "vim_server_script")
 
     def write_to_file(self, vim_client_script, vim_server_script, server_name,
         port):
         parser = ConfigParser.RawConfigParser()
         parser.add_section('vimpdb')
         parser.set('vimpdb', 'vim_client_script', vim_client_script)
-        if vim_client_script != vim_server_script:
-            parser.set('vimpdb', 'vim_server_script', vim_server_script)
+        parser.set('vimpdb', 'vim_server_script', vim_server_script)
         parser.set('vimpdb', 'server_name', server_name)
         parser.set('vimpdb', 'port', port)
         rcfile = open(self.filename, 'w')

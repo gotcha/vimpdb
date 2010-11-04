@@ -10,26 +10,6 @@ def test_read_options():
     file.write("""
 [vimpdb]
 vim_client_script = vim_client_script
-port = 1000
-server_name = server_name
-""")
-    file.close()
-    from vimpdb.config import Config
-    config = Config(name)
-    assert config.port == 1000
-    assert config.vim_client_script == 'vim_client_script'
-    assert config.vim_server_script == 'vim_client_script'
-    assert config.server_name == 'server_name'
-    os.remove(name)
-
-
-def test_read_options_with_server():
-    import tempfile
-    handle, name = tempfile.mkstemp()
-    file = open(name, 'w')
-    file.write("""
-[vimpdb]
-vim_client_script = vim_client_script
 vim_server_script = vim_server_script
 port = 1000
 server_name = server_name
@@ -59,6 +39,7 @@ server_name = server_name
     config = Config(name)
     assert config.port == 1000
     assert config.vim_client_script == 'vim_client_script'
+    assert config.vim_server_script == 'vim_client_script'
     assert config.server_name == 'server_name'
     os.remove(name)
 
@@ -80,13 +61,30 @@ server_name = server_name
     os.remove(name)
 
 
-def test_missing_script_option():
+def test_missing_client_script_option():
     import tempfile
     handle, name = tempfile.mkstemp()
     file = open(name, 'w')
     file.write("""
 [vimpdb]
-scriptx = vim_client_script
+vim_server_script = vim_server_script
+port = 1000
+server_name = server_name
+""")
+    file.close()
+    from vimpdb.config import Config
+    from vimpdb.config import BadConfiguration
+    py.test.raises(BadConfiguration, Config, name)
+    os.remove(name)
+
+
+def test_missing_server_script_option():
+    import tempfile
+    handle, name = tempfile.mkstemp()
+    file = open(name, 'w')
+    file.write("""
+[vimpdb]
+vim_client_script = vim_client_script
 port = 1000
 server_name = server_name
 """)
@@ -148,10 +146,10 @@ def test_file_creation():
     assert config.server_name == DEFAULT_SERVER_NAME
     config_file = open(name)
     content = config_file.read()
-    if config.vim_server_script == config.vim_client_script:
-        assert 'vim_server_script =' not in content
-    else:
-        assert 'vim_server_script =' in content
+    assert 'vim_client_script =' in content
+    assert 'vim_server_script =' in content
+    assert 'port =' in content
+    assert 'server_name =' in content
     config_file.close()
     os.remove(name)
 
@@ -312,7 +310,7 @@ def test_detector_server_not_available():
         "'SERVERNAME' server name not available in server list:\nVIM")
 
 
-def test_detector_launch_bad_script():
+def test_detector_launch_server_bad_script():
     from vimpdb.config import ReturnCodeError
     detector = makeDetector(vim_client_script="compatiblevim.py",
         vim_server_script="returncode.py", server_name="VIM")
