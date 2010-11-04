@@ -137,6 +137,12 @@ class Detector(object):
 
     def _checkConfiguration(self):
         try:
+            self.check_clientserver_support(CLIENT)
+        except ValueError, e:
+            print e.args[0]
+            self.query_script(CLIENT)
+            return False
+        try:
             self.check_python_support()
         except OSError, e:
             print e.args[1]
@@ -158,12 +164,6 @@ class Detector(object):
         except ValueError, e:
             print e.args[0]
             self.query_script(SERVER)
-            return False
-        try:
-            self.check_clientserver_support(CLIENT)
-        except ValueError, e:
-            print e.args[0]
-            self.query_script(CLIENT)
             return False
         try:
             self.check_serverlist()
