@@ -165,14 +165,18 @@ def build_script(vim_client_script):
     return script_path
 
 
-def makeDetector(vim_client_script, **kwargs):
+def makeDetector(**kwargs):
     """ make detector from config built with args rather
     than by reading config file
     """
 
     from vimpdb.config import Detector
     from vimpdb.testing import Config
-    vim_client_script = build_script(vim_client_script)
+    if "vim_client_script" in kwargs:
+        vim_client_script = build_script(kwargs["vim_client_script"])
+        del kwargs["vim_client_script"]
+    else:
+        vim_client_script = None
     if "vim_server_script" in kwargs:
         vim_server_script = build_script(kwargs["vim_server_script"])
         del kwargs["vim_server_script"]
@@ -184,14 +188,19 @@ def makeDetector(vim_client_script, **kwargs):
 
 
 def test_detect_compatible():
-    detector = makeDetector(vim_client_script='compatiblevim.py')
-    detector.check_server_support()
+    from vimpdb.config import SERVER
+    from vimpdb.config import CLIENT
+    detector = makeDetector(vim_client_script='compatiblevim.py',
+    vim_server_script='compatiblevim.py')
+    detector.check_server_support(SERVER)
+    detector.check_server_support(CLIENT)
     detector.check_python_support()
 
 
 def test_detect_incompatible():
-    detector = makeDetector(vim_client_script='incompatiblevim.py')
-    py.test.raises(ValueError, detector.check_server_support)
+    from vimpdb.config import SERVER
+    detector = makeDetector(vim_server_script='incompatiblevim.py')
+    py.test.raises(ValueError, detector.check_server_support, SERVER)
     py.test.raises(ValueError, detector.check_python_support)
 
 
@@ -210,10 +219,13 @@ def test_detect_wrongserverlist():
 
 def test_detector_instantiation():
     from vimpdb.config import Detector
+    from vimpdb.config import SERVER
+    from vimpdb.config import CLIENT
     from vimpdb.testing import config
     detector = Detector(config)
     assert detector.port == config.port
-    assert detector.vim_client_script == config.vim_client_script
+    assert detector.scripts[CLIENT] == config.vim_client_script
+    assert detector.scripts[SERVER] == config.vim_server_script
     assert detector.server_name == config.server_name
 
 
@@ -228,15 +240,17 @@ def test_detector_build_command():
 
 
 def test_detector_get_vim_version_bad_script():
+    from vimpdb.config import CLIENT
     detector = makeDetector(vim_client_script="returncode.py")
-    info = py.test.raises(ValueError, detector.get_vim_version)
+    info = py.test.raises(ValueError, detector.get_vim_version, CLIENT)
     assert (info.value.args[0].endswith(
         "returncode.py --version' returned exit code '1'."))
 
 
 def test_detector_get_vim_version_good_script():
+    from vimpdb.config import CLIENT
     detector = makeDetector(vim_client_script='compatiblevim.py')
-    version = detector.get_vim_version()
+    version = detector.get_vim_version(CLIENT)
     assert version == '+clientserver +python'
 
 
@@ -260,20 +274,23 @@ def test_detector_no_python_in_version():
 
 
 def test_detector_check_server_support():
+    from vimpdb.config import CLIENT
     detector = makeDetector(vim_client_script='compatiblevim.py')
-    assert detector.check_server_support()
+    assert detector.check_server_support(CLIENT)
 
 
 def test_detector_no_server_support():
+    from vimpdb.config import CLIENT
     detector = makeDetector(vim_client_script='noserver.py')
-    info = py.test.raises(ValueError, detector.check_server_support)
+    info = py.test.raises(ValueError, detector.check_server_support, CLIENT)
     assert info.value.args[0].endswith(
         "' launches a VIM instance without server support.")
 
 
 def test_detector_no_clientserver_in_version():
+    from vimpdb.config import CLIENT
     detector = makeDetector(vim_client_script='rightserverlist.py')
-    info = py.test.raises(ValueError, detector.check_server_support)
+    info = py.test.raises(ValueError, detector.check_server_support, CLIENT)
     assert (info.value.args[0] ==
         ('Calling --version returned no information about clientserver '
         'support:\n VIM'))

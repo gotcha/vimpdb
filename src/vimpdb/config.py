@@ -121,8 +121,9 @@ RETURN_CODE = "'%s' returned exit code '%d'."
 class Detector(object):
 
     def __init__(self, config, commandParser=getCommandOutput):
-        self.vim_client_script = config.vim_client_script
-        self.vim_server_script = config.vim_server_script
+        self.scripts = dict()
+        self.scripts[CLIENT] = config.vim_client_script
+        self.scripts[SERVER] = config.vim_server_script
         self.server_name = config.server_name
         self.port = config.port
         self.commandParser = commandParser
@@ -138,23 +139,30 @@ class Detector(object):
             self.check_python_support()
         except OSError, e:
             print e.args[1]
-            if self.vim_client_script == DEFAULT_CLIENT_SCRIPT:
-                print ("with the default VIM client script (%s)."
-                    % self.vim_client_script)
+            server_script = self.scripts[SERVER]
+            if server_script == DEFAULT_SERVER_SCRIPT:
+                print ("with the default VIM server script (%s)."
+                    % server_script)
             else:
-                print ("with the VIM client script from the configuration "
-                    "(%s)." % self.vim_client_script)
-            self.query_script()
+                print ("with the VIM server script from the configuration "
+                    "(%s)." % server_script)
+            self.query_script(SERVER)
             return False
         except ValueError, e:
             print e.args[0]
             self.query_script()
             return False
         try:
-            self.check_server_support()
+            self.check_server_support(SERVER)
         except ValueError, e:
             print e.args[0]
             self.query_script()
+            return False
+        try:
+            self.check_server_support(CLIENT)
+        except ValueError, e:
+            print e.args[0]
+            self.query_script(CLIENT)
             return False
         try:
             self.check_serverlist()
@@ -171,14 +179,8 @@ class Detector(object):
             raise ReturnCodeError(return_code, " ".join(command))
         return True
 
-    def build_command(self, type, *args):
-        if type == CLIENT:
-            script = self.vim_client_script
-        elif type == SERVER:
-            script = self.vim_server_script
-        else:
-            raise ValueError("'type' argument of method 'build_command' must "
-                "be or 'CLIENT' or 'SERVER'")
+    def build_command(self, script_type, *args):
+        script = self.scripts[script_type]
         command = script.split()
         command.extend(args)
         return command
@@ -209,40 +211,45 @@ class Detector(object):
             raise ValueError(msg % (self.server_name, serverlist))
         return True
 
-    def get_vim_version(self):
+    def get_vim_version(self, script_type):
         try:
-            command = self.build_command(CLIENT, '--version')
+            command = self.build_command(script_type, '--version')
             return self.commandParser(command)
         except ReturnCodeError, e:
             return_code = e.args[0]
             command = e.args[1]
             raise ValueError(RETURN_CODE % (command, return_code))
 
-    def check_server_support(self):
-        version = self.get_vim_version()
+    def check_server_support(self, script_type):
+        version = self.get_vim_version(script_type)
         if '+clientserver' in version:
             return True
         elif '-clientserver' in version:
-            raise ValueError(NO_SERVER_SUPPORT % self.vim_client_script)
+            raise ValueError(NO_SERVER_SUPPORT % self.scripts[script_type])
         else:
             raise ValueError(NO_CLIENTSERVER_IN_VERSION % version)
 
     def check_python_support(self):
-        version = self.get_vim_version()
+        version = self.get_vim_version(SERVER)
         if '+python' in version:
             return True
         elif '-python' in version:
-            raise ValueError(NO_PYTHON_SUPPORT % self.vim_client_script)
+            raise ValueError(NO_PYTHON_SUPPORT % self.scripts[SERVER])
         else:
             raise ValueError(NO_PYTHON_IN_VERSION % version)
 
-    def query_script(self):
-        question = "Input another VIM client script (leave empty to abort): "
+    def query_script(self, script_type):
+        if script_type == CLIENT:
+            type = 'client'
+        else:
+            type = 'server'
+        question = ("Input another VIM %s script (leave empty to abort): "
+            % type)
         answer = raw_input(question)
         if answer == '':
             raise NoWorkingConfigurationError
         else:
-            self.vim_client_script = answer
+            self.scripts[script_type] = answer
 
     def query_servername(self):
         question = "Input another server name (leave empty to abort): "
