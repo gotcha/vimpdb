@@ -10,7 +10,7 @@ RCNAME = os.path.expanduser('~/.vimpdbrc')
 
 if sys.platform == 'darwin':
     PLATFORM_SCRIPT = 'mvim'
-elif sys.platform == 'windows':
+elif sys.platform == 'win32':
     PLATFORM_SCRIPT = 'vim.exe'
 else:
     PLATFORM_SCRIPT = 'mvim'
@@ -36,10 +36,11 @@ class Config(object):
     def __init__(self, filename):
         self.filename = filename
         self.scripts = dict()
-        self.read_from_file()
+	self.isNew = False
 
     def read_from_file(self):
         if not os.path.exists(self.filename):
+            self.isNew = True
             self.write_to_file(
                 DEFAULT_CLIENT_SCRIPT, DEFAULT_SERVER_SCRIPT,
                 DEFAULT_SERVER_NAME, DEFAULT_PORT)
@@ -89,7 +90,11 @@ class Config(object):
 
 
 def getConfiguration():
-    return Config(RCNAME)
+    config = Config(RCNAME)
+    config.read_from_file()
+    if config.isNew:
+        config = Detector(config).checkConfiguration()
+    return config
 
 
 class ReturnCodeError(Exception):
@@ -123,6 +128,7 @@ RETURN_CODE = "'%s' returned exit code '%d'."
 class Detector(object):
 
     def __init__(self, config, commandParser=getCommandOutput):
+        self.mustStore = False
         self.scripts = dict()
         self.scripts[CLIENT] = config.scripts[CLIENT]
         self.scripts[SERVER] = config.scripts[SERVER]
@@ -133,19 +139,22 @@ class Detector(object):
     def checkConfiguration(self):
         while not self._checkConfiguration():
             pass
-        self.config = self.store_config()
+        if self.mustStore:
+            self.config = self.store_config()
         return self
 
     def _checkConfiguration(self):
         try:
             self.check_clientserver_support(CLIENT)
         except ValueError, e:
+            self.mustStore = True
             print e.args[0]
             self.query_script(CLIENT)
             return False
         try:
             self.check_python_support()
-        except OSError, e:
+        except (WindowsError, OSError), e:
+            self.mustStore = True
             print e.args[1]
             server_script = self.scripts[SERVER]
             if server_script == DEFAULT_SERVER_SCRIPT:
@@ -157,18 +166,21 @@ class Detector(object):
             self.query_script(SERVER)
             return False
         except ValueError, e:
+            self.mustStore = True
             print e.args[0]
             self.query_script(SERVER)
             return False
         try:
-            self.check_clientserver_support(SERVER)
+            self.check_server_clientserver_support()
         except ValueError, e:
+            self.mustStore = True
             print e.args[0]
             self.query_script(SERVER)
             return False
         try:
             self.check_serverlist()
         except ValueError, e:
+            self.mustStore = True
             print e.args[0]
             self.query_servername()
             return False
@@ -231,6 +243,9 @@ class Detector(object):
         else:
             raise ValueError(NO_CLIENTSERVER_IN_VERSION % version)
 
+    def check_server_clientserver_support(self):
+        return self.check_clientserver_support(SERVER)
+
     def check_python_support(self):
         version = self.get_vim_version(SERVER)
         if '+python' in version:
@@ -239,6 +254,24 @@ class Detector(object):
             raise ValueError(NO_PYTHON_SUPPORT % self.scripts[SERVER])
         else:
             raise ValueError(NO_PYTHON_IN_VERSION % version)
+
+    def check_python_support_windows(self):
+        command = self.build_command(SERVER, 'dummy.txt', 
+	    '+exe \'if has("python") | :q | else | :cq | endif\'')
+        return_code = call(command)
+        if return_code:
+            raise ValueError(NO_PYTHON_SUPPORT % self.scripts[SERVER])
+        else:
+	    return True
+
+    def check_server_clientserver_support_windows(self):
+        command = self.build_command(SERVER, 'dummy.txt', 
+	    '+exe \'if has("clientserver") | :q | else | :cq | endif\'')
+        return_code = call(command)
+        if return_code:
+            raise ValueError(NO_SERVER_SUPPORT % self.scripts[SERVER])
+        else:
+	    return True
 
     def query_script(self, script_type):
         if script_type == CLIENT:
@@ -267,6 +300,9 @@ class Detector(object):
             self.server_name, self.port)
         return config
 
+if sys.platform == 'win32':
+    Detector.check_python_support = Detector.check_python_support_windows
+    Detector.check_server_clientserver_support = Detector.check_server_clientserver_support_windows
 
 if __name__ == '__main__':
     detector = Detector(getConfiguration())
