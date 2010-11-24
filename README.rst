@@ -44,54 +44,106 @@ compiled in by default.
 Installation
 ============
 
-Just install this package using ``easy_install`` or similar::
+Just install this package using ``easy_install`` ::
 
     $ easy_install vimpdb
 
-If you look inside the package, you will see a VIM script file: ``vimpdb.vim``.
-Do **not** move it to VIM configuration directory (like ``~/.vim/plugin``).
-**vimpdb** knows how to make the script available to VIM.
+You can obviously also use ``pip``.
+
+    If you look inside the package, you will see a VIM script file: ``vimpdb.vim``.
+    Do **not** move it to VIM configuration directory (like ``~/.vim/plugin``).
+    **vimpdb** knows how to make the script available to VIM.
 
 Configuration
 =============
 
-**vimpdb** is configured through its RC file : ``~/.vimpdbrc``.
-The options are found in the ``[vimpdb]`` section.
+Short story
+-----------
 
-When **vimpdb** is started, it looks for that RC file.
+**vimpdb** tries to avoid depending on any user configuration.
+If it cannot detect the right configuration by itself, 
+it will ask a few questions which you should be able to answer easily.
+
+Long story
+----------
+
+When launched, **vimpdb** looks for its RC file : ``~/.vimpdbrc``.
 If it does not find it, **vimpdb** creates that file for you from default values.
 
-If the default values do not work for you, you should modify the RC file.
-See below for details about the options.
+**vimpdb** tries a set of default values that should work for you.
+It checks if those default values are appropriate.
+If the default values do not work, **vimpdb** asks for other values interactively until it 
+has checked that the values provided actually work.
 
-You should not remove any of the options. If you do, **vimpdb** will break and 
-complain accordingly.
+The default values per OS are listed hereunder.
 
-VIM script
-----------
+For Linux::
+
+    vim_client_script = vim
+    vim_server_script = vim
+    server_name = VIM
+    port = 6666
+
+For MacOSX::
+
+    vim_client_script = mvim
+    vim_server_script = mvim
+    server_name = VIM
+    port = 6666
+
+For Windows::
+
+    vim_client_script = vim.exe
+    vim_server_script = gvim.exe
+    server_name = VIM
+    port = 6666
+
+See below for details about each option.
+
+You are obviously allowed to create and tune that RC file.
+Nevertheless, the RC file should hold values for all 4 options.
+If one of them is missing, **vimpdb** breaks and complains accordingly.
+
+
+VIM client script - ``vim_client_script``
+-----------------------------------------
 
 To communicate with the VIM instance where debugging happens,
 **vimpdb** needs to launch another VIM instance in client mode. 
 
-By default, **vimpdb** uses the ``vim`` script to start that VIM instance with 
-clientserver support. If there exists such a ``vim`` script on your path, you are ok.
-
-You can configure another script with the ``script`` option.
-It must hold the script that **vimpdb** should use to launch a VIM instance 
+``vim_client_script`` option holds the script used to launch that VIM instance 
 with clientserver support.
 
-On Windows, it should hold the path to ``vim.exe``, **not** to ``gvim.exe``.
+On Windows, it should hold ``vim.exe``, **not** ``gvim.exe``.
 Furthermore, do **not** include quotes in the enviromnent variable to take care
 of whitespace in the path.
 
-Server Name
------------
-By default, **vimpdb** speaks to the server named ``VIMPDB``.  
-Note that the default ``servername`` used by VIM is ``VIM``.
+VIM server script - ``vim_server_script``
+-----------------------------------------
+
+In case no VIM instance is running, **vimpdb** launches a VIM instance in
+server mode.
+
+``vim_server_script`` option holds the script used to launch that VIM instance
+with clientserver support.
+
+On MacOSX and Linux, ``vim_server_script`` and ``vim_client_script`` can hold 
+the same value.
+
+However, on Windows, only the graphical VIM can be used as server, reason for
+the default value as seen above.
+
+Server Name - ``server_name``
+-----------------------------
+
+The VIM instance in server mode has a name.
+
+By default, **vimpdb** speaks to the server named ``VIM``, which  
+is the default ``servername`` used by VIM.
 
 If you want **vimpdb** to use another server name, modify the 
 ``server_name`` option. It should hold the name of the VIM
-server you will be using for debugging. 
+server you want to be used for debugging. 
 
 You may list the currently running VIM servers using::
 
@@ -108,8 +160,9 @@ name by issuing the following command at the VIM prompt::
 
     :echo v:servername
 
-Port
-----
+UDP Port - ``port``
+-------------------
+
 VIM communicates to **vimpdb** through a UDP socket. 
 By default, the socket is opened on port 6666.
 
@@ -119,6 +172,10 @@ port number in the ``port`` option.
 
 Backward Compatibility
 ----------------------
+
+Before version 4.1, **vimpdb** ony used a single ``script`` option. That
+option has now be turned into ``vim_client_script``. The migration should be
+transparent.
 
 Before version 4.0, **vimpdb** was configured through environment variables.
 If you had a working configuration, you should have no problem.

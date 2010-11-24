@@ -4,7 +4,7 @@ Changelog
 0.4.1 (unreleased)
 ------------------
 
-- check ``python``and ``clientserver`` support; gives a chance to provide right
+- check ``python`` and ``clientserver`` support; gives a chance to provide right
   configuration if support is missing
 
 - try to start a VIM instance if none is available
