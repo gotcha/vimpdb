@@ -20,7 +20,7 @@ if sys.platform == 'windows':
     DEFAULT_SERVER_SCRIPT = 'gvim.exe'
 else:
     DEFAULT_SERVER_SCRIPT = DEFAULT_CLIENT_SCRIPT
-DEFAULT_SERVER_NAME = os.environ.get("VIMPDB_SERVERNAME", "VIMPDB")
+DEFAULT_SERVER_NAME = os.environ.get("VIMPDB_SERVERNAME", "VIM")
 DEFAULT_PORT = 6666
 
 CLIENT = 'CLIENT'
@@ -110,7 +110,8 @@ def getCommandOutput(parts):
     return output.strip()
 
 
-NO_SERVER_SUPPORT = "'%s' launches a VIM instance without server support."
+NO_SERVER_SUPPORT = ("'%s' launches a VIM instance without "
+    "clientserver support.")
 NO_PYTHON_SUPPORT = "'%s' launches a VIM instance without python support."
 NO_PYTHON_IN_VERSION = ("Calling --version returned no information "
     "about python support:\n %s")

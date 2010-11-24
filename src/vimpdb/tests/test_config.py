@@ -291,7 +291,7 @@ def test_detector_no_clientserver_support():
     info = py.test.raises(ValueError, detector.check_clientserver_support,
         CLIENT)
     assert info.value.args[0].endswith(
-        "' launches a VIM instance without server support.")
+        "' launches a VIM instance without clientserver support.")
 
 
 def test_detector_no_clientserver_in_version():
