@@ -126,7 +126,7 @@ def write_to_file(filename, config):
     rcfile.close()
 
 
-def getCommandOutput(parts):
+def getCommandOutputOther(parts):
     p = Popen(parts, stdin=PIPE, stdout=PIPE)
     return_code = p.wait()
     if return_code:
@@ -134,6 +134,18 @@ def getCommandOutput(parts):
     child_stdout = p.stdout
     output = child_stdout.read()
     return output.strip()
+
+
+def getCommandOutputWindows(parts):
+    try:
+        return getCommandOutputOther(parts)
+    except WindowsError:
+        raise ReturnCodeError(1, " ".join(parts))
+
+if sys.platform == 'win32':
+    getCommandOutput = getCommandOutputWindows
+else:
+    getCommandOutput = getCommandOutputOther
 
 
 NO_SERVER_SUPPORT = ("'%s' launches a VIM instance without "
@@ -205,6 +217,11 @@ class Detector(object):
         return_code = call(command)
         if return_code:
             raise ReturnCodeError(return_code, " ".join(command))
+        return True
+
+    def launch_vim_server_windows(self):
+        command = self.build_command(SERVER, '--servername', self.server_name)
+        p = Popen(command, stdin=PIPE, stdout=PIPE)
         return True
 
     def build_command(self, script_type, *args):
@@ -312,6 +329,7 @@ if sys.platform == 'win32':
     Detector.check_python_support = Detector.check_python_support_windows
     Detector.check_server_clientserver_support = \
         Detector.check_server_clientserver_support_windows
+    Detector.launch_vim_server = Detector.launch_vim_server_windows
 
 if __name__ == '__main__':
     detector = Detector(getConfiguration())
