@@ -125,7 +125,8 @@ In case no VIM instance is running, **vimpdb** launches a VIM instance in
 server mode.
 
 ``vim_server_script`` option holds the script used to launch that VIM instance
-with clientserver support.
+with clientserver support. As debugging in the VIM instance is written with
+python, that instance must have python support.
 
 On MacOSX and Linux, ``vim_server_script`` and ``vim_client_script`` can hold 
 the same value.
