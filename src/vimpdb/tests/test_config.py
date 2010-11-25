@@ -17,8 +17,9 @@ port = 1000
 server_name = server_name
 """)
     file.close()
+    from vimpdb.config import read_from_file
     from vimpdb.config import Config
-    config = Config(name)
+    config = read_from_file(name, Config)
     assert config.port == 1000
     assert config.scripts[CLIENT] == 'vim_client_script'
     assert config.scripts[SERVER] == 'vim_server_script'
@@ -39,8 +40,9 @@ port = 1000
 server_name = server_name
 """)
     file.close()
+    from vimpdb.bbbconfig import read_from_file_4_0
     from vimpdb.config import Config
-    config = Config(name)
+    config = read_from_file_4_0(name, Config)
     assert config.port == 1000
     assert config.scripts[CLIENT] == 'vim_client_script'
     assert config.scripts[SERVER] == 'vim_client_script'
@@ -59,9 +61,10 @@ port = 1000
 server_name = server_name
 """)
     file.close()
+    from vimpdb.errors import BadRCFile
+    from vimpdb.config import read_from_file
     from vimpdb.config import Config
-    from vimpdb.config import BadConfiguration
-    py.test.raises(BadConfiguration, Config, name)
+    py.test.raises(BadRCFile, read_from_file, name, Config)
     os.remove(name)
 
 
@@ -76,9 +79,10 @@ port = 1000
 server_name = server_name
 """)
     file.close()
+    from vimpdb.errors import BadRCFile
+    from vimpdb.config import read_from_file
     from vimpdb.config import Config
-    from vimpdb.config import BadConfiguration
-    py.test.raises(BadConfiguration, Config, name)
+    py.test.raises(BadRCFile, read_from_file, name, Config)
     os.remove(name)
 
 
@@ -93,9 +97,10 @@ port = 1000
 server_name = server_name
 """)
     file.close()
+    from vimpdb.errors import BadRCFile
+    from vimpdb.config import read_from_file
     from vimpdb.config import Config
-    from vimpdb.config import BadConfiguration
-    py.test.raises(BadConfiguration, Config, name)
+    py.test.raises(BadRCFile, read_from_file, name, Config)
     os.remove(name)
 
 
@@ -110,9 +115,10 @@ portx = 1000
 server_name = server_name
 """)
     file.close()
+    from vimpdb.errors import BadRCFile
+    from vimpdb.config import read_from_file
     from vimpdb.config import Config
-    from vimpdb.config import BadConfiguration
-    py.test.raises(BadConfiguration, Config, name)
+    py.test.raises(BadRCFile, read_from_file, name, Config)
     os.remove(name)
 
 
@@ -127,35 +133,50 @@ port = 1000
 server_namex = server_name
 """)
     file.close()
+    from vimpdb.errors import BadRCFile
+    from vimpdb.config import read_from_file
     from vimpdb.config import Config
-    from vimpdb.config import BadConfiguration
-    py.test.raises(BadConfiguration, Config, name)
+    py.test.raises(BadRCFile, read_from_file, name, Config)
     os.remove(name)
 
 
-def test_file_creation():
-    import tempfile
+def test_default_config():
     from vimpdb.config import CLIENT
     from vimpdb.config import SERVER
-    handle, name = tempfile.mkstemp()
-    os.remove(name)
-    from vimpdb.config import Config
+    from vimpdb.config import defaultConfig
     from vimpdb.config import DEFAULT_PORT
     from vimpdb.config import DEFAULT_CLIENT_SCRIPT
     from vimpdb.config import DEFAULT_SERVER_SCRIPT
     from vimpdb.config import DEFAULT_SERVER_NAME
-    config = Config(name)
-    assert os.path.exists(name)
+    config = defaultConfig
     assert config.port == DEFAULT_PORT
     assert config.scripts[CLIENT] == DEFAULT_CLIENT_SCRIPT
     assert config.scripts[SERVER] == DEFAULT_SERVER_SCRIPT
     assert config.server_name == DEFAULT_SERVER_NAME
+
+
+def test_file_creation():
+    import tempfile
+    handle, name = tempfile.mkstemp()
+    os.remove(name)
+    from vimpdb.config import defaultConfig
+    from vimpdb.config import DEFAULT_PORT
+    from vimpdb.config import DEFAULT_CLIENT_SCRIPT
+    from vimpdb.config import DEFAULT_SERVER_SCRIPT
+    from vimpdb.config import DEFAULT_SERVER_NAME
+    from vimpdb.config import write_to_file
+    write_to_file(name, defaultConfig)
+    assert os.path.exists(name)
     config_file = open(name)
     content = config_file.read()
     assert 'vim_client_script =' in content
+    assert DEFAULT_CLIENT_SCRIPT in content
     assert 'vim_server_script =' in content
+    assert DEFAULT_SERVER_SCRIPT in content
     assert 'port =' in content
+    assert str(DEFAULT_PORT) in content
     assert 'server_name =' in content
+    assert DEFAULT_SERVER_NAME in content
     config_file.close()
     os.remove(name)
 

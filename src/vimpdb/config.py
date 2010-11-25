@@ -6,103 +6,124 @@ from subprocess import call
 from subprocess import Popen
 from subprocess import PIPE
 
+from vimpdb import bbbconfig
+from vimpdb.errors import BadRCFile
+from vimpdb.errors import ReturnCodeError
+from vimpdb.errors import BrokenConfiguration
+
 RCNAME = os.path.expanduser('~/.vimpdbrc')
-
-if sys.platform == 'darwin':
-    PLATFORM_SCRIPT = 'mvim'
-elif sys.platform == 'win32':
-    PLATFORM_SCRIPT = 'vim.exe'
-else:
-    PLATFORM_SCRIPT = 'mvim'
-
-DEFAULT_CLIENT_SCRIPT = os.environ.get("VIMPDB_VIMSCRIPT", PLATFORM_SCRIPT)
-if sys.platform == 'windows':
-    DEFAULT_SERVER_SCRIPT = 'gvim.exe'
-else:
-    DEFAULT_SERVER_SCRIPT = DEFAULT_CLIENT_SCRIPT
-DEFAULT_SERVER_NAME = os.environ.get("VIMPDB_SERVERNAME", "VIM")
-DEFAULT_PORT = 6666
 
 CLIENT = 'CLIENT'
 SERVER = 'SERVER'
 
 
-class BadConfiguration(Exception):
-    pass
-
-
 class Config(object):
 
-    def __init__(self, filename):
-        self.filename = filename
-        self.scripts = dict()
-	self.isNew = False
-
-    def read_from_file(self):
-        if not os.path.exists(self.filename):
-            self.isNew = True
-            self.write_to_file(
-                DEFAULT_CLIENT_SCRIPT, DEFAULT_SERVER_SCRIPT,
-                DEFAULT_SERVER_NAME, DEFAULT_PORT)
-        parser = ConfigParser.RawConfigParser()
-        parser.read(self.filename)
-        if not parser.has_section('vimpdb'):
-            raise BadConfiguration('[vimpdb] section is missing in "%s"' %
-                self.filename)
-        error_msg = ("'%s' option is missing from section [vimpdb] in "
-            + "'" + self.filename + "'.")
-        if parser.has_option('vimpdb', 'script'):
-            self.scripts[CLIENT] = parser.get('vimpdb', 'script')
-        elif parser.has_option('vimpdb', 'vim_client_script'):
-            self.scripts[CLIENT] = parser.get('vimpdb', 'vim_client_script')
-        else:
-            raise BadConfiguration(error_msg % "vim_client_script")
-        if parser.has_option('vimpdb', 'server_name'):
-            self.server_name = parser.get('vimpdb', 'server_name')
-        else:
-            raise BadConfiguration(error_msg % 'server_name')
-        if parser.has_option('vimpdb', 'port'):
-            self.port = parser.getint('vimpdb', 'port')
-        else:
-            raise BadConfiguration(error_msg % 'port')
-        if parser.has_option('vimpdb', 'vim_server_script'):
-            self.scripts[SERVER] = parser.get('vimpdb', 'vim_server_script')
-        elif parser.has_option('vimpdb', 'script'):
-            self.scripts[SERVER] = self.scripts[CLIENT]
-        else:
-            raise BadConfiguration(error_msg % "vim_server_script")
-
-    def write_to_file(self, vim_client_script, vim_server_script, server_name,
+    def __init__(self, vim_client_script, vim_server_script, server_name,
         port):
-        parser = ConfigParser.RawConfigParser()
-        parser.add_section('vimpdb')
-        parser.set('vimpdb', 'vim_client_script', vim_client_script)
-        parser.set('vimpdb', 'vim_server_script', vim_server_script)
-        parser.set('vimpdb', 'server_name', server_name)
-        parser.set('vimpdb', 'port', port)
-        rcfile = open(self.filename, 'w')
-        parser.write(rcfile)
-        rcfile.close()
+        self.scripts = dict()
+        self.scripts[CLIENT] = vim_client_script
+        self.scripts[SERVER] = vim_server_script
+        self.server_name = server_name
+        self.port = port
 
     def __repr__(self):
         return ("<vimpdb Config : Script %s; Server name %s, Port %s>" %
           (self.scripts[CLIENT], self.server_name, self.port))
 
+    def __eq__(self, other):
+        return (
+            self.scripts[CLIENT] == other.scripts[CLIENT] and
+            self.scripts[SERVER] == other.scripts[SERVER] and
+            self.server_name == other.server_name and
+            self.port == other.port)
 
-def getConfiguration():
-    config = Config(RCNAME)
-    config.read_from_file()
-    if config.isNew:
+
+if sys.platform == 'darwin':
+    DEFAULT_CLIENT_SCRIPT = 'mvim'
+    DEFAULT_SERVER_SCRIPT = DEFAULT_CLIENT_SCRIPT
+elif sys.platform == 'win32':
+    DEFAULT_CLIENT_SCRIPT = 'vim.exe'
+    DEFAULT_SERVER_SCRIPT = 'gvim.exe'
+else:
+    DEFAULT_CLIENT_SCRIPT = 'mvim'
+    DEFAULT_SERVER_SCRIPT = DEFAULT_CLIENT_SCRIPT
+
+DEFAULT_SERVER_NAME = "VIM"
+DEFAULT_PORT = 6666
+
+
+defaultConfig = Config(DEFAULT_CLIENT_SCRIPT, DEFAULT_SERVER_SCRIPT,
+            DEFAULT_SERVER_NAME, DEFAULT_PORT)
+defaultConfig.vim_client_script = defaultConfig.scripts[CLIENT]
+
+
+def getConfiguration(filename=RCNAME):
+    if not os.path.exists(filename):
+        mustCheck = True
+        mustWrite = True
+        if bbbconfig.has_environ():
+            config = bbbconfig.read_from_environ(Config, defaultConfig)
+        else:
+            config = defaultConfig
+    else:
+        mustCheck = False
+        mustWrite = False
+        try:
+            config = read_from_file(filename, Config)
+        except BadRCFile, e:
+            try:
+                config_4_0 = bbbconfig.read_from_file_4_0(filename, Config)
+            except BadRCFile:
+                raise e
+            config = config_4_0
+            mustCheck = True
+    initial = config
+    if mustCheck:
         config = Detector(config).checkConfiguration()
+    if mustWrite or initial != config:
+        write_to_file(filename, config)
+    Detector(config).check_serverlist()
     return config
 
 
-class ReturnCodeError(Exception):
-    pass
+def read_from_file(filename, klass):
+    parser = ConfigParser.RawConfigParser()
+    parser.read(filename)
+    if not parser.has_section('vimpdb'):
+        raise BadRCFile('[vimpdb] section is missing in "%s"' %
+            filename)
+    error_msg = ("'%s' option is missing from section [vimpdb] in "
+        + "'" + filename + "'.")
+    if parser.has_option('vimpdb', 'vim_client_script'):
+        vim_client_script = parser.get('vimpdb', 'vim_client_script')
+    else:
+        raise BadRCFile(error_msg % "vim_client_script")
+    if parser.has_option('vimpdb', 'server_name'):
+        server_name = parser.get('vimpdb', 'server_name')
+    else:
+        raise BadRCFile(error_msg % 'server_name')
+    if parser.has_option('vimpdb', 'port'):
+        port = parser.getint('vimpdb', 'port')
+    else:
+        raise BadRCFile(error_msg % 'port')
+    if parser.has_option('vimpdb', 'vim_server_script'):
+        vim_server_script = parser.get('vimpdb', 'vim_server_script')
+    else:
+        raise BadRCFile(error_msg % "vim_server_script")
+    return klass(vim_client_script, vim_server_script, server_name, port)
 
 
-class NoWorkingConfigurationError(Exception):
-    pass
+def write_to_file(filename, config):
+    parser = ConfigParser.RawConfigParser()
+    parser.add_section('vimpdb')
+    parser.set('vimpdb', 'vim_client_script', config.scripts[CLIENT])
+    parser.set('vimpdb', 'vim_server_script', config.scripts[SERVER])
+    parser.set('vimpdb', 'server_name', config.server_name)
+    parser.set('vimpdb', 'port', config.port)
+    rcfile = open(filename, 'w')
+    parser.write(rcfile)
+    rcfile.close()
 
 
 def getCommandOutput(parts):
@@ -128,7 +149,6 @@ RETURN_CODE = "'%s' returned exit code '%d'."
 class Detector(object):
 
     def __init__(self, config, commandParser=getCommandOutput):
-        self.mustStore = False
         self.scripts = dict()
         self.scripts[CLIENT] = config.scripts[CLIENT]
         self.scripts[SERVER] = config.scripts[SERVER]
@@ -139,22 +159,19 @@ class Detector(object):
     def checkConfiguration(self):
         while not self._checkConfiguration():
             pass
-        if self.mustStore:
-            self.config = self.store_config()
         return self
 
     def _checkConfiguration(self):
         try:
             self.check_clientserver_support(CLIENT)
         except ValueError, e:
-            self.mustStore = True
             print e.args[0]
             self.query_script(CLIENT)
             return False
         try:
             self.check_python_support()
-        except (WindowsError, OSError), e:
-            self.mustStore = True
+        #XXX catch WindowsError
+        except OSError, e:
             print e.args[1]
             server_script = self.scripts[SERVER]
             if server_script == DEFAULT_SERVER_SCRIPT:
@@ -166,21 +183,18 @@ class Detector(object):
             self.query_script(SERVER)
             return False
         except ValueError, e:
-            self.mustStore = True
             print e.args[0]
             self.query_script(SERVER)
             return False
         try:
             self.check_server_clientserver_support()
         except ValueError, e:
-            self.mustStore = True
             print e.args[0]
             self.query_script(SERVER)
             return False
         try:
             self.check_serverlist()
         except ValueError, e:
-            self.mustStore = True
             print e.args[0]
             self.query_servername()
             return False
@@ -256,22 +270,22 @@ class Detector(object):
             raise ValueError(NO_PYTHON_IN_VERSION % version)
 
     def check_python_support_windows(self):
-        command = self.build_command(SERVER, 'dummy.txt', 
-	    '+exe \'if has("python") | :q | else | :cq | endif\'')
+        command = self.build_command(SERVER, 'dummy.txt',
+            '+exe \'if has("python") | :q | else | :cq | endif\'')
         return_code = call(command)
         if return_code:
             raise ValueError(NO_PYTHON_SUPPORT % self.scripts[SERVER])
         else:
-	    return True
+            return True
 
     def check_server_clientserver_support_windows(self):
-        command = self.build_command(SERVER, 'dummy.txt', 
-	    '+exe \'if has("clientserver") | :q | else | :cq | endif\'')
+        command = self.build_command(SERVER, 'dummy.txt',
+            '+exe \'if has("clientserver") | :q | else | :cq | endif\'')
         return_code = call(command)
         if return_code:
             raise ValueError(NO_SERVER_SUPPORT % self.scripts[SERVER])
         else:
-	    return True
+            return True
 
     def query_script(self, script_type):
         if script_type == CLIENT:
@@ -282,7 +296,7 @@ class Detector(object):
             % type)
         answer = raw_input(question)
         if answer == '':
-            raise NoWorkingConfigurationError
+            raise BrokenConfiguration
         else:
             self.scripts[script_type] = answer
 
@@ -290,19 +304,14 @@ class Detector(object):
         question = "Input another server name (leave empty to abort): "
         answer = raw_input(question)
         if answer == '':
-            raise NoWorkingConfigurationError
+            raise BrokenConfiguration
         else:
             self.server_name = answer
 
-    def store_config(self):
-        config = getConfiguration()
-        config.write_to_file(self.scripts[CLIENT], self.scripts[SERVER],
-            self.server_name, self.port)
-        return config
-
 if sys.platform == 'win32':
     Detector.check_python_support = Detector.check_python_support_windows
-    Detector.check_server_clientserver_support = Detector.check_server_clientserver_support_windows
+    Detector.check_server_clientserver_support = \
+        Detector.check_server_clientserver_support_windows
 
 if __name__ == '__main__':
     detector = Detector(getConfiguration())
