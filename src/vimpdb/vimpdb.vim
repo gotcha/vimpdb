@@ -6,8 +6,10 @@ python <<EOT
 import sys
 egg_path = vim.eval("a:path")
 sys.path.insert(0, egg_path)
-from vimpdb.config import getConfiguration
-config = getConfiguration()
+from vimpdb.config import Config
+from vimpdb.config import read_from_file
+from vimpdb.config import RCNAME
+config = read_from_file(RCNAME, Config)
 PDB_PORT = config.port
 EOT
 endfunction
