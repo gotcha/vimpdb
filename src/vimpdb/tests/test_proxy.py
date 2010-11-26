@@ -15,7 +15,7 @@ def test_ProxyToVim_setupRemote():
     to_vim.setupRemote()
     lines = to_vim.logged().splitlines()
     assert len(lines) == 5
-    assert lines[1] == "expr: exists('*PDB_init')"
+    assert lines[1] == "expr: exists('*PDB_setup_egg')"
     assert lines[2] == "return: '0'"
     assert lines[3].startswith('send: <C-\\><C-N>:source ')
     assert lines[3].endswith('vimpdb/vimpdb.vim<CR>')
@@ -30,7 +30,7 @@ def test_ProxyToVim_setupRemote_does_nothing():
     to_vim.setupRemote()
     assert (to_vim.logged() ==
 """
-expr: exists('*PDB_init')
+expr: exists('*PDB_setup_egg')
 return: '1'
 """)
 
@@ -41,7 +41,7 @@ def test_ProxyToVim_isRemoteSetup():
     to_vim.isRemoteSetup()
     assert (to_vim.logged() ==
 """
-expr: exists('*PDB_init')
+expr: exists('*PDB_setup_egg')
 return: None
 """)
 
@@ -63,7 +63,7 @@ def test_ProxyToVim_showFeedback_content():
     to_vim.showFeedback('first\nsecond')
     assert (to_vim.logged() ==
 """
-expr: exists('*PDB_init')
+expr: exists('*PDB_setup_egg')
 return: '1'
 send: :call PDB_show_feedback(['first', 'second'])<CR>
 """)
@@ -88,7 +88,7 @@ def test_ProxyToVim_showFileAtLine_existing_file():
     to_vim.showFileAtLine(existingFile, 1)
     lines = to_vim.logged().splitlines()
     assert len(lines) == 4
-    assert lines[1] == "expr: exists('*PDB_init')"
+    assert lines[1] == "expr: exists('*PDB_setup_egg')"
     assert lines[2] == "return: '1'"
     assert lines[3].startswith('send: :call PDB_show_file_at_line("')
     assert lines[3].endswith(' "1")<CR>')
@@ -105,7 +105,7 @@ def test_ProxyToVim_showFileAtLine_existing_file_windows():
     to_vim._showFileAtLine(existingFile, 1)
     lines = to_vim.logged().splitlines()
     assert len(lines) == 4
-    assert lines[1] == "expr: exists('*PDB_init')"
+    assert lines[1] == "expr: exists('*PDB_setup_egg')"
     assert lines[2] == "return: '1'"
     assert lines[3].startswith('send: :call PDB_show_file_at_line("')
     assert lines[3].endswith(' "1")<CR>')

@@ -53,7 +53,7 @@ class ProxyToVim(object):
             self._send(':call PDB_setup_egg(%s)<CR>' % repr(egg_path))
 
     def isRemoteSetup(self):
-        status = self._remote_expr("exists('*PDB_init')")
+        status = self._expr("exists('*PDB_setup_egg')")
         return status == '1'
 
     def showFeedback(self, feedback):
