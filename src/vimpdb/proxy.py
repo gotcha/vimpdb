@@ -37,6 +37,8 @@ class ProxyToVim(object):
         return output.strip()
 
     def _send(self, command):
+        # add ':<BS>' to hide last keys sent in VIM command-line
+        command = ''.join((command, ':<BS>'))
         return_code = call([self.vim_client_script, '--servername',
             self.server_name, '--remote-send', command])
         if return_code:
