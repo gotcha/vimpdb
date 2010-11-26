@@ -1,7 +1,7 @@
 Changelog
 =========
 
-0.4.1 (unreleased)
+0.4.1 (2010-11-26)
 ------------------
 
 - check ``python`` and ``clientserver`` support; gives a chance to provide right
