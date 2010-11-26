@@ -136,8 +136,8 @@ The default values per OS are listed hereunder.
 For Linux::
 
     vim_client_script = vim
-    vim_server_script = vim
-    server_name = VIM
+    vim_server_script = gvim
+    server_name = GVIM
     port = 6666
 
 For MacOSX::
