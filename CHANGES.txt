@@ -4,6 +4,8 @@ Changelog
 0.4.2 (unreleased)
 ------------------
 
+- close vimpdb buffer whem continue (c), reset (x) or quit (q).
+
 - launch VIM server also if another server is running.
 
 

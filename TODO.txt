@@ -10,8 +10,6 @@ In priority order:
 
 - keep debugging state in vim to switch vimpdb back to pdb when closing vim.
 
-- when resetting, close vimpdb buffer and issue message.
-
 - key bindings in vimpdb buffer.
 
 and much more...

@@ -14,7 +14,7 @@ endfunction
 function! PDB_init_display()
     call PDB_move_to_debug_tab()
     " avoid "Press Enter to continue"
-    execute "set cmdheight=2"
+    set cmdheight=2
     call foreground()
 endfunction
 
@@ -127,6 +127,9 @@ endfunction
 function! PDB_continue()
     call PDB_send_command('c')
     call PDB_reset_original_map()
+python <<EOT
+controller.buffer_close()
+EOT
 endfunction
 
 function! PDB_reset()
@@ -149,8 +152,11 @@ function! PDB_exit()
     call PDB_reset_original_map()
 python <<EOT
 controller.socket_close()
-controller.buffer_write(["Switch back to shell."])   
+controller.buffer_close()
 EOT
+    echohl ErrorMsg
+    echo "Switch back to shell.\n\n"
+    echohl None
 endfunction
 
 "---------------------------------------------------------------------
