@@ -100,7 +100,7 @@ compiled in by default.
 Installation
 ============
 
-Just install this package using ``easy_install`` ::
+Standard installation with ``easy_install`` ::
 
     $ easy_install vimpdb
 
