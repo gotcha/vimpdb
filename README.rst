@@ -232,9 +232,9 @@ Known issues
 Backward Compatibility
 ----------------------
 
-Before version 0.4.1, **vimpdb** RC file had a single ``script`` option. That
-option has now be turned into the ``vim_client_script`` option. The migration
-should be transparent.
+Before version 0.4.1, **vimpdb** RC file (``~/.vimpdbrc``) had a single 
+``script`` option. That option has now be turned into the ``vim_client_script``
+option. The migration should be transparent.
 
 Before version 0.4.0, **vimpdb** was configured through environment variables.
 If you had a working configuration, you should have no problem.
