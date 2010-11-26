@@ -81,6 +81,7 @@ let s:pdb_map["x"] = "PDBReset"
 let s:pdb_map["a"] = "PDBArgs"
 let s:pdb_map["w"] = "PDBWord"
 let s:pdb_map["b"] = "PDBBreak"
+let s:pdb_map["B"] = "PDBClear"
 
 function! PDB_map()
     if !exists("b:pdb_mapped")
@@ -151,6 +152,12 @@ function! PDB_break()
     call PDB_send_command("b " . filename . ":" . line)
 endfunction
 
+function! PDB_clear()
+    let line = line('.')
+    let filename = expand('%:p')
+    call PDB_send_command("cl " . filename . ":" . line)
+endfunction
+
 function! PDB_exit()
     call PDB_reset_original_map()
 python <<EOT
@@ -181,6 +188,9 @@ if !exists(":PDBContinue")
 endif
 if !exists(":PDBBreak")
   command! PDBBreak :call PDB_break()
+endif
+if !exists(":PDBClear")
+  command! PDBClear :call PDB_clear()
 endif
 if !exists(":PDBDown")
   command! PDBDown :call PDB_send_command("d")

@@ -203,6 +203,7 @@ In VIM, you may now use the following commands:
     r , Return
     c , Continue
     b , Sets a breakpoint at the line on which the cursor is sitting.
+    B , Clears a breakpoint at the line on which the cursor is sitting.
     w , Displays the value of the word on which the cursor is sitting.
     x , Switch to debugging in shell with standard ``pdb``.
     v , Switch back to **vimpdb** from plain ``pdb``.

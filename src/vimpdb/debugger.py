@@ -176,10 +176,11 @@ class VimPdb(Pdb, Switcher):
             self.pdb.interaction(self.curframe, None)
         return 1
 
-    do_u = do_up = show_line(Pdb.do_up)
-    do_d = do_down = show_line(Pdb.do_down)
+    do_u = do_up = capture(show_line(Pdb.do_up))
+    do_d = do_down = capture(show_line(Pdb.do_down))
     do_a = do_args = capture(Pdb.do_args)
     do_b = do_break = capture(Pdb.do_break)
+    do_cl = do_clear = capture(Pdb.do_clear)
     do_c = do_continue = close_socket(Pdb.do_continue)
 
     @capture

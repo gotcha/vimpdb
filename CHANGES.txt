@@ -4,6 +4,8 @@ Changelog
 0.4.2 (unreleased)
 ------------------
 
+- PDBClear ('B') key to clear a previously set breakpoint.
+
 - open new tab only if there is already an opened file in VIM.
 
 - close vimpdb buffer whem continue (c), reset (x) or quit (q).
