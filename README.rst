@@ -10,6 +10,62 @@ Abstract
 This package provides an integration of the Python debugger ``pdb`` into the
 VIM editor.
 
+Usage
+=====
+
+Python code
+-----------
+
+Using **vimpdb** is easy -- just insert a call to ``set_trace`` in your code
+almost as usual::
+
+    import vimpdb; vimpdb.set_trace() 
+
+Then start your python application/script.
+
+When the python interpreter hits that line, **vimpdb** will launch a VIM 
+instance. VIM should get the focus; it loads the source file at the right line.
+
+VIM commands
+------------
+
+In VIM, you may now use the following commands:
+
+.. csv-table:: **vimpdb** commands
+    :header-rows: 1
+
+    Ex Command, Key binding, Details
+    ``:PDBNext``, ``n`` , ``pdb`` (n)ext
+    ``:PDBStep``, ``s`` , ``pdb`` (s)tep 
+    ``:PDBArgs``, ``a`` , ``pdb`` (a)rgs
+    ``:PDBUp``, ``u`` , ``pdb`` (u)p
+    ``:PDBDown``, ``d`` , ``pdb`` (d)own
+    ``:PDBReturn``, ``r`` , ``pdb`` (r)eturn
+    ``:PDBContinue``, ``c`` , ``pdb`` (c)ontinue
+    ``:PDBBreak``, ``b`` , Sets a breakpoint at the line on which the cursor is sitting; similar to ``pdb`` b(reak)
+    ``:PDBClear``, ``B`` , Clears a breakpoint at the line on which the cursor is sitting; similar to ``pdb`` cl(ear)
+    ``:PDBWord``, ``w`` , Evaluates the value of the identifier on which the cursor is sitting.
+    ``:PDBEval``, ``?`` , Evaluates a Python expression after having asked for it.
+    ``:PDBReset``, ``x`` , Switch back to normal debugging in shell with standard ``pdb``.
+    N/A, ``v(im)`` , Switch back to **vimpdb**; only in plain ``pdb``.
+
+Standard ``pdb`` hook
+---------------------
+
+If you find it hard to change habits and keep on typing 
+
+::
+
+    import pdb; pdb.set_trace()
+
+you can add the following line to the  ``.pdbrc`` file sitting in your home
+folder::
+
+    import vimpdb; vimpdb.hookPdb()
+
+This way, the command ``v(im)`` mentioned above is added to your standard 
+``pdb`` and you can switch to **vimpdb** at any time.
+
 Requirements
 ============
 
@@ -169,62 +225,6 @@ By default, the socket is opened on port 6666.
 
 If that socket is not available in your system, you can specify an available
 port number with the ``port`` option.
-
-Usage
-=====
-
-Python code
------------
-
-Using **vimpdb** is easy -- just insert a call to ``set_trace`` in your code
-almost as usual::
-
-    import vimpdb; vimpdb.set_trace() 
-
-Then start your python application/script.
-
-When the python interpreter hits that line, **vimpdb** will launch a VIM 
-instance. VIM should get the focus; it loads the source file at the right line.
-
-VIM commands
-------------
-
-In VIM, you may now use the following commands:
-
-.. csv-table:: **vimpdb** commands
-    :header-rows: 1
-
-    Ex Command, Key binding, Details
-    ``:PDBNext``, ``n`` , ``pdb`` (n)ext
-    ``:PDBStep``, ``s`` , ``pdb`` (s)tep 
-    ``:PDBArgs``, ``a`` , ``pdb`` (a)rgs
-    ``:PDBUp``, ``u`` , ``pdb`` (u)p
-    ``:PDBDown``, ``d`` , ``pdb`` (d)own
-    ``:PDBReturn``, ``r`` , ``pdb`` (r)eturn
-    ``:PDBContinue``, ``c`` , ``pdb`` (c)ontinue
-    ``:PDBBreak``, ``b`` , Sets a breakpoint at the line on which the cursor is sitting; similar to ``pdb`` b(reak)
-    ``:PDBClear``, ``B`` , Clears a breakpoint at the line on which the cursor is sitting; similar to ``pdb`` cl(ear)
-    ``:PDBWord``, ``w`` , Evaluates the value of the identifier on which the cursor is sitting.
-    ``:PDBEval``, ``?`` , Evaluates a Python expression after having asked for it.
-    ``:PDBReset``, ``x`` , Switch back to normal debugging in shell with standard ``pdb``.
-    N/A, ``v(im)`` , Switch back to **vimpdb**; only in plain ``pdb``.
-
-Standard Pdb hook
-=================
-
-If you find it hard to change habits and keep on typing 
-
-::
-
-    import pdb; pdb.set_trace()
-
-you can add the following line to the  ``.pdbrc`` file sitting in your home
-folder::
-
-    import vimpdb; vimpdb.hookPdb()
-
-This way, the command ``v(im)`` mentioned above is added to your standard 
-``pdb`` and you can switch to **vimpdb** at any time.
 
 Known issues
 ============
