@@ -112,10 +112,10 @@ To communicate with the VIM instance where debugging happens,
 **vimpdb** needs to launch another VIM instance in client mode. 
 
 ``vim_client_script`` option holds the script used to launch that VIM instance 
-with clientserver support.
+with ``clientserver`` support.
 
 On Windows, it should hold ``vim.exe``, **not** ``gvim.exe``.
-Furthermore, do **not** include quotes in the enviromnent variable to take care
+Furthermore, do **not** include quotes in the value to take care
 of whitespace in the path.
 
 VIM server script - ``vim_server_script``
@@ -125,8 +125,8 @@ In case no VIM instance is running, **vimpdb** launches a VIM instance in
 server mode.
 
 ``vim_server_script`` option holds the script used to launch that VIM instance
-with clientserver support. As debugging in the VIM instance is written with
-python, that instance must have python support.
+with ``clientserver`` support. As debugging in the VIM instance is written with
+python, that instance must have ``python`` support.
 
 On MacOSX and Linux, ``vim_server_script`` and ``vim_client_script`` can hold 
 the same value.
