@@ -1,16 +1,16 @@
 Changelog
 =========
 
-0.4.2 (unreleased)
-------------------
+0.4.1.2 (2010-11-26)
+--------------------
 
-- Nothing changed yet.
+- polish documentation.
 
 
 0.4.1.1 (2010-11-26)
 --------------------
 
-- Tune documentation.
+- tune documentation.
 
 
 0.4.1 (2010-11-26)

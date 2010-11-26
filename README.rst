@@ -131,8 +131,8 @@ python, that instance must have ``python`` support.
 On MacOSX and Linux, ``vim_server_script`` and ``vim_client_script`` can hold 
 the same value.
 
-However, on Windows, only the graphical VIM can be used as server, reason for
-the default value as seen above.
+On Windows, only the graphical VIM can be used as server, reason for the two 
+separate default values as seen above.
 
 Server Name - ``server_name``
 -----------------------------
@@ -168,7 +168,7 @@ VIM communicates to **vimpdb** through a UDP socket.
 By default, the socket is opened on port 6666.
 
 If that socket is not available in your system, you can specify an available
-port number in the ``port`` option.
+port number with the ``port`` option.
 
 Usage
 =====
@@ -191,7 +191,7 @@ VIM commands
 
 In VIM, you may now use the following commands:
 
-.. csv-table:: VimPDB Commands
+.. csv-table:: **vimpdb** commands
     :header-rows: 1
 
     Key, Command
@@ -204,8 +204,8 @@ In VIM, you may now use the following commands:
     c , Continue
     b , Sets a breakpoint at the line on which the cursor is sitting.
     w , Displays the value of the word on which the cursor is sitting.
-    x , Switch to debugging in shell with standard Pdb.
-    v , Switch back to VimPdb from plain Pdb.
+    x , Switch to debugging in shell with standard ``pdb``.
+    v , Switch back to **vimpdb** from plain ``pdb``.
 
 Standard Pdb hook
 =================
@@ -221,8 +221,8 @@ folder::
 
     import vimpdb; vimpdb.hookPdb()
 
-This way, the command ``v(im)`` mentioned above is added to your standard Pdb
-and you can switch to **vimpdb** at any time.
+This way, the command ``v(im)`` mentioned above is added to your standard 
+``pdb`` and you can switch to **vimpdb** at any time.
 
 Known issues
 ============
@@ -230,14 +230,14 @@ Known issues
 * No convenient way to evaluate a Python expression.
 
 Backward Compatibility
-----------------------
+======================
 
 Before version 0.4.1, **vimpdb** RC file (``~/.vimpdbrc``) had a single 
-``script`` option. That option has now be turned into the ``vim_client_script``
-option. The migration should be transparent.
+``script`` option. That option has been turned into the ``vim_client_script``
+option. The upgrade should be transparent.
 
 Before version 0.4.0, **vimpdb** was configured through environment variables.
-If you had a working configuration, you should have no problem.
+If you had a working configuration, upgrate should be transparent.
 The values of ``VIMPDB_SERVERNAME`` and ``VIMPDB_VIMSCRIPT`` environment
 variables are setup in the RC file (``~/.vimpdbrc``). 
 They are put respectively in ``server_name`` and ``script`` options.
