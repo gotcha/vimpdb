@@ -1,3 +1,4 @@
+import logging
 from proxy import ProxyToVim
 from StringIO import StringIO
 
@@ -47,5 +48,6 @@ class Config(object):
             self.scripts[SERVER] = vim_server_script
         self.server_name = server_name
         self.port = port
+        self.loglevel = logging.INFO
 
 config = Config(vim_client_script="bad script")
