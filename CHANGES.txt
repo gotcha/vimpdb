@@ -4,7 +4,7 @@ Changelog
 0.4.3 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- fix and tune Linux default values.
 
 
 0.4.2 (2010-11-26)
