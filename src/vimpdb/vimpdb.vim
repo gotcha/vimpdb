@@ -27,7 +27,7 @@ function! PDB_show_file_at_line(filename, line)
         call PDB_load_file(a:filename)
     endif
     execute "normal " . a:line . "ggz."
-    execute 'match PdbCurrentLine "\%' . a:line . 'l.\+"'
+    execute 'match PdbCurrentLine /\%' . a:line . 'l\s*\zs.\+/'
 endfunction
 
 function! PDB_load_file(filename)
