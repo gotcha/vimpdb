@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-version = '0.4.3.1'
+version = '0.4.3.2'
 
 setup(name='vimpdb',
       version=version,
