@@ -174,11 +174,11 @@ port number in the ``port`` option.
 Backward Compatibility
 ----------------------
 
-Before version 4.1, **vimpdb** ony used a single ``script`` option. That
+Before version 0.4.1, **vimpdb** ony used a single ``script`` option. That
 option has now be turned into ``vim_client_script``. The migration should be
 transparent.
 
-Before version 4.0, **vimpdb** was configured through environment variables.
+Before version 0.4.0, **vimpdb** was configured through environment variables.
 If you had a working configuration, you should have no problem.
 The values of ``VIMPDB_SERVERNAME`` and ``VIMPDB_VIMSCRIPT`` environment
 variables are setup in the RC file (``~/.vimpdbrc``). 
