@@ -205,6 +205,7 @@ In VIM, you may now use the following commands:
     b , Sets a breakpoint at the line on which the cursor is sitting.
     B , Clears a breakpoint at the line on which the cursor is sitting.
     w , Displays the value of the word on which the cursor is sitting.
+    ? , Evaluate Python expression after having asked for it.
     x , Switch to debugging in shell with standard ``pdb``.
     v , Switch back to **vimpdb** from plain ``pdb``.
 
@@ -228,7 +229,7 @@ This way, the command ``v(im)`` mentioned above is added to your standard
 Known issues
 ============
 
-* No convenient way to evaluate a Python expression.
+* None for now.
 
 Backward Compatibility
 ======================

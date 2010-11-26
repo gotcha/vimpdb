@@ -4,7 +4,9 @@ Changelog
 0.4.2 (unreleased)
 ------------------
 
-- PDBClear ('B') key to clear a previously set breakpoint.
+- PDBEval (mapped to '?' key) to ask for a Python expression to evaluate.
+
+- PDBClear (mapped to 'B' key) to clear a previously set breakpoint.
 
 - open new tab only if there is already an opened file in VIM.
 
@@ -31,7 +33,7 @@ Changelog
 - check ``python`` and ``clientserver`` support; gives a chance to provide right
   configuration if support is missing.
 
-- try to start a VIM instance if none is available.
+- try to launch a VIM server instance if none is running.
 
 
 0.4.0 (2010-07-29)

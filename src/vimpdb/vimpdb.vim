@@ -82,6 +82,7 @@ let s:pdb_map["a"] = "PDBArgs"
 let s:pdb_map["w"] = "PDBWord"
 let s:pdb_map["b"] = "PDBBreak"
 let s:pdb_map["B"] = "PDBClear"
+let s:pdb_map["?"] = "PDBEval"
 
 function! PDB_map()
     if !exists("b:pdb_mapped")
@@ -146,6 +147,11 @@ function! PDB_quit()
     call PDB_exit()
 endfunction
 
+function! PDB_eval()
+    let expr = input("vimpdb - Type Python expression:")
+    call PDB_send_command("!" . expr)
+endfunction
+
 function! PDB_break()
     let line = line('.')
     let filename = expand('%:p')
@@ -185,6 +191,9 @@ if !exists(":PDBReturn")
 endif
 if !exists(":PDBContinue")
   command! PDBContinue :call PDB_continue()
+endif
+if !exists(":PDBEval")
+  command! PDBEval :call PDB_eval()
 endif
 if !exists(":PDBBreak")
   command! PDBBreak :call PDB_break()
