@@ -30,6 +30,10 @@ def buffer_create():
     return buffer
 
 
+def buffer_close():
+    vim.command('silent! bwipeout -vimpdb-')
+
+
 def buffer_exist():
     for win in vim.windows:
         try:                 #FIXME: Error while new a unnamed buffer
@@ -53,20 +57,16 @@ class Controller(object):
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM,
                 socket.IPPROTO_UDP)
 
-    def vimpdb_socket_send(self, message):
+    def socket_send(self, message):
         self.init_socket()
         self.socket.sendto(message, (self.host, self.port))
 
-    def vimpdb_socket_close(self):
+    def socket_close(self):
         if self.socket is not None:
             self.socket.close()
             self.socket = None
 
-#---------------------------------------------------------------------
-# vimpdb feedback buffer
-#---------------------------------------------------------------------
-
-    def vimpdb_buffer_write(self, message):
+    def buffer_write(self, message):
 
         if not buffer_exist():
             self.pdb_buffer = buffer_create()
@@ -78,5 +78,5 @@ class Controller(object):
             pdb_buffer.append(line)
         del pdb_buffer[0]
 
-    def vimpdb_buffer_close(self):
-        vim.command('silent! bwipeout -vimpdb-')
+    def buffer_close(self):
+        buffer_close()

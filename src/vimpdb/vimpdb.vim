@@ -31,7 +31,7 @@ function! PDB_show_feedback(message)
     call PDB_init_display()
 python <<EOT
 _message = vim.eval("a:message")
-controller.vimpdb_buffer_write(_message)
+controller.buffer_write(_message)
 EOT
 endfunction
 
@@ -59,7 +59,7 @@ endfunction
 function! PDB_send_command(command)
 python <<EOT
 _command = vim.eval("a:command")
-controller.vimpdb_socket_send(_command)
+controller.socket_send(_command)
 EOT
 endfunction
 
@@ -148,8 +148,8 @@ endfunction
 function! PDB_exit()
     call PDB_reset_original_map()
 python <<EOT
-controller.vimpdb_socket_close()
-controller.vimpdb_buffer_write(["Switch back to shell."])   
+controller.socket_close()
+controller.buffer_write(["Switch back to shell."])   
 EOT
 endfunction
 
