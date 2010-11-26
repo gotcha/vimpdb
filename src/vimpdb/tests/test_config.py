@@ -211,7 +211,9 @@ def makeDetector(**kwargs):
         vim_server_script = None
     config = Config(vim_client_script=vim_client_script,
         vim_server_script=vim_server_script, **kwargs)
-    return Detector(config)
+    detector = Detector(config)
+    detector.MAX_TIMEOUT = 0.5
+    return detector
 
 
 def test_detect_compatible():
@@ -353,12 +355,8 @@ def test_detector_check_serverlist_bad_server_script():
 
 
 def test_detector_server_not_available():
-    from vimpdb.config import Detector
-    from vimpdb.testing import Config
-    vim_client_script = build_script('rightserverlist.py')
-    config = Config(vim_client_script=vim_client_script,
-        server_name="SERVERNAME")
-    detector = Detector(config)
+    detector = makeDetector(vim_client_script="rightserverlist.py",
+        vim_server_script="rightserverlist.py", server_name="SERVERNAME")
     info = py.test.raises(ValueError, detector.check_serverlist)
     assert (info.value.args[0] ==
         "'SERVERNAME' server name not available in server list:\nVIM")

@@ -2,6 +2,7 @@ import sys
 import os
 import os.path
 import logging
+import time
 import ConfigParser
 from subprocess import call
 from subprocess import Popen
@@ -48,7 +49,6 @@ class Config(object):
             self.scripts[SERVER] == other.scripts[SERVER] and
             self.server_name == other.server_name and
             self.port == other.port)
-
 
 if sys.platform == 'darwin':
     DEFAULT_CLIENT_SCRIPT = 'mvim'
@@ -170,6 +170,8 @@ RETURN_CODE = "'%s' returned exit code '%d'."
 
 class DetectorBase(object):
 
+    MAX_TIMEOUT = 5
+
     def __init__(self, config, commandParser):
         self.scripts = dict()
         self.scripts[CLIENT] = config.scripts[CLIENT]
@@ -240,21 +242,30 @@ class DetectorBase(object):
             command = e.args[1]
             raise ValueError(RETURN_CODE % (command, return_code))
 
-    def check_serverlist(self):
+    def serverAvailable(self):
         serverlist = self.get_serverlist()
-        if len(serverlist) == 0:
+        return self.server_name.lower() in serverlist.lower()
+
+    def check_serverlist(self):
+        if not self.serverAvailable():
             try:
                 self.launch_vim_server()
             except ReturnCodeError, e:
                 return_code = e.args[0]
                 command = e.args[1]
                 raise ValueError(RETURN_CODE % (command, return_code))
-        # XXX add a timeout to the loop
-        while not serverlist:
+        timeout = 0.0
+        INCREMENT = 0.1
+        while timeout < self.MAX_TIMEOUT:
+            if self.serverAvailable():
+                break
+            time.sleep(INCREMENT)
+            timeout += INCREMENT
+        else:
             serverlist = self.get_serverlist()
-        if self.server_name.lower() not in serverlist.lower():
-            msg = "'%s' server name not available in server list:\n%s"
-            raise ValueError(msg % (self.server_name, serverlist))
+            if not self.serverAvailable():
+                msg = "'%s' server name not available in server list:\n%s"
+                raise ValueError(msg % (self.server_name, serverlist))
         return True
 
     def get_vim_version(self, script_type):
@@ -333,7 +344,7 @@ if sys.platform == 'win32':
             else:
                 return True
 
-        def launch_vim_servers(self):
+        def launch_vim_server(self):
             command = self.build_command(SERVER, '--servername',
                 self.server_name)
             Popen(command, stdin=PIPE, stdout=PIPE)
