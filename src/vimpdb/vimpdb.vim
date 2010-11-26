@@ -6,9 +6,8 @@ python <<EOT
 import sys
 egg_path = vim.eval("a:path")
 sys.path.insert(0, egg_path)
-from vimpdb.config import getRawConfiguration
-config = getRawConfiguration()
-PDB_PORT = config.port
+from vimpdb.controller import make
+controller = make(vim)
 EOT
 endfunction
 
@@ -32,7 +31,7 @@ function! PDB_show_feedback(message)
     call PDB_init_display()
 python <<EOT
 _message = vim.eval("a:message")
-vimpdb_buffer_write(_message)
+controller.vimpdb_buffer_write(_message)
 EOT
 endfunction
 
@@ -60,71 +59,10 @@ endfunction
 function! PDB_send_command(command)
 python <<EOT
 _command = vim.eval("a:command")
-vimpdb_socket_send(_command)
+controller.vimpdb_socket_send(_command)
 EOT
 endfunction
 
-python <<EOT
-import socket
-    
-
-def vimpdb_socket_get():
-    try:
-        return socket_to_pdb
-    except NameError:
-        socket_to_pdb = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-        return socket_to_pdb
-
-def vimpdb_socket_send(message):
-    PDB_ADDRESS = '127.0.0.1'
-    send_socket = vimpdb_socket_get()
-    send_socket.sendto(message, (PDB_ADDRESS, PDB_PORT))
-
-def vimpdb_socket_close():
-    try:
-        socket_to_pdb.close()
-        del socket_to_pdb
-    except NameError:
-        pass
-
-#---------------------------------------------------------------------
-# vimpdb feedback buffer
-def vimpdb_buffer_write(message):
-
-    if not vimpdb_buffer_exist():
-        vimpdb_buffer_create()
-
-    pdb_buffer[:] = None
-
-    for line in message:
-        pdb_buffer.append(line)
-    del pdb_buffer[0]
-
-def vimpdb_buffer_create():
-    global pdb_buffer
-    source_buffer = vim.current.buffer.name
-    vim.command('silent rightbelow 5new -vimpdb-')
-    vim.command('set buftype=nofile')
-    vim.command('set noswapfile')
-    vim.command('set nonumber')
-    vim.command('set nowrap')
-    pdb_buffer = vim.current.buffer
-    while True:
-        vim.command('wincmd w')   #switch back window
-        if source_buffer == vim.current.buffer.name:
-            break
-
-def vimpdb_buffer_close():
-    vim.command('silent! bwipeout -vimpdb-')
-
-def vimpdb_buffer_exist():
-    for win in vim.windows:
-        try:                 #FIXME: Error while new a unnamed buffer
-            if '-vimpdb-' in win.buffer.name:
-                return True
-        except: pass
-    return False
-EOT
 
 "---------------------------------------------------------------------
 " Keyboard mapping management
@@ -210,8 +148,8 @@ endfunction
 function! PDB_exit()
     call PDB_reset_original_map()
 python <<EOT
-vimpdb_socket_close()
-vimpdb_buffer_write(["Switch back to shell."])   
+controller.vimpdb_socket_close()
+controller.vimpdb_buffer_write(["Switch back to shell."])   
 EOT
 endfunction
 
