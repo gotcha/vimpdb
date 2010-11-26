@@ -1,10 +1,10 @@
 Changelog
 =========
 
-0.4.2 (unreleased)
+0.4.1.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Tune documentation.
 
 
 0.4.1 (2010-11-26)

@@ -187,17 +187,6 @@ They are put respectively in ``server_name`` and ``script`` options.
 Usage
 =====
 
-Starting VIM
-------------
-
-To start a VIM instance for debugging, issue the following command on the shell::
-
-    $ vim --servername VIMPDB
-
-Or, on a Mac, if you installed the ``mvim`` script::
-
-    $ mvim --servername VIMPDB
-
 Python code
 -----------
 
@@ -208,8 +197,8 @@ almost as usual::
 
 Then start your python application/script.
 
-When the python interpreter hits that line, VIM will get the focus and
-load the source file at the right line.
+When the python interpreter hits that line, **vimpdb** will launch a VIM 
+instance. VIM should get the focus; it loads the source file at the right line.
 
 VIM commands
 ------------
