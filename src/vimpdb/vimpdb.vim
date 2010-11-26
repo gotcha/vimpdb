@@ -40,7 +40,10 @@ endfunction
 "
 " We use a separate debug tab.
 function! s:PDB_create_debug_tab()
-    tabnew
+    let filename = expand('%')
+    if len(filename) != 0 || &modified
+        tabnew
+    endif
     let t:vimpdb = "vimpdb"
 endfunction
 
