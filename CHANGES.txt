@@ -4,13 +4,14 @@ Changelog
 0.4.2 (unreleased)
 ------------------
 
-- PDBEval (mapped to '?' key) to ask for a Python expression to evaluate.
+- ``PDBEval`` (mapped to ``?`` key) to ask for a Python expression to evaluate.
 
-- PDBClear (mapped to 'B' key) to clear a previously set breakpoint.
+- ``PDBClear`` (mapped to ``B`` key) to clear a previously set breakpoint.
 
 - open new tab only if there is already an opened file in VIM.
 
-- close vimpdb buffer whem continue (c), reset (x) or quit (q).
+- close **vimpdb** buffer when ``continue`` (``c``), ``reset`` (``x``) or quit
+  (``q``).
 
 - launch VIM server also if another server is running.
 
@@ -43,7 +44,7 @@ Changelog
 
 - UDP port is now an option.
 
-- configuration through ~/.vimpdbrc instead of environment variables.
+- configuration through ``~/.vimpdbrc`` instead of environment variables.
 
 
 0.3.8 (2010-06-17)
@@ -57,17 +58,17 @@ Changelog
 0.3.7 (2010-05-20)
 ------------------
 
-- fix: could not go "down" after switching from pdb to
-  vimpdb after having gone "up".
+- fix: could not go ``down`` after switching from ``pdb`` to
+  **vimpdb** after having gone ``up``.
   (http://github.com/gotcha/vimpdb/issues/issue/4)
 
 0.3.6 (2010-04-17)
 ------------------
 
-- fix: "continue" command was broken after breakpoint has been set.
+- fix: ``continue`` command was broken after breakpoint has been set.
   (http://github.com/gotcha/vimpdb/issues/issue/3)
 
-- fix: Key mappings were left broken after "continue" command.
+- fix: Key mappings were left broken after ``continue`` command.
   (http://github.com/gotcha/vimpdb/issues/issue/2)
 
 0.3.5 (2010-03-22)

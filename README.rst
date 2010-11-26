@@ -229,7 +229,7 @@ This way, the command ``v(im)`` mentioned above is added to your standard
 Known issues
 ============
 
-* None for now.
+None for now.
 
 Backward Compatibility
 ======================

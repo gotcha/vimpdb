@@ -3,10 +3,11 @@ TODO
 
 In priority order:
 
-- document the PDBxx commands in Ex mode.
+- document the ``PDBxx`` commands in ``Ex`` mode.
 
-- keep debugging state in vim to switch vimpdb back to pdb when closing vim.
+- keep debugging state in VIM to switch **vimpdb** back to ``pdb`` when closing
+  VIM while debugging.
 
-- key bindings in vimpdb buffer.
+- key bindings in **vimpdb** buffer.
 
 and much more...
