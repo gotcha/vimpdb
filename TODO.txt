@@ -5,9 +5,6 @@ In priority order:
 
 - document the PDBxx commands in Ex mode.
 
-- when switching from pdb to vimpdb, if the remote VIM is unavailable,
-  log a message and keep pdb running.
-
 - keep debugging state in vim to switch vimpdb back to pdb when closing vim.
 
 - key bindings in vimpdb buffer.
