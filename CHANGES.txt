@@ -4,6 +4,10 @@ Changelog
 0.4.4 (unreleased)
 ------------------
 
+- fix Linux default values in documentation.
+
+- document ``PDBxx`` commands.
+
 - less noise on VIM command-line.
 
 - better highlighting of current line.
