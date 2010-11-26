@@ -237,7 +237,7 @@ Before version 0.4.1, **vimpdb** RC file (``~/.vimpdbrc``) had a single
 option. The upgrade should be transparent.
 
 Before version 0.4.0, **vimpdb** was configured through environment variables.
-If you had a working configuration, upgrate should be transparent.
+If you had a working configuration, upgrade should be transparent.
 The values of ``VIMPDB_SERVERNAME`` and ``VIMPDB_VIMSCRIPT`` environment
 variables are setup in the RC file (``~/.vimpdbrc``). 
 They are put respectively in ``server_name`` and ``script`` options.
