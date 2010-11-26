@@ -87,6 +87,10 @@ def getConfiguration(filename=RCNAME):
     return config
 
 
+def getRawConfiguration(filename=RCNAME):
+    return read_from_file(filename, Config)
+
+
 def read_from_file(filename, klass):
     parser = ConfigParser.RawConfigParser()
     parser.read(filename)
@@ -126,7 +130,7 @@ def write_to_file(filename, config):
     rcfile.close()
 
 
-def getCommandOutputOther(parts):
+def getCommandOutputPosix(parts):
     p = Popen(parts, stdin=PIPE, stdout=PIPE)
     return_code = p.wait()
     if return_code:
@@ -134,18 +138,6 @@ def getCommandOutputOther(parts):
     child_stdout = p.stdout
     output = child_stdout.read()
     return output.strip()
-
-
-def getCommandOutputWindows(parts):
-    try:
-        return getCommandOutputOther(parts)
-    except WindowsError:
-        raise ReturnCodeError(1, " ".join(parts))
-
-if sys.platform == 'win32':
-    getCommandOutput = getCommandOutputWindows
-else:
-    getCommandOutput = getCommandOutputOther
 
 
 NO_SERVER_SUPPORT = ("'%s' launches a VIM instance without "
@@ -158,9 +150,9 @@ NO_CLIENTSERVER_IN_VERSION = ("Calling --version returned no information "
 RETURN_CODE = "'%s' returned exit code '%d'."
 
 
-class Detector(object):
+class DetectorBase(object):
 
-    def __init__(self, config, commandParser=getCommandOutput):
+    def __init__(self, config, commandParser):
         self.scripts = dict()
         self.scripts[CLIENT] = config.scripts[CLIENT]
         self.scripts[SERVER] = config.scripts[SERVER]
@@ -213,16 +205,7 @@ class Detector(object):
         return True
 
     def launch_vim_server(self):
-        command = self.build_command(SERVER, '--servername', self.server_name)
-        return_code = call(command)
-        if return_code:
-            raise ReturnCodeError(return_code, " ".join(command))
-        return True
-
-    def launch_vim_server_windows(self):
-        command = self.build_command(SERVER, '--servername', self.server_name)
-        p = Popen(command, stdin=PIPE, stdout=PIPE)
-        return True
+        raise NotImplemented
 
     def build_command(self, script_type, *args):
         script = self.scripts[script_type]
@@ -275,34 +258,10 @@ class Detector(object):
             raise ValueError(NO_CLIENTSERVER_IN_VERSION % version)
 
     def check_server_clientserver_support(self):
-        return self.check_clientserver_support(SERVER)
+        raise NotImplemented
 
     def check_python_support(self):
-        version = self.get_vim_version(SERVER)
-        if '+python' in version:
-            return True
-        elif '-python' in version:
-            raise ValueError(NO_PYTHON_SUPPORT % self.scripts[SERVER])
-        else:
-            raise ValueError(NO_PYTHON_IN_VERSION % version)
-
-    def check_python_support_windows(self):
-        command = self.build_command(SERVER, 'dummy.txt',
-            '+exe \'if has("python") | :q | else | :cq | endif\'')
-        return_code = call(command)
-        if return_code:
-            raise ValueError(NO_PYTHON_SUPPORT % self.scripts[SERVER])
-        else:
-            return True
-
-    def check_server_clientserver_support_windows(self):
-        command = self.build_command(SERVER, 'dummy.txt',
-            '+exe \'if has("clientserver") | :q | else | :cq | endif\'')
-        return_code = call(command)
-        if return_code:
-            raise ValueError(NO_SERVER_SUPPORT % self.scripts[SERVER])
-        else:
-            return True
+        raise NotImplemented
 
     def query_script(self, script_type):
         if script_type == CLIENT:
@@ -326,12 +285,65 @@ class Detector(object):
             self.server_name = answer
 
 if sys.platform == 'win32':
-    Detector.check_python_support = Detector.check_python_support_windows
-    Detector.check_server_clientserver_support = \
-        Detector.check_server_clientserver_support_windows
-    Detector.launch_vim_server = Detector.launch_vim_server_windows
 
-if __name__ == '__main__':
-    detector = Detector(getConfiguration())
-    detector.checkConfiguration()
-    print detector.config
+    def getCommandOutputWindows(parts):
+        try:
+            return getCommandOutputPosix(parts)
+        except WindowsError:
+            raise ReturnCodeError(1, " ".join(parts))
+
+    class Detector(DetectorBase):
+
+        def __init__(self, config, commandParser=getCommandOutputWindows):
+            return super(Detector, self).__init__(config, commandParser)
+
+        def check_python_support(self):
+            command = self.build_command(SERVER, 'dummy.txt',
+                '+exe \'if has("python") | :q | else | :cq | endif\'')
+            return_code = call(command)
+            if return_code:
+                raise ValueError(NO_PYTHON_SUPPORT % self.scripts[SERVER])
+            else:
+                return True
+
+        def check_server_clientserver_support(self):
+            command = self.build_command(SERVER, 'dummy.txt',
+                '+exe \'if has("clientserver") | :q | else | :cq | endif\'')
+            return_code = call(command)
+            if return_code:
+                raise ValueError(NO_SERVER_SUPPORT % self.scripts[SERVER])
+            else:
+                return True
+
+        def launch_vim_servers(self):
+            command = self.build_command(SERVER, '--servername',
+                self.server_name)
+            Popen(command, stdin=PIPE, stdout=PIPE)
+            return True
+
+else:
+
+    class Detector(DetectorBase):
+
+        def __init__(self, config, commandParser=getCommandOutputPosix):
+            return super(Detector, self).__init__(config, commandParser)
+
+        def check_python_support(self):
+            version = self.get_vim_version(SERVER)
+            if '+python' in version:
+                return True
+            elif '-python' in version:
+                raise ValueError(NO_PYTHON_SUPPORT % self.scripts[SERVER])
+            else:
+                raise ValueError(NO_PYTHON_IN_VERSION % version)
+
+        def check_server_clientserver_support(self):
+            return self.check_clientserver_support(SERVER)
+
+        def launch_vim_server(self):
+            command = self.build_command(SERVER, '--servername',
+                self.server_name)
+            return_code = call(command)
+            if return_code:
+                raise ReturnCodeError(return_code, " ".join(command))
+            return True
