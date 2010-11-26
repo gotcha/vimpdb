@@ -232,7 +232,7 @@ Known issues
 Backward Compatibility
 ----------------------
 
-Before version 0.4.1, **vimpdb** only used a single ``script`` option. That
+Before version 0.4.1, **vimpdb** RC file had a single ``script`` option. That
 option has now be turned into the ``vim_client_script`` option. The migration
 should be transparent.
 
