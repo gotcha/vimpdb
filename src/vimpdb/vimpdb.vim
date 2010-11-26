@@ -1,6 +1,8 @@
 " some versions of VIM need explicit import
 python import vim
 
+highlight PdbCurrentLine ctermbg=Grey guibg=Grey
+
 function! PDB_setup_egg(path)
 python <<EOT
 import sys
@@ -20,10 +22,19 @@ endfunction
 
 function! PDB_show_file_at_line(filename, line)
     call PDB_init_display()
+    let current_filename = expand('%:p')
+    if current_filename != a:filename
+        call PDB_load_file(a:filename)
+    endif
+    execute "normal " . a:line . "ggz."
+    execute 'match PdbCurrentLine "\%' . a:line . 'l.\+"'
+endfunction
+
+function! PDB_load_file(filename)
     call PDB_reset_original_map()
     execute "view " . a:filename
-    execute "normal " . a:line . "ggz."
     setlocal cursorline
+    highlight PdbCurrentLine
     call PDB_map()
 endfunction
 
