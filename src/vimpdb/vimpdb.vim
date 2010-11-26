@@ -40,7 +40,7 @@ endfunction
 "
 " We use a separate debug tab.
 function! s:PDB_create_debug_tab()
-    execute "tabnew"
+    tabnew
     let t:vimpdb = "vimpdb"
 endfunction
 

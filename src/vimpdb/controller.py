@@ -10,11 +10,6 @@ def make(module):
     return Controller()
 
 
-def tab_create():
-    vim.command('tabnew')
-    vim.command('let t:vimpdb = "vimpdb"')
-
-
 def buffer_create():
     source_buffer = vim.current.buffer.name
     vim.command('silent rightbelow 5new -vimpdb-')
