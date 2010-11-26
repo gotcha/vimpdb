@@ -4,7 +4,9 @@ Changelog
 0.4.4 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- less noise on VIM command-line.
+
+- better highlighting of current line.
 
 
 0.4.3 (2010-11-26)
