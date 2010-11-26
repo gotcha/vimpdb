@@ -4,7 +4,7 @@ Changelog
 0.4.2 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- launch VIM server also if another server is running.
 
 
 0.4.1.2 (2010-11-26)
@@ -23,9 +23,9 @@ Changelog
 ------------------
 
 - check ``python`` and ``clientserver`` support; gives a chance to provide right
-  configuration if support is missing
+  configuration if support is missing.
 
-- try to start a VIM instance if none is available
+- try to start a VIM instance if none is available.
 
 
 0.4.0 (2010-07-29)
@@ -65,9 +65,9 @@ Changelog
 0.3.5 (2010-03-22)
 ------------------
 
-- better documentation, especially for Windows
+- better documentation, especially for Windows.
 
-- fix: capture of output was broken for Python 2.5 and 2.6
+- fix: capture of output was broken for Python 2.5 and 2.6.
 
 - Windows compatibility (at least XP)
 
@@ -75,13 +75,13 @@ Changelog
 0.3.4 (2010-03-15)
 ------------------
 
-- close socket to allow debugging session to start again
+- close socket to allow debugging session to start again.
 
 
 0.3.3 (2010-03-04)
 ------------------
 
-- avoid leaving mappings in debugged buffers
+- avoid leaving mappings in debugged buffers.
 
 
 0.3.2 (2010-03-03)
@@ -94,24 +94,24 @@ Changelog
 ------------------
 
 - fix setup.py metadata so that it does not hold non ascii chars.
-  This avoided actual release to PyPI
+  This avoided actual release to PyPI.
 
 
 0.3 (2010-03-02)
 ----------------
 
-- fully rewritten
+- fully rewritten.
 
 
 0.2.1 (2008-06-27)
 ------------------
 
-- added ``vimpdb`` script
+- added ``vimpdb`` script.
 
-- added "exit" callback
+- added "exit" callback.
 
 0.2 (2008-06-17)
 ----------------
 
-- first release to PyPi
+- first release to PyPI.
 
