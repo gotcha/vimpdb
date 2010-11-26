@@ -4,6 +4,8 @@ Changelog
 0.4.3 (unreleased)
 ------------------
 
+- fix detection of VIM support.
+
 - fix **vimpdb** buffer creation. 
 
 - fix and tune Linux default values.

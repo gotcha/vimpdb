@@ -151,8 +151,12 @@ def write_to_file(filename, config):
 
 
 def getCommandOutputPosix(parts):
-    p = Popen(parts, stdin=PIPE, stdout=PIPE)
-    return_code = p.wait()
+    try:
+        p = Popen(parts, stdin=PIPE, stdout=PIPE)
+        return_code = p.wait()
+    except OSError, e:
+        message = 'When trying to run "%s" : %s' % (" ".join(parts), e.args[1])
+        raise OSError(e.args[0], message)
     if return_code:
         raise ReturnCodeError(return_code, " ".join(parts))
     child_stdout = p.stdout
@@ -180,6 +184,7 @@ class DetectorBase(object):
         self.scripts[SERVER] = config.scripts[SERVER]
         self.server_name = config.server_name
         self.port = config.port
+        self.loglevel = config.loglevel
         self.commandParser = commandParser
 
     def checkConfiguration(self):
@@ -243,6 +248,8 @@ class DetectorBase(object):
             return_code = e.args[0]
             command = e.args[1]
             raise ValueError(RETURN_CODE % (command, return_code))
+        except OSError, e:
+            raise ValueError(str(e))
 
     def serverAvailable(self):
         serverlist = self.get_serverlist()
@@ -256,6 +263,8 @@ class DetectorBase(object):
                 return_code = e.args[0]
                 command = e.args[1]
                 raise ValueError(RETURN_CODE % (command, return_code))
+            except OSError, e:
+                raise ValueError(str(e))
         timeout = 0.0
         INCREMENT = 0.1
         while timeout < self.MAX_TIMEOUT:
@@ -278,6 +287,8 @@ class DetectorBase(object):
             return_code = e.args[0]
             command = e.args[1]
             raise ValueError(RETURN_CODE % (command, return_code))
+        except OSError, e:
+            raise ValueError(str(e))
 
     def check_clientserver_support(self, script_type):
         version = self.get_vim_version(script_type)
