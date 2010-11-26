@@ -67,13 +67,13 @@ it will ask a few questions which you should be able to answer easily.
 Long story
 ----------
 
-When launched, **vimpdb** looks for its RC file : ``~/.vimpdbrc``.
-If it does not find it, **vimpdb** creates that file for you from default values.
+When launched, **vimpdb** looks for its RC file : ``~/.vimpdbrc``. If it does
+not find it, **vimpdb** creates that file for you from default values.
 
-**vimpdb** tries a set of default values that should work for you.
+**vimpdb** tries a set of default values that should work.
 It checks if those default values are appropriate.
-If the default values do not work, **vimpdb** asks for other values interactively until it 
-has checked that the values provided actually work.
+If the default values do not work, **vimpdb** asks for other values 
+interactively until it has checked that the values provided actually work.
 
 The default values per OS are listed hereunder.
 
