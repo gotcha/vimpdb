@@ -253,7 +253,12 @@ class DetectorBase(object):
 
     def serverAvailable(self):
         serverlist = self.get_serverlist()
-        return self.server_name.lower() in serverlist.lower()
+        servers = serverlist.lower().splitlines()
+        server_name = self.server_name.lower()
+        for server in servers:
+            if server_name == server:
+                return True
+        return False
 
     def check_serverlist(self):
         if not self.serverAvailable():

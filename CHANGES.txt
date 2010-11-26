@@ -4,6 +4,8 @@ Changelog
 0.4.3 (unreleased)
 ------------------
 
+- fix launch of VIM server when server names collide like VIM and GVIM.
+
 - fix detection of VIM support.
 
 - fix **vimpdb** buffer creation. 
