@@ -29,15 +29,14 @@ def buffer_close():
     vim.command('silent! bwipeout -vimpdb-')
 
 
-def buffer_exist():
+def buffer_find():
     for win in vim.windows:
         try:                 #FIXME: Error while new a unnamed buffer
             if '-vimpdb-' in win.buffer.name:
-                return True
+                return win.buffer
         except:
             pass
-    return False
-
+    return None
 
 class Controller(object):
 
@@ -63,7 +62,8 @@ class Controller(object):
 
     def buffer_write(self, message):
 
-        if not buffer_exist():
+        self.pdb_buffer = buffer_find()
+        if self.pdb_buffer is None:
             self.pdb_buffer = buffer_create()
 
         pdb_buffer = self.pdb_buffer
