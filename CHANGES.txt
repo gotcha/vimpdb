@@ -1,7 +1,7 @@
 Changelog
 =========
 
-0.4.2 (unreleased)
+0.4.2 (2010-11-26)
 ------------------
 
 - ``PDBEval`` (mapped to ``?`` key) to ask for a Python expression to evaluate.
