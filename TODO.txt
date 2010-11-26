@@ -3,11 +3,17 @@ TODO
 
 In priority order:
 
-- document the ``PDBxx`` commands in ``Ex`` mode.
+- add a watch window.
+
+- highlight breakpoints
+
+- conditional breakpoints
 
 - keep debugging state in VIM to switch **vimpdb** back to ``pdb`` when closing
   VIM while debugging.
 
 - key bindings in **vimpdb** buffer.
+
+- enable customization of key bindings.
 
 and much more...

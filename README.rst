@@ -194,20 +194,20 @@ In VIM, you may now use the following commands:
 .. csv-table:: **vimpdb** commands
     :header-rows: 1
 
-    Key, Command
-    n , Next
-    s , Step
-    a , Args
-    u , Up
-    d , Down
-    r , Return
-    c , Continue
-    b , Sets a breakpoint at the line on which the cursor is sitting.
-    B , Clears a breakpoint at the line on which the cursor is sitting.
-    w , Displays the value of the word on which the cursor is sitting.
-    ? , Evaluate Python expression after having asked for it.
-    x , Switch to debugging in shell with standard ``pdb``.
-    v , Switch back to **vimpdb** from plain ``pdb``.
+    Ex Command, Key binding, Details
+    ``:PDBNext``, ``n`` , ``pdb`` (n)ext
+    ``:PDBStep``, ``s`` , ``pdb`` (s)tep 
+    ``:PDBArgs``, ``a`` , ``pdb`` (a)rgs
+    ``:PDBUp``, ``u`` , ``pdb`` (u)p
+    ``:PDBDown``, ``d`` , ``pdb`` (d)own
+    ``:PDBReturn``, ``r`` , ``pdb`` (r)eturn
+    ``:PDBContinue``, ``c`` , ``pdb`` (c)ontinue
+    ``:PDBBreak``, ``b`` , Sets a breakpoint at the line on which the cursor is sitting; similar to ``pdb`` b(reak)
+    ``:PDBClear``, ``B`` , Clears a breakpoint at the line on which the cursor is sitting; similar to ``pdb`` cl(ear)
+    ``:PDBWord``, ``w`` , Evaluates the value of the identifier on which the cursor is sitting.
+    ``:PDBEval``, ``?`` , Evaluates a Python expression after having asked for it.
+    ``:PDBReset``, ``x`` , Switch back to normal debugging in shell with standard ``pdb``.
+    N/A, ``v(im)`` , Switch back to **vimpdb**; only in plain ``pdb``.
 
 Standard Pdb hook
 =================
