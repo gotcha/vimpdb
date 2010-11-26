@@ -9,7 +9,17 @@ setup(name='vimpdb',
                        open("CREDITS.txt").read() + "\n" +
                        open("CHANGES.txt").read() + "\n" +
                        open("TODO.txt").read(),
-      classifiers=[],
+      classifiers=[
+        'Programming Language :: Python :: 2.4',
+        'Programming Language :: Python :: 2.5',
+        'Programming Language :: Python :: 2.6',
+        'Programming Language :: Python :: 2.7',
+        'Operating System :: MacOS :: MacOS X',
+        'Operating System :: POSIX :: Linux',
+        'Operating System :: Microsoft :: Windows',
+        'Topic :: Software Development :: Debuggers',
+        'Topic :: Text Editors :: VIM',
+      ],
       keywords='pdb vim',
       author='Godefroid Chapelle',
       author_email='gotcha@bubblenet.be',
@@ -20,7 +30,6 @@ setup(name='vimpdb',
       include_package_data=True,
       zip_safe=False,
       install_requires=[
-          # -*- Extra requirements: -*-
       ],
       entry_points="""
       # -*- Entry points: -*-
