@@ -1,11 +1,13 @@
 import os
 import sys
 import socket
+
 from subprocess import call
 from subprocess import Popen
 from subprocess import PIPE
 
 from vimpdb.config import CLIENT
+from vimpdb.config import logger
 
 
 def getPackagePath(instance):
@@ -39,7 +41,7 @@ class ProxyToVim(object):
             self.server_name, '--remote-send', command])
         if return_code:
             raise RemoteUnavailable()
-        print "sent:", command
+        logger.debug("sent: %s" % command)
 
     def setupRemote(self):
         if not self.isRemoteSetup():
@@ -81,9 +83,9 @@ class ProxyToVim(object):
         return command
 
     def _expr(self, expr):
-        print "expr:", expr
+        logger.debug("expr: %s" % expr)
         result = self._remote_expr(expr)
-        print "result:", result
+        logger.debug("result: %s" % result)
         return result
 
 
@@ -109,7 +111,7 @@ class ProxyFromVim(object):
     def waitFor(self, pdb):
         self.bindSocket()
         (message, address) = self.socket.recvfrom(self.BUFLEN)
-        print "command:", message
+        logger.debug("command: %s" % message)
         return message
 
 

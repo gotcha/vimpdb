@@ -1,6 +1,7 @@
 import sys
 import os
 import os.path
+import logging
 import ConfigParser
 from subprocess import call
 from subprocess import Popen
@@ -17,15 +18,25 @@ CLIENT = 'CLIENT'
 SERVER = 'SERVER'
 
 
+logger = logging.getLogger('vimpdb')
+logger.setLevel(logging.DEBUG)
+handler = logging.StreamHandler(sys.stdout)
+formatter = logging.Formatter("%(name)s - %(levelname)s - \
+%(message)s")
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+
+
 class Config(object):
 
     def __init__(self, vim_client_script, vim_server_script, server_name,
-        port):
+        port, loglevel=logging.INFO):
         self.scripts = dict()
         self.scripts[CLIENT] = vim_client_script
         self.scripts[SERVER] = vim_server_script
         self.server_name = server_name
         self.port = port
+        self.loglevel = loglevel
 
     def __repr__(self):
         return ("<vimpdb Config : Script %s; Server name %s, Port %s>" %
@@ -84,6 +95,7 @@ def getConfiguration(filename=RCNAME):
     if mustWrite or initial != config:
         write_to_file(filename, config)
     Detector(config).check_serverlist()
+    logger.setLevel(config.loglevel)
     return config
 
 
@@ -115,7 +127,13 @@ def read_from_file(filename, klass):
         vim_server_script = parser.get('vimpdb', 'vim_server_script')
     else:
         raise BadRCFile(error_msg % "vim_server_script")
-    return klass(vim_client_script, vim_server_script, server_name, port)
+    loglevel = logging.INFO
+    if parser.has_option('vimpdb', 'loglevel'):
+        loglevel = parser.get('vimpdb', 'loglevel')
+        if loglevel == 'DEBUG':
+            loglevel = logging.DEBUG
+    return klass(vim_client_script, vim_server_script, server_name, port,
+        loglevel)
 
 
 def write_to_file(filename, config):
