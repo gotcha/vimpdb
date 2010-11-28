@@ -8,3 +8,7 @@ class ReturnCodeError(Exception):
 
 class BrokenConfiguration(Exception):
     pass
+
+
+class RemoteUnavailable(Exception):
+    pass

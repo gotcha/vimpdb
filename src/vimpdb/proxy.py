@@ -4,6 +4,7 @@ import socket
 import subprocess
 
 from vimpdb import config
+from vimpdb import errors
 
 
 class Communicator(object):
@@ -18,7 +19,7 @@ class Communicator(object):
             stdout=subprocess.PIPE)
         return_code = p.wait()
         if return_code:
-            raise RemoteUnavailable()
+            raise errors.RemoteUnavailable()
         child_stdout = p.stdout
         output = child_stdout.read()
         return output.strip()
@@ -29,7 +30,7 @@ class Communicator(object):
         return_code = subprocess.call([self.script, '--servername',
             self.server_name, '--remote-send', command])
         if return_code:
-            raise RemoteUnavailable()
+            raise errors.RemoteUnavailable()
 
 
 class ProxyToVim(object):
@@ -124,10 +125,6 @@ class ProxyFromVim(object):
         (message, address) = self.socket.recvfrom(self.BUFLEN)
         config.logger.debug("command: %s" % message)
         return message
-
-
-class RemoteUnavailable(Exception):
-    pass
 
 
 # code leftover from hacking
