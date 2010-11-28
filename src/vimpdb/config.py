@@ -123,22 +123,10 @@ def read_from_file(filename, klass):
             filename)
     error_msg = ("'%s' option is missing from section [vimpdb] in "
         + "'" + filename + "'.")
-    if parser.has_option('vimpdb', 'vim_client_script'):
-        vim_client_script = parser.get('vimpdb', 'vim_client_script')
-    else:
-        raise BadRCFile(error_msg % "vim_client_script")
-    if parser.has_option('vimpdb', 'server_name'):
-        server_name = parser.get('vimpdb', 'server_name')
-    else:
-        raise BadRCFile(error_msg % 'server_name')
-    if parser.has_option('vimpdb', 'port'):
-        port = parser.getint('vimpdb', 'port')
-    else:
-        raise BadRCFile(error_msg % 'port')
-    if parser.has_option('vimpdb', 'vim_server_script'):
-        vim_server_script = parser.get('vimpdb', 'vim_server_script')
-    else:
-        raise BadRCFile(error_msg % "vim_server_script")
+    vim_client_script = read_option(parser, 'vim_client_script', error_msg)
+    vim_server_script = read_option(parser, 'vim_server_script', error_msg)
+    server_name = read_option(parser, 'server_name', error_msg)
+    port = int(read_option(parser, 'port', error_msg))
     loglevel = logging.INFO
     if parser.has_option('vimpdb', 'loglevel'):
         loglevel = parser.get('vimpdb', 'loglevel')
@@ -146,6 +134,13 @@ def read_from_file(filename, klass):
             loglevel = logging.DEBUG
     return klass(vim_client_script, vim_server_script, server_name, port,
         loglevel)
+
+
+def read_option(parser, name, error_msg):
+    if parser.has_option('vimpdb', name):
+        return parser.get('vimpdb', name)
+    else:
+        raise BadRCFile(error_msg % name)
 
 
 def write_to_file(filename, config):
