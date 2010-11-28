@@ -93,7 +93,7 @@ def _PDB_buffer_close():
 
 
 @bridged
-def _PDB_send_command(message):
+def PDB_send_command(message):
     controller.socket_send(message)
 
 

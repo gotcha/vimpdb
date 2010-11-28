@@ -18,7 +18,7 @@ initialize(vim)
 EOT
 endfunction
 
-function! PDB_init_display()
+function! s:PDB_init_display()
     call PDB_move_to_debug_tab()
     " avoid "Press Enter to continue"
     set cmdheight=2
@@ -26,25 +26,25 @@ function! PDB_init_display()
 endfunction
 
 function! PDB_show_file_at_line(filename, line)
-    call PDB_init_display()
+    call s:PDB_init_display()
     let current_filename = expand('%:p')
     if current_filename != a:filename
-        call PDB_load_file(a:filename)
+        call s:PDB_load_file(a:filename)
     endif
     execute "normal " . a:line . "ggz."
     execute 'match PdbCurrentLine /\%' . a:line . 'l\s*\zs.\+/'
 endfunction
 
-function! PDB_load_file(filename)
-    call PDB_reset_original_map()
+function! s:PDB_load_file(filename)
+    call s:PDB_reset_original_map()
     execute "view " . a:filename
     setlocal cursorline
     highlight PdbCurrentLine
-    call PDB_map()
+    call s:PDB_map()
 endfunction
 
 function! PDB_show_feedback(message)
-    call PDB_init_display()
+    call s:PDB_init_display()
     call s:PDBBufferWrite(a:message)
 endfunction
 
@@ -87,12 +87,12 @@ let s:pdb_map["b"] = "PDBBreak"
 let s:pdb_map["B"] = "PDBClear"
 let s:pdb_map["?"] = "PDBEval"
 
-function! PDB_map()
+function! s:PDB_map()
     if !exists("b:pdb_mapped")
         let b:pdb_mapped = 0
     endif
     if ! b:pdb_mapped
-        call PDB_store_original_map()
+        call s:PDB_store_original_map()
         for key in keys(s:pdb_map)
             let command = s:pdb_map[key]
             execute "nmap <buffer> " . key . " :" . command . "<CR>"
@@ -101,14 +101,14 @@ function! PDB_map()
     endif
 endfunction
 
-function! PDB_store_original_map()
+function! s:PDB_store_original_map()
     let b:pdb_original_map = {}
     for key in keys(s:pdb_map)
         let b:pdb_original_map[key] = maparg(key, "n")
     endfor
 endfunction
 
-function! PDB_reset_original_map()
+function! s:PDB_reset_original_map()
     if exists("b:pdb_mapped")
         if b:pdb_mapped
             for key in keys(b:pdb_original_map)
@@ -133,40 +133,40 @@ endfunction
 "---------------------------------------------------------------------
 " ex mode commands support
 function! PDB_continue()
-    call s:PDBSendCommand('c')
-    call PDB_reset_original_map()
+    call PDBSendCommand('c')
+    call s:PDB_reset_original_map()
     call s:PDBBufferClose()
 endfunction
 
 function! PDB_reset()
-    call s:PDBSendCommand('pdb')
+    call PDBSendCommand('pdb')
     call PDB_exit()
 endfunction
 
 function! PDB_quit()
-    call s:PDBSendCommand('q')
+    call PDBSendCommand('q')
     call PDB_exit()
 endfunction
 
 function! PDB_eval()
     let expr = input("vimpdb - Type Python expression:")
-    call s:PDBSendCommand("!" . expr)
+    call PDBSendCommand("!" . expr)
 endfunction
 
 function! PDB_break()
     let line = line('.')
     let filename = expand('%:p')
-    call s:PDBSendCommand("b " . filename . ":" . line)
+    call PDBSendCommand("b " . filename . ":" . line)
 endfunction
 
 function! PDB_clear()
     let line = line('.')
     let filename = expand('%:p')
-    call s:PDBSendCommand("cl " . filename . ":" . line)
+    call PDBSendCommand("cl " . filename . ":" . line)
 endfunction
 
 function! PDB_exit()
-    call PDB_reset_original_map()
+    call s:PDB_reset_original_map()
     call s:PDBBufferClose()
     call s:PDBSocketClose()
     echohl ErrorMsg
@@ -177,16 +177,16 @@ endfunction
 "---------------------------------------------------------------------
 " ex mode commands
 if !exists(":PDBNext")
-  command! PDBNext :call s:PDBSendCommand("n")
+  command! PDBNext :call PDBSendCommand("n")
 endif
 if !exists(":PDBQuit")
   command! PDBQuit :call PDB_quit()
 endif
 if !exists(":PDBStep")
-  command! PDBStep :call s:PDBSendCommand("s")
+  command! PDBStep :call PDBSendCommand("s")
 endif
 if !exists(":PDBReturn")
-  command! PDBReturn :call s:PDBSendCommand("r")
+  command! PDBReturn :call PDBSendCommand("r")
 endif
 if !exists(":PDBContinue")
   command! PDBContinue :call PDB_continue()
@@ -201,17 +201,17 @@ if !exists(":PDBClear")
   command! PDBClear :call PDB_clear()
 endif
 if !exists(":PDBDown")
-  command! PDBDown :call s:PDBSendCommand("d")
+  command! PDBDown :call PDBSendCommand("d")
 endif
 if !exists(":PDBUp")
-  command! PDBUp :call s:PDBSendCommand("u")
+  command! PDBUp :call PDBSendCommand("u")
 endif
 if !exists(":PDBReset")
   command! PDBReset :call PDB_reset()
 endif
 if !exists(":PDBArgs")
-  command! PDBArgs :call s:PDBSendCommand("a")
+  command! PDBArgs :call PDBSendCommand("a")
 endif
 if !exists("PDBWord")
-  command! PDBWord :call s:PDBSendCommand("!".expand("<cword>"))
+  command! PDBWord :call PDBSendCommand("!".expand("<cword>"))
 endif  
