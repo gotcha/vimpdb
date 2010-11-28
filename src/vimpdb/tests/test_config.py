@@ -198,19 +198,26 @@ def makeDetector(**kwargs):
     """
 
     from vimpdb.config import Detector
-    from vimpdb.testing import Config
+    from vimpdb.config import Config
     if "vim_client_script" in kwargs:
         vim_client_script = build_script(kwargs["vim_client_script"])
-        del kwargs["vim_client_script"]
     else:
         vim_client_script = None
     if "vim_server_script" in kwargs:
         vim_server_script = build_script(kwargs["vim_server_script"])
-        del kwargs["vim_server_script"]
     else:
-        vim_server_script = None
+        vim_server_script = build_script('server_script')
+    if "server_name" in kwargs:
+        server_name = kwargs["server_name"]
+    else:
+        server_name = 'server_name'
+    if "port" in kwargs:
+        port = kwargs["port"]
+    else:
+        port = 6666
     configuration = Config(vim_client_script=vim_client_script,
-        vim_server_script=vim_server_script, **kwargs)
+        vim_server_script=vim_server_script, server_name=server_name,
+        port=port)
     detector = Detector(configuration)
     detector.MAX_TIMEOUT = 0.5
     return detector
@@ -250,7 +257,9 @@ def test_detector_instantiation():
     from vimpdb.config import Detector
     from vimpdb.config import SERVER
     from vimpdb.config import CLIENT
-    from vimpdb.testing import configuration
+    from vimpdb.config import Config
+    configuration = Config('vim_client_script', 'vim_server_script',
+        'server_name', 6666)
     detector = Detector(configuration)
     assert detector.port == configuration.port
     assert detector.scripts[CLIENT] == configuration.scripts[CLIENT]
@@ -261,7 +270,9 @@ def test_detector_instantiation():
 def test_detector_build_command():
     from vimpdb.config import Detector
     from vimpdb.config import CLIENT
-    from vimpdb.testing import configuration
+    from vimpdb.config import Config
+    configuration = Config('vim_client_script', 'vim_server_script',
+        'server_name', 6666)
     detector = Detector(configuration)
     result = detector.build_command(CLIENT, "test")
     assert result[-1] == "test"
@@ -284,19 +295,19 @@ def test_detector_get_vim_version_good_script():
 
 
 def test_detector_check_python_support():
-    detector = makeDetector(vim_client_script='compatiblevim.py')
+    detector = makeDetector(vim_server_script='compatiblevim.py')
     assert detector.check_python_support()
 
 
 def test_detector_no_python_support():
-    detector = makeDetector(vim_client_script='nopython.py')
+    detector = makeDetector(vim_server_script='nopython.py')
     info = py.test.raises(ValueError, detector.check_python_support)
     assert info.value.args[0].endswith(
         "' launches a VIM instance without python support.")
 
 
 def test_detector_no_python_in_version():
-    detector = makeDetector(vim_client_script='rightserverlist.py')
+    detector = makeDetector(vim_server_script='rightserverlist.py')
     info = py.test.raises(ValueError, detector.check_python_support)
     assert (info.value.args[0] ==
       'Calling --version returned no information about python support:\n VIM')

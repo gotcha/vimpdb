@@ -1,7 +1,5 @@
-import logging
 import StringIO
 
-from vimpdb import config
 from vimpdb import proxy
 
 
@@ -33,20 +31,3 @@ class ProxyToVimForTests(proxy.ProxyToVim):
 
     def logged(self):
         return self.log.getvalue()
-
-
-class Config(object):
-
-    def __init__(self, vim_client_script, vim_server_script="server_script",
-        server_name='server_name', port=6666):
-        self.scripts = dict()
-        self.scripts[config.CLIENT] = vim_client_script
-        if vim_server_script is None:
-            self.scripts[config.SERVER] = vim_client_script
-        else:
-            self.scripts[config.SERVER] = vim_server_script
-        self.server_name = server_name
-        self.port = port
-        self.loglevel = logging.INFO
-
-configuration = Config(vim_client_script="bad script")
