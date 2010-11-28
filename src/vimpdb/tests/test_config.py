@@ -224,31 +224,67 @@ def makeDetector(**kwargs):
 
 
 def test_detect_compatible():
-    from vimpdb.config import SERVER
-    from vimpdb.config import CLIENT
-    detector = makeDetector(vim_client_script='compatiblevim.py',
-    vim_server_script='compatiblevim.py')
-    detector.check_clientserver_support(SERVER)
-    detector.check_clientserver_support(CLIENT)
+    from vimpdb import config
+
+    vim_client_script = build_script("compatiblevim.py")
+    vim_server_script = build_script("compatiblevim.py")
+    server_name = 'server_name'
+    port = 6666
+
+    configuration = config.Config(vim_client_script, vim_server_script,
+        server_name, port)
+
+    detector = config.Detector(configuration)
+    detector.check_clientserver_support(config.SERVER)
+    detector.check_clientserver_support(config.CLIENT)
     detector.check_python_support()
 
 
 def test_detect_incompatible():
-    from vimpdb.config import SERVER
-    detector = makeDetector(vim_server_script='incompatiblevim.py')
-    py.test.raises(ValueError, detector.check_clientserver_support, SERVER)
+    from vimpdb import config
+
+    vim_client_script = "dummy"
+    vim_server_script = build_script("incompatiblevim.py")
+    server_name = 'server_name'
+    port = 6666
+
+    configuration = config.Config(vim_client_script, vim_server_script,
+        server_name, port)
+
+    detector = config.Detector(configuration)
+    py.test.raises(ValueError, detector.check_clientserver_support,
+        config.SERVER)
     py.test.raises(ValueError, detector.check_python_support)
 
 
 def test_detect_rightserverlist():
-    detector = makeDetector(vim_client_script='rightserverlist.py',
-        server_name="VIM")
+    from vimpdb import config
+
+    vim_client_script = build_script("rightserverlist.py")
+    vim_server_script = "dummy"
+    server_name = 'VIM'
+    port = 6666
+
+    configuration = config.Config(vim_client_script, vim_server_script,
+        server_name, port)
+
+    detector = config.Detector(configuration)
     assert 'VIM' in detector.get_serverlist()
     detector.check_serverlist()
 
 
 def test_detect_wrongserverlist():
-    detector = makeDetector(vim_client_script='wrongserverlist.py')
+    from vimpdb import config
+
+    vim_client_script = build_script("wrongserverlist.py")
+    vim_server_script = "dummy"
+    server_name = 'VIM'
+    port = 6666
+
+    configuration = config.Config(vim_client_script, vim_server_script,
+        server_name, port)
+
+    detector = config.Detector(configuration)
     assert 'WRONG' in detector.get_serverlist()
     py.test.raises(ValueError, detector.check_serverlist)
 
