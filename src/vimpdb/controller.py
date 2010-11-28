@@ -4,7 +4,13 @@ from vimpdb.config import getRawConfiguration
 
 from vim_bridge import bridged
 
+# after call of initialize function,
+# pointer to vim module
+# instead of importing vim module
 vim = None
+
+# after call of initialize function,
+# holds a Controller instance
 controller = None
 
 
@@ -28,10 +34,6 @@ def buffer_create():
         if source_buffer == vim.current.buffer.name:
             break
     return buffer
-
-
-def buffer_close():
-    vim.command('silent! bwipeout -vimpdb-')
 
 
 def buffer_find():
@@ -79,9 +81,6 @@ class Controller(object):
             pdb_buffer.append(line)
         del pdb_buffer[0]
 
-    def buffer_close(self):
-        buffer_close()
-
 
 @bridged
 def _PDB_buffer_write(message):
@@ -90,7 +89,7 @@ def _PDB_buffer_write(message):
 
 @bridged
 def _PDB_buffer_close():
-    controller.buffer_close()
+    vim.command('silent! bwipeout -vimpdb-')
 
 
 @bridged
