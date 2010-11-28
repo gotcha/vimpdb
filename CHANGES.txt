@@ -1,7 +1,7 @@
 Changelog
 =========
 
-0.4.4 (unreleased)
+0.4.4 (2010-11-29)
 ------------------
 
 - tests cleanup : get rid of helper class and functions.
