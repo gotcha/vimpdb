@@ -14,7 +14,9 @@ Changelog
 
 - code cleanup : improve imports style.
 
-- after c(ontinue), key mapping was broken (again :-().
+- code cleanup : use ``vim_bridge`` to bridge VIM script and python.
+
+- after ``c(ontinue)``, key mapping was broken (again :-().
 
 
 0.4.3.2 (2010-11-27)
