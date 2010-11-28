@@ -4,6 +4,10 @@ Changelog
 0.4.4 (unreleased)
 ------------------
 
+- tests cleanup : get rid of helper class and functions.
+
+- code cleanup : improve imports style.
+
 - after c(ontinue), key mapping was broken (again :-().
 
 
