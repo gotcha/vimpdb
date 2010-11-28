@@ -6,18 +6,14 @@ import subprocess
 from vimpdb import config
 
 
-class ProxyToVim(object):
-    """
-    use subprocess to launch Vim instance that use clientserver mode
-    to communicate with Vim instance used for debugging.
-    """
+class Communicator(object):
 
-    def __init__(self, configuration):
-        self.vim_client_script = configuration.scripts[config.CLIENT]
-        self.server_name = configuration.server_name
+    def __init__(self, script, server_name):
+        self.script = script
+        self.server_name = server_name
 
     def _remote_expr(self, expr):
-        p = subprocess.Popen([self.vim_client_script, '--servername',
+        p = subprocess.Popen([self.script, '--servername',
                    self.server_name, "--remote-expr", expr],
             stdout=subprocess.PIPE)
         return_code = p.wait()
@@ -30,11 +26,27 @@ class ProxyToVim(object):
     def _send(self, command):
         # add ':<BS>' to hide last keys sent in VIM command-line
         command = ''.join((command, ':<BS>'))
-        return_code = subprocess.call([self.vim_client_script, '--servername',
+        return_code = subprocess.call([self.script, '--servername',
             self.server_name, '--remote-send', command])
         if return_code:
             raise RemoteUnavailable()
+
+
+class ProxyToVim(object):
+    """
+    use subprocess to launch Vim instance that use clientserver mode
+    to communicate with Vim instance used for debugging.
+    """
+
+    def __init__(self, communicator):
+        self.communicator = communicator
+
+    def _send(self, command):
+        self.communicator._send(command)
         config.logger.debug("sent: %s" % command)
+
+    def _remote_expr(self, expr):
+        return self.communicator._remote_expr(expr)
 
     def setupRemote(self):
         if not self.isRemoteSetup():
@@ -75,26 +87,26 @@ class ProxyToVim(object):
         self._send(':call PDB_show_file_at_line("%s", "%d")<CR>'
             % (filename, lineno))
 
-    # code leftover from hacking
-    def getText(self, prompt):
-        self.setupRemote()
-        command = self._expr('PDB_get_command("%s")' % prompt)
-        return command
-
     def _expr(self, expr):
         config.logger.debug("expr: %s" % expr)
         result = self._remote_expr(expr)
         config.logger.debug("result: %s" % result)
         return result
 
+    # code leftover from hacking
+    def getText(self, prompt):
+        self.setupRemote()
+        command = self._expr('PDB_get_command("%s")' % prompt)
+        return command
+
 
 class ProxyFromVim(object):
 
     BUFLEN = 512
 
-    def __init__(self, configuration):
+    def __init__(self, port):
         self.socket_inactive = True
-        self.port = configuration.port
+        self.port = port
 
     def bindSocket(self):
         if self.socket_inactive:

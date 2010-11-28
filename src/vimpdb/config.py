@@ -39,8 +39,8 @@ class Config(object):
     def __init__(self, vim_client_script, vim_server_script, server_name,
         port, loglevel=logging.INFO):
         self.scripts = dict()
-        self.scripts[CLIENT] = vim_client_script
-        self.scripts[SERVER] = vim_server_script
+        self.vim_client_script = self.scripts[CLIENT] = vim_client_script
+        self.vim_server_script = self.scripts[SERVER] = vim_server_script
         self.server_name = server_name
         self.port = port
         self.loglevel = loglevel

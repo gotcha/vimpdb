@@ -86,13 +86,11 @@ class VimPdb(Pdb, Switcher):
     debugger integrated with Vim
     """
 
-    def __init__(self, ToClass=proxy.ProxyToVim, FromClass=proxy.ProxyFromVim,
-        getConfiguration=config.getConfiguration):
+    def __init__(self, to_vim, from_vim):
         Pdb.__init__(self)
         self.capturing = False
-        configuration = getConfiguration()
-        self.to_vim = ToClass(configuration)
-        self.from_vim = FromClass(configuration)
+        self.to_vim = to_vim
+        self.from_vim = from_vim
         self._textOutput = ''
 
     def trace_dispatch(self, frame, event, arg):
@@ -199,11 +197,21 @@ else:
     VimPdb.default = capture_sys_stdout(VimPdb.default)
 
 
+def make_instance():
+    configuration = config.getConfiguration()
+    communicator = proxy.Communicator(configuration.vim_client_script,
+        configuration.server_name)
+    to_vim = proxy.ProxyToVim(communicator)
+    from_vim = proxy.ProxyFromVim(configuration.port)
+    return VimPdb(to_vim, from_vim)
+
+
 def set_trace():
     """
     can be called like pdb.set_trace()
     """
-    VimPdb().set_trace(sys._getframe().f_back)
+    instance = make_instance()
+    instance.set_trace(sys._getframe().f_back)
 
 
 # hook vimpdb  #
@@ -226,7 +234,7 @@ class VimpdbSwitcher(Switcher):
     def do_vim(self, arg):
         """v(im)
     switch to debugging with vimpdb"""
-        self.vimpdb = VimPdb()
+        self.vimpdb = make_instance()
         self.vimpdb.set_trace_without_step(self.botframe)
         if self.has_gone_up():
             self.vimpdb.update_state(self)
