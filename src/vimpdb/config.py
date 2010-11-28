@@ -157,7 +157,7 @@ def write_to_file(filename, config):
 
 def getCommandOutputPosix(parts):
     try:
-        p = Popen(parts, stdin=PIPE, stdout=PIPE)
+        p = Popen(parts, stdout=PIPE)
         return_code = p.wait()
     except OSError, e:
         message = 'When trying to run "%s" : %s' % (" ".join(parts), e.args[1])
@@ -370,7 +370,7 @@ if sys.platform == 'win32':
         def launch_vim_server(self):
             command = self.build_command(SERVER, '--servername',
                 self.server_name)
-            Popen(command, stdin=PIPE, stdout=PIPE)
+            Popen(command)
             return True
 
 else:

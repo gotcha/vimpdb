@@ -25,7 +25,7 @@ class ProxyToVim(object):
     def _remote_expr(self, expr):
         p = Popen([self.vim_client_script, '--servername',
                    self.server_name, "--remote-expr", expr],
-            stdin=PIPE, stdout=PIPE)
+            stdout=PIPE)
         return_code = p.wait()
         if return_code:
             raise RemoteUnavailable()
