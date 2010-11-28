@@ -8,11 +8,7 @@ from subprocess import PIPE
 
 from vimpdb.config import CLIENT
 from vimpdb.config import logger
-
-
-def getPackagePath(instance):
-    module = sys.modules[instance.__module__]
-    return os.path.dirname(module.__file__)
+from vimpdb.config import get_package_path
 
 
 class ProxyToVim(object):
@@ -47,7 +43,7 @@ class ProxyToVim(object):
 
     def setupRemote(self):
         if not self.isRemoteSetup():
-            package_path = getPackagePath(self)
+            package_path = get_package_path(self)
             filename = os.path.join(package_path, "vimpdb.vim")
             command = "<C-\><C-N>:source %s<CR>" % filename
             self._send(command)

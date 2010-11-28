@@ -28,6 +28,11 @@ handler.setFormatter(formatter)
 logger.addHandler(handler)
 
 
+def get_package_path(instance):
+    module = sys.modules[instance.__module__]
+    return os.path.dirname(module.__file__)
+
+
 class Config(object):
 
     def __init__(self, vim_client_script, vim_server_script, server_name,

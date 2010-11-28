@@ -81,10 +81,11 @@ def test_ProxyToVim_showFileAtLine_wrong_file():
 
 def test_ProxyToVim_showFileAtLine_existing_file():
     from vimpdb.testing import ProxyToVimForTests
-    from vimpdb.proxy import getPackagePath
+    from vimpdb.proxy import get_package_path
     to_vim = ProxyToVimForTests()
     to_vim.setState(to_vim.IS_REMOTE_SETUP_IS_TRUE)
-    existingFile = getPackagePath(test_ProxyToVim_showFileAtLine_existing_file)
+    existingFile = get_package_path(
+        test_ProxyToVim_showFileAtLine_existing_file)
     to_vim.showFileAtLine(existingFile, 1)
     lines = to_vim.logged().splitlines()
     assert len(lines) == 4
@@ -97,10 +98,11 @@ def test_ProxyToVim_showFileAtLine_existing_file():
 
 def test_ProxyToVim_showFileAtLine_existing_file_windows():
     from vimpdb.testing import ProxyToVimForTests
-    from vimpdb.proxy import getPackagePath
+    from vimpdb.proxy import get_package_path
     to_vim = ProxyToVimForTests()
     to_vim.setState(to_vim.IS_REMOTE_SETUP_IS_TRUE)
-    existingFile = getPackagePath(test_ProxyToVim_showFileAtLine_existing_file)
+    existingFile = get_package_path(
+        test_ProxyToVim_showFileAtLine_existing_file)
     existingFile = existingFile.replace(os.sep, '\\')
     to_vim._showFileAtLine(existingFile, 1)
     lines = to_vim.logged().splitlines()
