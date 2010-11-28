@@ -86,12 +86,13 @@ class VimPdb(Pdb, Switcher):
     debugger integrated with Vim
     """
 
-    def __init__(self):
+    def __init__(self, ProxyToClass=ProxyToVim, ProxyFromClass=ProxyFromVim,
+        getConfiguration=getConfiguration):
         Pdb.__init__(self)
         self.capturing = False
         config = getConfiguration()
-        self.to_vim = ProxyToVim(config)
-        self.from_vim = ProxyFromVim(config)
+        self.to_vim = ProxyToClass(config)
+        self.from_vim = ProxyFromClass(config)
         self._textOutput = ''
 
     def trace_dispatch(self, frame, event, arg):
