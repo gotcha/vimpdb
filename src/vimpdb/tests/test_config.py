@@ -185,7 +185,7 @@ def build_script(vim_client_script):
     """make path to scripts used by tests
     """
 
-    from vimpdb.proxy import get_package_path
+    from vimpdb.config import get_package_path
     tests_path = get_package_path(build_script)
     script_path = sys.executable + " " + os.path.sep.join([tests_path,
         'scripts', vim_client_script])

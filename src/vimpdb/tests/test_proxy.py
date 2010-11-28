@@ -81,7 +81,7 @@ def test_ProxyToVim_showFileAtLine_wrong_file():
 
 def test_ProxyToVim_showFileAtLine_existing_file():
     from vimpdb.testing import ProxyToVimForTests
-    from vimpdb.proxy import get_package_path
+    from vimpdb.config import get_package_path
     to_vim = ProxyToVimForTests()
     to_vim.setState(to_vim.IS_REMOTE_SETUP_IS_TRUE)
     existingFile = get_package_path(
@@ -98,7 +98,7 @@ def test_ProxyToVim_showFileAtLine_existing_file():
 
 def test_ProxyToVim_showFileAtLine_existing_file_windows():
     from vimpdb.testing import ProxyToVimForTests
-    from vimpdb.proxy import get_package_path
+    from vimpdb.config import get_package_path
     to_vim = ProxyToVimForTests()
     to_vim.setState(to_vim.IS_REMOTE_SETUP_IS_TRUE)
     existingFile = get_package_path(
