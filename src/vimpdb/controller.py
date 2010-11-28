@@ -1,13 +1,18 @@
 import socket
+
 from vimpdb.config import getRawConfiguration
 
+from vim_bridge import bridged
+
 vim = None
+controller = None
 
 
-def make(module):
+def initialize(module):
     global vim
+    global controller
     vim = module
-    return Controller()
+    controller = Controller()
 
 
 def buffer_create():
@@ -37,6 +42,7 @@ def buffer_find():
         except:
             pass
     return None
+
 
 class Controller(object):
 
@@ -75,3 +81,23 @@ class Controller(object):
 
     def buffer_close(self):
         buffer_close()
+
+
+@bridged
+def _PDB_buffer_write(message):
+    controller.buffer_write(message)
+
+
+@bridged
+def _PDB_buffer_close():
+    controller.buffer_close()
+
+
+@bridged
+def _PDB_send_command(message):
+    controller.socket_send(message)
+
+
+@bridged
+def _PDB_socket_close():
+    controller.socket_close()

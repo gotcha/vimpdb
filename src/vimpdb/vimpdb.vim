@@ -1,15 +1,20 @@
-" some versions of VIM need explicit import
-python import vim
-
 highlight PdbCurrentLine ctermbg=Grey guibg=Grey
 
 function! PDB_setup_egg(path)
 python <<EOT
 import sys
+import vim
 egg_path = vim.eval("a:path")
-sys.path.insert(0, egg_path)
-from vimpdb.controller import make
-controller = make(vim)
+if egg_path not in sys.path:
+    sys.path.insert(0, egg_path)
+EOT
+endfunction
+
+function! PDB_init_controller()
+python <<EOT
+from vimpdb.controller import initialize
+import vim
+initialize(vim)
 EOT
 endfunction
 
@@ -40,10 +45,7 @@ endfunction
 
 function! PDB_show_feedback(message)
     call PDB_init_display()
-python <<EOT
-_message = vim.eval("a:message")
-controller.buffer_write(_message)
-EOT
+    call s:PDBBufferWrite(a:message)
 endfunction
 
 "---------------------------------------------------------------------
@@ -67,16 +69,6 @@ function! PDB_move_to_debug_tab()
     endfor
     call s:PDB_create_debug_tab()
 endfunction
-
-"---------------------------------------------------------------------
-" vim to pdb communication
-function! PDB_send_command(command)
-python <<EOT
-_command = vim.eval("a:command")
-controller.socket_send(_command)
-EOT
-endfunction
-
 
 "---------------------------------------------------------------------
 " Keyboard mapping management
@@ -141,46 +133,42 @@ endfunction
 "---------------------------------------------------------------------
 " ex mode commands support
 function! PDB_continue()
-    call PDB_send_command('c')
+    call s:PDBSendCommand('c')
     call PDB_reset_original_map()
-python <<EOT
-controller.buffer_close()
-EOT
+    call s:PDBBufferClose()
 endfunction
 
 function! PDB_reset()
-    call PDB_send_command('pdb')
+    call s:PDBSendCommand('pdb')
     call PDB_exit()
 endfunction
 
 function! PDB_quit()
-    call PDB_send_command('q')
+    call s:PDBSendCommand('q')
     call PDB_exit()
 endfunction
 
 function! PDB_eval()
     let expr = input("vimpdb - Type Python expression:")
-    call PDB_send_command("!" . expr)
+    call s:PDBSendCommand("!" . expr)
 endfunction
 
 function! PDB_break()
     let line = line('.')
     let filename = expand('%:p')
-    call PDB_send_command("b " . filename . ":" . line)
+    call s:PDBSendCommand("b " . filename . ":" . line)
 endfunction
 
 function! PDB_clear()
     let line = line('.')
     let filename = expand('%:p')
-    call PDB_send_command("cl " . filename . ":" . line)
+    call s:PDBSendCommand("cl " . filename . ":" . line)
 endfunction
 
 function! PDB_exit()
     call PDB_reset_original_map()
-python <<EOT
-controller.socket_close()
-controller.buffer_close()
-EOT
+    call s:PDBBufferClose()
+    call s:PDBSocketClose()
     echohl ErrorMsg
     echo "Switch back to shell.\n\n"
     echohl None
@@ -189,16 +177,16 @@ endfunction
 "---------------------------------------------------------------------
 " ex mode commands
 if !exists(":PDBNext")
-  command! PDBNext :call PDB_send_command("n")
+  command! PDBNext :call s:PDBSendCommand("n")
 endif
 if !exists(":PDBQuit")
   command! PDBQuit :call PDB_quit()
 endif
 if !exists(":PDBStep")
-  command! PDBStep :call PDB_send_command("s")
+  command! PDBStep :call s:PDBSendCommand("s")
 endif
 if !exists(":PDBReturn")
-  command! PDBReturn :call PDB_send_command("r")
+  command! PDBReturn :call s:PDBSendCommand("r")
 endif
 if !exists(":PDBContinue")
   command! PDBContinue :call PDB_continue()
@@ -213,17 +201,17 @@ if !exists(":PDBClear")
   command! PDBClear :call PDB_clear()
 endif
 if !exists(":PDBDown")
-  command! PDBDown :call PDB_send_command("d")
+  command! PDBDown :call s:PDBSendCommand("d")
 endif
 if !exists(":PDBUp")
-  command! PDBUp :call PDB_send_command("u")
+  command! PDBUp :call s:PDBSendCommand("u")
 endif
 if !exists(":PDBReset")
   command! PDBReset :call PDB_reset()
 endif
 if !exists(":PDBArgs")
-  command! PDBArgs :call PDB_send_command("a")
+  command! PDBArgs :call s:PDBSendCommand("a")
 endif
 if !exists("PDBWord")
-  command! PDBWord :call PDB_send_command("!".expand("<cword>"))
+  command! PDBWord :call s:PDBSendCommand("!".expand("<cword>"))
 endif  

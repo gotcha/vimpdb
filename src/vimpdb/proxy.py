@@ -9,6 +9,7 @@ from subprocess import PIPE
 from vimpdb.config import CLIENT
 from vimpdb.config import logger
 from vimpdb.config import get_package_path
+from vimpdb.config import get_dependencies_paths
 
 
 class ProxyToVim(object):
@@ -47,8 +48,14 @@ class ProxyToVim(object):
             filename = os.path.join(package_path, "vimpdb.vim")
             command = "<C-\><C-N>:source %s<CR>" % filename
             self._send(command)
-            egg_path = os.path.dirname(package_path)
-            self._send(':call PDB_setup_egg(%s)<CR>' % repr(egg_path))
+            self.setup_egg(package_path)
+            for package_path in get_dependencies_paths():
+                self.setup_egg(package_path)
+            self._send(':call PDB_init_controller()')
+
+    def setup_egg(self, package_path):
+        egg_path = os.path.dirname(package_path)
+        self._send(':call PDB_setup_egg(%s)<CR>' % repr(egg_path))
 
     def isRemoteSetup(self):
         status = self._expr("exists('*PDB_setup_egg')")

@@ -30,6 +30,7 @@ setup(name='vimpdb',
       include_package_data=True,
       zip_safe=False,
       install_requires=[
+          'vim_bridge',
       ],
       entry_points="""
       # -*- Entry points: -*-
