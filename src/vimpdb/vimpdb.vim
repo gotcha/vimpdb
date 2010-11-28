@@ -31,6 +31,10 @@ function! PDB_show_file_at_line(filename, line)
     if current_filename != a:filename
         call s:PDB_load_file(a:filename)
     endif
+    "PDB_map needs to be called each time a file is showed
+    "to take care of the case when debugging starts again
+    "after c(ontinue)
+    call s:PDB_map()
     execute "normal " . a:line . "ggz."
     execute 'match PdbCurrentLine /\%' . a:line . 'l\s*\zs.\+/'
 endfunction
@@ -40,7 +44,6 @@ function! s:PDB_load_file(filename)
     execute "view " . a:filename
     setlocal cursorline
     highlight PdbCurrentLine
-    call s:PDB_map()
 endfunction
 
 function! PDB_show_feedback(message)
