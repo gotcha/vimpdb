@@ -1,9 +1,9 @@
-from pdb import Pdb, line_prefix
+import pdb
+from pdb import Pdb
 import sys
 import StringIO
-from vimpdb.proxy import ProxyToVim
-from vimpdb.proxy import ProxyFromVim
-from vimpdb.config import getConfiguration
+from vimpdb import proxy
+from vimpdb import config
 
 PYTHON_25_OR_BIGGER = sys.version_info >= (2, 5)
 PYTHON_26_OR_BIGGER = sys.version_info >= (2, 6)
@@ -86,13 +86,13 @@ class VimPdb(Pdb, Switcher):
     debugger integrated with Vim
     """
 
-    def __init__(self, ProxyToClass=ProxyToVim, ProxyFromClass=ProxyFromVim,
-        getConfiguration=getConfiguration):
+    def __init__(self, ToClass=proxy.ProxyToVim, FromClass=proxy.ProxyFromVim,
+        getConfiguration=config.getConfiguration):
         Pdb.__init__(self)
         self.capturing = False
-        config = getConfiguration()
-        self.to_vim = ProxyToClass(config)
-        self.from_vim = ProxyFromClass(config)
+        configuration = getConfiguration()
+        self.to_vim = ToClass(configuration)
+        self.from_vim = FromClass(configuration)
         self._textOutput = ''
 
     def trace_dispatch(self, frame, event, arg):
@@ -185,7 +185,7 @@ class VimPdb(Pdb, Switcher):
     do_c = do_continue = close_socket(Pdb.do_continue)
 
     @capture
-    def print_stack_entry(self, frame_lineno, prompt_prefix=line_prefix):
+    def print_stack_entry(self, frame_lineno, prompt_prefix=pdb.line_prefix):
         return Pdb.print_stack_entry(self, frame_lineno, prompt_prefix)
 
     def default(self, line):

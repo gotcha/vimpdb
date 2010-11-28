@@ -19,11 +19,11 @@ server_name = server_name
     file.close()
     from vimpdb.config import read_from_file
     from vimpdb.config import Config
-    config = read_from_file(name, Config)
-    assert config.port == 1000
-    assert config.scripts[CLIENT] == 'vim_client_script'
-    assert config.scripts[SERVER] == 'vim_server_script'
-    assert config.server_name == 'server_name'
+    configuration = read_from_file(name, Config)
+    assert configuration.port == 1000
+    assert configuration.scripts[CLIENT] == 'vim_client_script'
+    assert configuration.scripts[SERVER] == 'vim_server_script'
+    assert configuration.server_name == 'server_name'
     os.remove(name)
 
 
@@ -42,11 +42,11 @@ server_name = server_name
     file.close()
     from vimpdb.bbbconfig import read_from_file_4_0
     from vimpdb.config import Config
-    config = read_from_file_4_0(name, Config)
-    assert config.port == 1000
-    assert config.scripts[CLIENT] == 'vim_client_script'
-    assert config.scripts[SERVER] == 'vim_client_script'
-    assert config.server_name == 'server_name'
+    configuration = read_from_file_4_0(name, Config)
+    assert configuration.port == 1000
+    assert configuration.scripts[CLIENT] == 'vim_client_script'
+    assert configuration.scripts[SERVER] == 'vim_client_script'
+    assert configuration.server_name == 'server_name'
     os.remove(name)
 
 
@@ -148,11 +148,11 @@ def test_default_config():
     from vimpdb.config import DEFAULT_CLIENT_SCRIPT
     from vimpdb.config import DEFAULT_SERVER_SCRIPT
     from vimpdb.config import DEFAULT_SERVER_NAME
-    config = defaultConfig
-    assert config.port == DEFAULT_PORT
-    assert config.scripts[CLIENT] == DEFAULT_CLIENT_SCRIPT
-    assert config.scripts[SERVER] == DEFAULT_SERVER_SCRIPT
-    assert config.server_name == DEFAULT_SERVER_NAME
+    configuration = defaultConfig
+    assert configuration.port == DEFAULT_PORT
+    assert configuration.scripts[CLIENT] == DEFAULT_CLIENT_SCRIPT
+    assert configuration.scripts[SERVER] == DEFAULT_SERVER_SCRIPT
+    assert configuration.server_name == DEFAULT_SERVER_NAME
 
 
 def test_file_creation():
@@ -193,7 +193,7 @@ def build_script(vim_client_script):
 
 
 def makeDetector(**kwargs):
-    """ make detector from config built with args rather
+    """ make detector from configuration built with args rather
     than by reading config file
     """
 
@@ -209,9 +209,9 @@ def makeDetector(**kwargs):
         del kwargs["vim_server_script"]
     else:
         vim_server_script = None
-    config = Config(vim_client_script=vim_client_script,
+    configuration = Config(vim_client_script=vim_client_script,
         vim_server_script=vim_server_script, **kwargs)
-    detector = Detector(config)
+    detector = Detector(configuration)
     detector.MAX_TIMEOUT = 0.5
     return detector
 
@@ -250,22 +250,22 @@ def test_detector_instantiation():
     from vimpdb.config import Detector
     from vimpdb.config import SERVER
     from vimpdb.config import CLIENT
-    from vimpdb.testing import config
-    detector = Detector(config)
-    assert detector.port == config.port
-    assert detector.scripts[CLIENT] == config.scripts[CLIENT]
-    assert detector.scripts[SERVER] == config.scripts[SERVER]
-    assert detector.server_name == config.server_name
+    from vimpdb.testing import configuration
+    detector = Detector(configuration)
+    assert detector.port == configuration.port
+    assert detector.scripts[CLIENT] == configuration.scripts[CLIENT]
+    assert detector.scripts[SERVER] == configuration.scripts[SERVER]
+    assert detector.server_name == configuration.server_name
 
 
 def test_detector_build_command():
     from vimpdb.config import Detector
     from vimpdb.config import CLIENT
-    from vimpdb.testing import config
-    detector = Detector(config)
+    from vimpdb.testing import configuration
+    detector = Detector(configuration)
     result = detector.build_command(CLIENT, "test")
     assert result[-1] == "test"
-    assert result[0:-1] == config.scripts[CLIENT].split()
+    assert result[0:-1] == configuration.scripts[CLIENT].split()
 
 
 def test_detector_get_vim_version_bad_script():
@@ -369,10 +369,10 @@ def test_detector_launch_server():
 
 
 def test_detector_launch_server_bad_script():
-    from vimpdb.config import ReturnCodeError
+    from vimpdb import errors
     detector = makeDetector(vim_client_script="compatiblevim.py",
         vim_server_script="returncode.py", server_name="VIM")
-    info = py.test.raises(ReturnCodeError, detector.launch_vim_server)
+    info = py.test.raises(errors.ReturnCodeError, detector.launch_vim_server)
     assert info.value.args[0] == 1
     assert info.value.args[1].endswith('returncode.py --servername VIM')
 

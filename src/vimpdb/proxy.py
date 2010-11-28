@@ -1,15 +1,9 @@
 import os
 import sys
 import socket
+import subprocess
 
-from subprocess import call
-from subprocess import Popen
-from subprocess import PIPE
-
-from vimpdb.config import CLIENT
-from vimpdb.config import logger
-from vimpdb.config import get_package_path
-from vimpdb.config import get_dependencies_paths
+from vimpdb import config
 
 
 class ProxyToVim(object):
@@ -18,14 +12,14 @@ class ProxyToVim(object):
     to communicate with Vim instance used for debugging.
     """
 
-    def __init__(self, config):
-        self.vim_client_script = config.scripts[CLIENT]
-        self.server_name = config.server_name
+    def __init__(self, configuration):
+        self.vim_client_script = configuration.scripts[config.CLIENT]
+        self.server_name = configuration.server_name
 
     def _remote_expr(self, expr):
-        p = Popen([self.vim_client_script, '--servername',
+        p = subprocess.Popen([self.vim_client_script, '--servername',
                    self.server_name, "--remote-expr", expr],
-            stdout=PIPE)
+            stdout=subprocess.PIPE)
         return_code = p.wait()
         if return_code:
             raise RemoteUnavailable()
@@ -36,20 +30,20 @@ class ProxyToVim(object):
     def _send(self, command):
         # add ':<BS>' to hide last keys sent in VIM command-line
         command = ''.join((command, ':<BS>'))
-        return_code = call([self.vim_client_script, '--servername',
+        return_code = subprocess.call([self.vim_client_script, '--servername',
             self.server_name, '--remote-send', command])
         if return_code:
             raise RemoteUnavailable()
-        logger.debug("sent: %s" % command)
+        config.logger.debug("sent: %s" % command)
 
     def setupRemote(self):
         if not self.isRemoteSetup():
-            package_path = get_package_path(self)
+            package_path = config.get_package_path(self)
             filename = os.path.join(package_path, "vimpdb.vim")
             command = "<C-\><C-N>:source %s<CR>" % filename
             self._send(command)
             self.setup_egg(package_path)
-            for package_path in get_dependencies_paths():
+            for package_path in config.get_dependencies_paths():
                 self.setup_egg(package_path)
             self._send(':call PDB_init_controller()')
 
@@ -88,9 +82,9 @@ class ProxyToVim(object):
         return command
 
     def _expr(self, expr):
-        logger.debug("expr: %s" % expr)
+        config.logger.debug("expr: %s" % expr)
         result = self._remote_expr(expr)
-        logger.debug("result: %s" % result)
+        config.logger.debug("result: %s" % result)
         return result
 
 
@@ -98,9 +92,9 @@ class ProxyFromVim(object):
 
     BUFLEN = 512
 
-    def __init__(self, config):
+    def __init__(self, configuration):
         self.socket_inactive = True
-        self.port = config.port
+        self.port = configuration.port
 
     def bindSocket(self):
         if self.socket_inactive:
@@ -116,7 +110,7 @@ class ProxyFromVim(object):
     def waitFor(self, pdb):
         self.bindSocket()
         (message, address) = self.socket.recvfrom(self.BUFLEN)
-        logger.debug("command: %s" % message)
+        config.logger.debug("command: %s" % message)
         return message
 
 

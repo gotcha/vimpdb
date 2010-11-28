@@ -1,33 +1,33 @@
 import os
 import ConfigParser
 
-from vimpdb.errors import BadRCFile
+from vimpdb import errors
 
 
 def read_from_file_4_0(filename, klass):
     parser = ConfigParser.RawConfigParser()
     parser.read(filename)
     if not parser.has_section('vimpdb'):
-        raise BadRCFile('[vimpdb] section is missing in "%s"' %
+        raise errors.BadRCFile('[vimpdb] section is missing in "%s"' %
             filename)
     error_msg = ("'%s' option is missing from section [vimpdb] in "
         + "'" + filename + "'.")
     if parser.has_option('vimpdb', 'script'):
         vim_client_script = parser.get('vimpdb', 'script')
     else:
-        raise BadRCFile(error_msg % "vim_client_script")
+        raise errors.BadRCFile(error_msg % "vim_client_script")
     if parser.has_option('vimpdb', 'server_name'):
         server_name = parser.get('vimpdb', 'server_name')
     else:
-        raise BadRCFile(error_msg % 'server_name')
+        raise errors.BadRCFile(error_msg % 'server_name')
     if parser.has_option('vimpdb', 'port'):
         port = parser.getint('vimpdb', 'port')
     else:
-        raise BadRCFile(error_msg % 'port')
+        raise errors.BadRCFile(error_msg % 'port')
     if parser.has_option('vimpdb', 'script'):
         vim_server_script = parser.get('vimpdb', 'script')
     else:
-        raise BadRCFile(error_msg % "vim_server_script")
+        raise errors.BadRCFile(error_msg % "vim_server_script")
     return klass(vim_client_script, vim_server_script, server_name, port)
 
 

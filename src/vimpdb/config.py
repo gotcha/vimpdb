@@ -4,14 +4,10 @@ import os.path
 import logging
 import time
 import ConfigParser
-from subprocess import call
-from subprocess import Popen
-from subprocess import PIPE
+import subprocess
 
 from vimpdb import bbbconfig
-from vimpdb.errors import BadRCFile
-from vimpdb.errors import ReturnCodeError
-from vimpdb.errors import BrokenConfiguration
+from vimpdb import errors
 
 RCNAME = os.path.expanduser('~/.vimpdbrc')
 
@@ -94,10 +90,10 @@ def getConfiguration(filename=RCNAME):
         mustWrite = False
         try:
             config = read_from_file(filename, Config)
-        except BadRCFile, e:
+        except errors.BadRCFile, e:
             try:
                 config_4_0 = bbbconfig.read_from_file_4_0(filename, Config)
-            except BadRCFile:
+            except errors.BadRCFile:
                 raise e
             config = config_4_0
             mustCheck = True
@@ -119,7 +115,7 @@ def read_from_file(filename, klass):
     parser = ConfigParser.RawConfigParser()
     parser.read(filename)
     if not parser.has_section('vimpdb'):
-        raise BadRCFile('[vimpdb] section is missing in "%s"' %
+        raise errors.BadRCFile('[vimpdb] section is missing in "%s"' %
             filename)
     error_msg = ("'%s' option is missing from section [vimpdb] in "
         + "'" + filename + "'.")
@@ -140,7 +136,7 @@ def read_option(parser, name, error_msg):
     if parser.has_option('vimpdb', name):
         return parser.get('vimpdb', name)
     else:
-        raise BadRCFile(error_msg % name)
+        raise errors.BadRCFile(error_msg % name)
 
 
 def write_to_file(filename, config):
@@ -157,13 +153,13 @@ def write_to_file(filename, config):
 
 def getCommandOutputPosix(parts):
     try:
-        p = Popen(parts, stdout=PIPE)
+        p = subprocess.Popen(parts, stdout=subprocess.PIPE)
         return_code = p.wait()
     except OSError, e:
         message = 'When trying to run "%s" : %s' % (" ".join(parts), e.args[1])
         raise OSError(e.args[0], message)
     if return_code:
-        raise ReturnCodeError(return_code, " ".join(parts))
+        raise errors.ReturnCodeError(return_code, " ".join(parts))
     child_stdout = p.stdout
     output = child_stdout.read()
     return output.strip()
@@ -249,7 +245,7 @@ class DetectorBase(object):
         command = self.build_command(CLIENT, '--serverlist')
         try:
             return self.commandParser(command)
-        except ReturnCodeError, e:
+        except errors.ReturnCodeError, e:
             return_code = e.args[0]
             command = e.args[1]
             raise ValueError(RETURN_CODE % (command, return_code))
@@ -269,7 +265,7 @@ class DetectorBase(object):
         if not self.serverAvailable():
             try:
                 self.launch_vim_server()
-            except ReturnCodeError, e:
+            except errors.ReturnCodeError, e:
                 return_code = e.args[0]
                 command = e.args[1]
                 raise ValueError(RETURN_CODE % (command, return_code))
@@ -293,7 +289,7 @@ class DetectorBase(object):
         try:
             command = self.build_command(script_type, '--version')
             return self.commandParser(command)
-        except ReturnCodeError, e:
+        except errors.ReturnCodeError, e:
             return_code = e.args[0]
             command = e.args[1]
             raise ValueError(RETURN_CODE % (command, return_code))
@@ -324,7 +320,7 @@ class DetectorBase(object):
             % type)
         answer = raw_input(question)
         if answer == '':
-            raise BrokenConfiguration
+            raise errors.BrokenConfiguration
         else:
             self.scripts[script_type] = answer
 
@@ -332,7 +328,7 @@ class DetectorBase(object):
         question = "Input another server name (leave empty to abort): "
         answer = raw_input(question)
         if answer == '':
-            raise BrokenConfiguration
+            raise errors.BrokenConfiguration
         else:
             self.server_name = answer
 
@@ -342,7 +338,7 @@ if sys.platform == 'win32':
         try:
             return getCommandOutputPosix(parts)
         except WindowsError:
-            raise ReturnCodeError(1, " ".join(parts))
+            raise errors.ReturnCodeError(1, " ".join(parts))
 
     class Detector(DetectorBase):
 
@@ -352,7 +348,7 @@ if sys.platform == 'win32':
         def check_python_support(self):
             command = self.build_command(SERVER, 'dummy.txt',
                 '+exe \'if has("python") | :q | else | :cq | endif\'')
-            return_code = call(command)
+            return_code = subprocess.call(command)
             if return_code:
                 raise ValueError(NO_PYTHON_SUPPORT % self.scripts[SERVER])
             else:
@@ -361,7 +357,7 @@ if sys.platform == 'win32':
         def check_server_clientserver_support(self):
             command = self.build_command(SERVER, 'dummy.txt',
                 '+exe \'if has("clientserver") | :q | else | :cq | endif\'')
-            return_code = call(command)
+            return_code = subprocess.call(command)
             if return_code:
                 raise ValueError(NO_SERVER_SUPPORT % self.scripts[SERVER])
             else:
@@ -370,7 +366,7 @@ if sys.platform == 'win32':
         def launch_vim_server(self):
             command = self.build_command(SERVER, '--servername',
                 self.server_name)
-            Popen(command)
+            subprocess.Popen(command)
             return True
 
 else:
@@ -395,7 +391,7 @@ else:
         def launch_vim_server(self):
             command = self.build_command(SERVER, '--servername',
                 self.server_name)
-            return_code = call(command)
+            return_code = subprocess.call(command)
             if return_code:
-                raise ReturnCodeError(return_code, " ".join(command))
+                raise errors.ReturnCodeError(return_code, " ".join(command))
             return True

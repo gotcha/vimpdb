@@ -1,8 +1,7 @@
 import socket
+import vim_bridge
 
-from vimpdb.config import getRawConfiguration
-
-from vim_bridge import bridged
+from vimpdb import config
 
 # after call of initialize function,
 # pointer to vim module
@@ -49,8 +48,8 @@ def buffer_find():
 class Controller(object):
 
     def __init__(self):
-        config = getRawConfiguration()
-        self.port = config.port
+        configuration = config.getRawConfiguration()
+        self.port = configuration.port
         self.host = '127.0.0.1'
         self.socket = None
 
@@ -82,21 +81,21 @@ class Controller(object):
         del pdb_buffer[0]
 
 
-@bridged
+@vim_bridge.bridged
 def _PDB_buffer_write(message):
     controller.buffer_write(message)
 
 
-@bridged
+@vim_bridge.bridged
 def _PDB_buffer_close():
     vim.command('silent! bwipeout -vimpdb-')
 
 
-@bridged
+@vim_bridge.bridged
 def PDB_send_command(message):
     controller.socket_send(message)
 
 
-@bridged
+@vim_bridge.bridged
 def _PDB_socket_close():
     controller.socket_close()
