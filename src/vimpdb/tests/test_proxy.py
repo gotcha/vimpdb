@@ -1,126 +1,171 @@
 import os
+from mock import Mock
 
 
 def test_ProxyToVim_instantiation():
     from vimpdb.proxy import ProxyToVim
-    from vimpdb.config import Config
-    configuration = Config('vim_client_script', 'vim_server_script',
-        'server_name', 6666)
-    to_vim = ProxyToVim(configuration)
+
+    communicator = Mock(spec=['_remote_expr', '_send'])
+
+    to_vim = ProxyToVim(communicator)
     assert isinstance(to_vim, ProxyToVim)
 
 
 def test_ProxyToVim_setupRemote():
-    from vimpdb.testing import ProxyToVimForTests
-    to_vim = ProxyToVimForTests()
-    to_vim.setState(to_vim.IS_REMOTE_SETUP_IS_FALSE)
+    from vimpdb.proxy import ProxyToVim
+
+    communicator = Mock(spec=['_remote_expr', '_send'])
+    communicator._remote_expr.return_value = '0'
+
+    to_vim = ProxyToVim(communicator)
     to_vim.setupRemote()
-    lines = to_vim.logged().splitlines()
-    assert len(lines) == 7
-    assert lines[1] == "expr: exists('*PDB_setup_egg')"
-    assert lines[2] == "return: '0'"
-    assert lines[3].startswith('send: <C-\\><C-N>:source ')
-    assert lines[3].endswith('vimpdb/vimpdb.vim<CR>')
-    assert lines[4].startswith('send: :call PDB_setup_egg(')
-    assert lines[5].startswith('send: :call PDB_setup_egg(')
-    assert lines[6].startswith('send: :call PDB_init_controller(')
+
+    method_calls = communicator.method_calls
+    assert len(method_calls) == 5
+    call = method_calls[0]
+    assert call[0] == '_remote_expr'
+    assert call[1] == ("exists('*PDB_setup_egg')",)
+    call = method_calls[1]
+    assert call[0] == '_send'
+    assert call[1][0].endswith('vimpdb/vimpdb.vim<CR>')
+    call = method_calls[2]
+    assert call[0] == '_send'
+    assert call[1][0].startswith(':call PDB_setup_egg(')
+    call = method_calls[3]
+    assert call[0] == '_send'
+    assert call[1][0].startswith(':call PDB_setup_egg(')
+    call = method_calls[4]
+    assert call[0] == '_send'
+    assert call[1][0].startswith(':call PDB_init_controller(')
 
 
 def test_ProxyToVim_setupRemote_does_nothing():
-    from vimpdb.testing import ProxyToVimForTests
-    to_vim = ProxyToVimForTests()
-    to_vim.setState(to_vim.IS_REMOTE_SETUP_IS_TRUE)
+    from vimpdb.proxy import ProxyToVim
+
+    communicator = Mock(spec=['_remote_expr', '_send'])
+    communicator._remote_expr.return_value = '1'
+
+    to_vim = ProxyToVim(communicator)
     to_vim.setupRemote()
-    assert (to_vim.logged() ==
-"""
-expr: exists('*PDB_setup_egg')
-return: '1'
-""")
+
+    method_calls = communicator.method_calls
+    assert len(method_calls) == 1
+    call = method_calls[0]
+    assert call[0] == '_remote_expr'
+    assert call[1] == ("exists('*PDB_setup_egg')",)
 
 
 def test_ProxyToVim_isRemoteSetup():
-    from vimpdb.testing import ProxyToVimForTests
-    to_vim = ProxyToVimForTests()
+    from vimpdb.proxy import ProxyToVim
+
+    communicator = Mock(spec=['_remote_expr', '_send'])
+
+    to_vim = ProxyToVim(communicator)
     to_vim.isRemoteSetup()
-    assert (to_vim.logged() ==
-"""
-expr: exists('*PDB_setup_egg')
-return: None
-""")
+
+    method_calls = communicator.method_calls
+    assert len(method_calls) == 1
+    call = method_calls[0]
+    assert call[0] == '_remote_expr'
+    assert call[1] == ("exists('*PDB_setup_egg')",)
 
 
 def test_ProxyToVim_showFeedback_empty():
-    from vimpdb.testing import ProxyToVimForTests
-    to_vim = ProxyToVimForTests()
-    to_vim.setState(to_vim.IS_REMOTE_SETUP_IS_TRUE)
+    from vimpdb.proxy import ProxyToVim
+
+    communicator = Mock(spec=['_remote_expr', '_send'])
+
+    to_vim = ProxyToVim(communicator)
     to_vim.showFeedback('')
-    assert (to_vim.logged() ==
-"""
-""")
+
+    method_calls = communicator.method_calls
+    assert len(method_calls) == 0
 
 
 def test_ProxyToVim_showFeedback_content():
-    from vimpdb.testing import ProxyToVimForTests
-    to_vim = ProxyToVimForTests()
-    to_vim.setState(to_vim.IS_REMOTE_SETUP_IS_TRUE)
+    from vimpdb.proxy import ProxyToVim
+
+    communicator = Mock(spec=['_remote_expr', '_send'])
+    communicator._remote_expr.return_value = '1'
+
+    to_vim = ProxyToVim(communicator)
     to_vim.showFeedback('first\nsecond')
-    assert (to_vim.logged() ==
-"""
-expr: exists('*PDB_setup_egg')
-return: '1'
-send: :call PDB_show_feedback(['first', 'second'])<CR>
-""")
+
+    method_calls = communicator.method_calls
+    assert len(method_calls) == 2
+    call = method_calls[0]
+    assert call[0] == '_remote_expr'
+    assert call[1] == ("exists('*PDB_setup_egg')",)
+    call = method_calls[1]
+    assert call[0] == '_send'
+    assert call[1][0] == ":call PDB_show_feedback(['first', 'second'])<CR>"
 
 
 def test_ProxyToVim_showFileAtLine_wrong_file():
-    from vimpdb.testing import ProxyToVimForTests
-    to_vim = ProxyToVimForTests()
-    to_vim.setState(to_vim.IS_REMOTE_SETUP_IS_TRUE)
+    from vimpdb.proxy import ProxyToVim
+
+    communicator = Mock(spec=['_remote_expr', '_send'])
+    communicator._remote_expr.return_value = '1'
+
+    to_vim = ProxyToVim(communicator)
     to_vim.showFileAtLine('bla.vim', 1)
-    assert (to_vim.logged() ==
-"""
-""")
+
+    method_calls = communicator.method_calls
+    assert len(method_calls) == 0
 
 
 def test_ProxyToVim_showFileAtLine_existing_file():
-    from vimpdb.testing import ProxyToVimForTests
+    from vimpdb.proxy import ProxyToVim
     from vimpdb.config import get_package_path
-    to_vim = ProxyToVimForTests()
-    to_vim.setState(to_vim.IS_REMOTE_SETUP_IS_TRUE)
+
     existingFile = get_package_path(
         test_ProxyToVim_showFileAtLine_existing_file)
+
+    communicator = Mock(spec=['_remote_expr', '_send'])
+    communicator._remote_expr.return_value = '1'
+
+    to_vim = ProxyToVim(communicator)
     to_vim.showFileAtLine(existingFile, 1)
-    lines = to_vim.logged().splitlines()
-    assert len(lines) == 4
-    assert lines[1] == "expr: exists('*PDB_setup_egg')"
-    assert lines[2] == "return: '1'"
-    assert lines[3].startswith('send: :call PDB_show_file_at_line("')
-    assert lines[3].endswith(' "1")<CR>')
-    assert not '\\' in lines[3]
+
+    method_calls = communicator.method_calls
+    assert len(method_calls) == 2
+    call = method_calls[0]
+    assert call[0] == '_remote_expr'
+    assert call[1] == ("exists('*PDB_setup_egg')",)
+    call = method_calls[1]
+    assert call[0] == '_send'
+    assert call[1][0].startswith(':call PDB_show_file_at_line("')
+    assert call[1][0].endswith(' "1")<CR>')
+    assert not '\\' in call[1][0]
 
 
 def test_ProxyToVim_showFileAtLine_existing_file_windows():
-    from vimpdb.testing import ProxyToVimForTests
+    from vimpdb.proxy import ProxyToVim
     from vimpdb.config import get_package_path
-    to_vim = ProxyToVimForTests()
-    to_vim.setState(to_vim.IS_REMOTE_SETUP_IS_TRUE)
+
     existingFile = get_package_path(
         test_ProxyToVim_showFileAtLine_existing_file)
     existingFile = existingFile.replace(os.sep, '\\')
+
+    communicator = Mock(spec=['_remote_expr', '_send'])
+    communicator._remote_expr.return_value = '1'
+
+    to_vim = ProxyToVim(communicator)
     to_vim._showFileAtLine(existingFile, 1)
-    lines = to_vim.logged().splitlines()
-    assert len(lines) == 4
-    assert lines[1] == "expr: exists('*PDB_setup_egg')"
-    assert lines[2] == "return: '1'"
-    assert lines[3].startswith('send: :call PDB_show_file_at_line("')
-    assert lines[3].endswith(' "1")<CR>')
-    assert not '\\' in lines[3]
+
+    method_calls = communicator.method_calls
+    assert len(method_calls) == 2
+    call = method_calls[0]
+    assert call[0] == '_remote_expr'
+    assert call[1] == ("exists('*PDB_setup_egg')",)
+    call = method_calls[1]
+    assert call[0] == '_send'
+    assert call[1][0].startswith(':call PDB_show_file_at_line("')
+    assert call[1][0].endswith(' "1")<CR>')
+    assert not '\\' in call[1][0]
 
 
 def test_ProxyFromVim_instantiation():
     from vimpdb.proxy import ProxyFromVim
-    from vimpdb.config import Config
-    configuration = Config('vim_client_script', 'vim_server_script',
-        'server_name', 6666)
-    from_vim = ProxyFromVim(configuration)
+    from_vim = ProxyFromVim(6666)
     assert isinstance(from_vim, ProxyFromVim)
