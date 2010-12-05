@@ -95,3 +95,20 @@ def test_get_hooked_pdb(mocked_trace_dispatch):
     assert isinstance(debugger, SwitcherToVimpdb)
     assert hasattr(debugger, 'do_vim')
     assert debugger.trace_dispatch == mocked_trace_dispatch
+
+
+@patch('vimpdb.config.get_configuration')
+def test_make_instance(mocked_get_configuration):
+    from vimpdb.config import Config
+    from vimpdb.debugger import make_instance
+    from vimpdb.debugger import VimPdb
+
+    mocked_get_configuration.return_value = Config(
+        'client', 'server', 'name', 6666)
+
+    instance = make_instance()
+
+    assert isinstance(instance, VimPdb)
+    assert instance.from_vim.port == 6666
+    assert instance.to_vim.communicator.script == 'client'
+    assert instance.to_vim.communicator.server_name == 'name'
