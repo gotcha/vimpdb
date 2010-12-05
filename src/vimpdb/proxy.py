@@ -124,8 +124,9 @@ class ProxyFromVim(object):
             self.socket_inactive = False
 
     def closeSocket(self):
-        self.socket.close()
-        self.socket_inactive = True
+        if not self.socket_inactive:
+            self.socket.close()
+            self.socket_inactive = True
 
     def waitFor(self, pdb):
         self.bindSocket()

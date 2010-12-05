@@ -228,3 +228,85 @@ def test_ProxyFromVim_instantiation():
     from vimpdb.proxy import ProxyFromVim
     from_vim = ProxyFromVim(6666)
     assert isinstance(from_vim, ProxyFromVim)
+    assert from_vim.port == 6666
+    assert from_vim.socket_inactive
+
+
+def test_ProxyFromVim_bindSocket():
+    from vimpdb.proxy import ProxyFromVim
+    from_vim = ProxyFromVim(6666)
+
+    mocked_socket = Mock(spec=['bind'])
+    mocked_factory = Mock(return_value=mocked_socket)
+    from_vim.socket_factory = mocked_factory
+
+    from_vim.bindSocket()
+
+    assert not from_vim.socket_inactive
+    method_calls = mocked_socket.method_calls
+    assert len(method_calls) == 1
+    call = method_calls[0]
+    assert call[0] == 'bind'
+    assert call[1] == (('', 6666),)
+
+
+def test_ProxyFromVim_bindSocket_active():
+    from vimpdb.proxy import ProxyFromVim
+    from_vim = ProxyFromVim(6666)
+
+    mocked_factory = Mock()
+    from_vim.socket_factory = mocked_factory
+    from_vim.socket_inactive = False
+
+    from_vim.bindSocket()
+
+    assert mocked_factory.call_count == 0
+
+
+def test_ProxyFromVim_closeSocket():
+    from vimpdb.proxy import ProxyFromVim
+    from_vim = ProxyFromVim(6666)
+
+    mocked_socket = Mock(spec=['close'])
+    from_vim.socket = mocked_socket
+    from_vim.socket_inactive = False
+
+    from_vim.closeSocket()
+
+    assert from_vim.socket_inactive
+    method_calls = mocked_socket.method_calls
+    assert len(method_calls) == 1
+    call = method_calls[0]
+    assert call[0] == 'close'
+
+
+def test_ProxyFromVim_closeSocket_inactive():
+    from vimpdb.proxy import ProxyFromVim
+    from_vim = ProxyFromVim(6666)
+
+    mocked_socket = Mock(spec=['close'])
+    from_vim.socket = mocked_socket
+
+    from_vim.closeSocket()
+
+    assert from_vim.socket_inactive
+    method_calls = mocked_socket.method_calls
+    assert len(method_calls) == 0
+
+
+def test_ProxyFromVim_waitFor():
+    from vimpdb.proxy import ProxyFromVim
+    from_vim = ProxyFromVim(6666)
+
+    mocked_socket = Mock(spec=['bind', 'recvfrom'])
+    mocked_socket.recvfrom.return_value = ('message', None)
+    mocked_factory = Mock(return_value=mocked_socket)
+    from_vim.socket_factory = mocked_factory
+
+    message = from_vim.waitFor(None)
+
+    assert message == 'message'
+    method_calls = mocked_socket.method_calls
+    assert len(method_calls) == 2
+    call = method_calls[1]
+    assert call[0] == 'recvfrom'
