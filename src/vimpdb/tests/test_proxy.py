@@ -178,14 +178,12 @@ def test_ProxyToVim_showFileAtLine_existing_file():
     to_vim = ProxyToVim(communicator)
     to_vim.showFileAtLine(existingFile, 1)
 
-    method_calls = communicator.method_calls
-    assert len(method_calls) == 2
     communicator._remote_expr.assert_called_with("exists('*PDB_setup_egg')")
-    call = method_calls[1]
-    assert call[0] == '_send'
-    assert call[1][0].startswith(':call PDB_show_file_at_line("')
-    assert call[1][0].endswith(' "1")<CR>')
-    assert not '\\' in call[1][0]
+    assert communicator._send.call_count == 1
+    call_args, call_kwargs = communicator._send.call_args
+    assert call_args[0].startswith(':call PDB_show_file_at_line("')
+    assert call_args[0].endswith(' "1")<CR>')
+    assert not '\\' in call_args[0]
 
 
 def test_ProxyToVim_showFileAtLine_existing_file_windows():
