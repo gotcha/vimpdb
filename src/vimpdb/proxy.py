@@ -1,5 +1,4 @@
 import os
-import sys
 import socket
 import subprocess
 
@@ -13,10 +12,15 @@ class Communicator(object):
         self.script = script
         self.server_name = server_name
 
+    def prepare_subprocess(self, *args):
+        parts = self.script.split()
+        parts.extend(args)
+        return parts
+
     def _remote_expr(self, expr):
-        p = subprocess.Popen([self.script, '--servername',
-                   self.server_name, "--remote-expr", expr],
-            stdout=subprocess.PIPE)
+        parts = self.prepare_subprocess('--servername',
+                   self.server_name, "--remote-expr", expr)
+        p = subprocess.Popen(parts, stdout=subprocess.PIPE)
         return_code = p.wait()
         if return_code:
             raise errors.RemoteUnavailable()
@@ -27,8 +31,9 @@ class Communicator(object):
     def _send(self, command):
         # add ':<BS>' to hide last keys sent in VIM command-line
         command = ''.join((command, ':<BS>'))
-        return_code = subprocess.call([self.script, '--servername',
-            self.server_name, '--remote-send', command])
+        parts = self.prepare_subprocess('--servername',
+                   self.server_name, "--remote-send", command)
+        return_code = subprocess.call(parts)
         if return_code:
             raise errors.RemoteUnavailable()
 
@@ -95,15 +100,17 @@ class ProxyToVim(object):
         return result
 
     # code leftover from hacking
-    def getText(self, prompt):
-        self.setupRemote()
-        command = self._expr('PDB_get_command("%s")' % prompt)
-        return command
+    # def getText(self, prompt):
+    #     self.setupRemote()
+    #     command = self._expr('PDB_get_command("%s")' % prompt)
+    #     return command
 
 
 class ProxyFromVim(object):
 
     BUFLEN = 512
+
+    socket_factory = socket.socket
 
     def __init__(self, port):
         self.socket_inactive = True
@@ -111,8 +118,8 @@ class ProxyFromVim(object):
 
     def bindSocket(self):
         if self.socket_inactive:
-            self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM,
-                socket.IPPROTO_UDP)
+            self.socket = self.socket_factory(
+                socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
             self.socket.bind(('', self.port))
             self.socket_inactive = False
 
@@ -128,7 +135,7 @@ class ProxyFromVim(object):
 
 
 # code leftover from hacking
-def eat_stdin(self):
-    sys.stdout.write('-- Type Ctrl-D to continue --\n')
-    sys.stdout.flush()
-    sys.stdin.readlines()
+# def eat_stdin(self):
+#     sys.stdout.write('-- Type Ctrl-D to continue --\n')
+#     sys.stdout.flush()
+#     sys.stdin.readlines()
