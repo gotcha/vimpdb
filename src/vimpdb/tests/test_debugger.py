@@ -47,7 +47,7 @@ def test_instance_of_klass_after_setup_method():
 @patch('vimpdb.debugger.trace_dispatch')
 def test_hook(mocked_trace_dispatch):
     from vimpdb.debugger import hook
-    from vimpdb.debugger import VimpdbSwitcher
+    from vimpdb.debugger import SwitcherToVimpdb
 
     class Klass:
 
@@ -60,14 +60,14 @@ def test_hook(mocked_trace_dispatch):
     hook(Klass)
 
     assert Klass._orig_trace_dispatch == orig_trace_dispatch
-    assert VimpdbSwitcher in Klass.__bases__
+    assert SwitcherToVimpdb in Klass.__bases__
     assert Klass.trace_dispatch == mocked_trace_dispatch
 
 
 @patch('vimpdb.debugger.setupMethod')
 def test_hook_do_nothing(mocked_setupMethod):
     from vimpdb.debugger import hook
-    from vimpdb.debugger import VimpdbSwitcher
+    from vimpdb.debugger import SwitcherToVimpdb
 
     class Klass:
 
@@ -78,20 +78,20 @@ def test_hook_do_nothing(mocked_setupMethod):
     hook(Klass)
 
     assert not mocked_setupMethod.called
-    assert VimpdbSwitcher not in Klass.__bases__
+    assert SwitcherToVimpdb not in Klass.__bases__
 
 
 @patch('vimpdb.debugger.trace_dispatch')
 def test_get_hooked_pdb(mocked_trace_dispatch):
     from pdb import Pdb
     from vimpdb.debugger import get_hooked_pdb
-    from vimpdb.debugger import VimpdbSwitcher
+    from vimpdb.debugger import SwitcherToVimpdb
 
     mocked_trace_dispatch.__name__ = 'trace_dispatch'
 
     debugger = get_hooked_pdb()
 
     assert isinstance(debugger, Pdb)
-    assert isinstance(debugger, VimpdbSwitcher)
+    assert isinstance(debugger, SwitcherToVimpdb)
     assert hasattr(debugger, 'do_vim')
     assert debugger.trace_dispatch == mocked_trace_dispatch

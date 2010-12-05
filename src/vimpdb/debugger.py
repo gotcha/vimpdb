@@ -226,7 +226,7 @@ def trace_dispatch(self, frame, event, arg):
         return self._orig_trace_dispatch(frame, event, arg)
 
 
-class VimpdbSwitcher(Switcher):
+class SwitcherToVimpdb(Switcher):
     """
     with vim command
     """
@@ -268,7 +268,7 @@ def hook(klass):
 
     if not hasattr(klass, 'do_vim'):
         setupMethod(klass, trace_dispatch)
-        klass.__bases__ += (VimpdbSwitcher, )
+        klass.__bases__ += (SwitcherToVimpdb, )
 
 
 def get_hooked_pdb():
