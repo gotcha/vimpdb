@@ -181,14 +181,14 @@ def test_file_creation():
     os.remove(name)
 
 
-def build_script(vim_client_script):
+def build_script(script):
     """make path to scripts used by tests
     """
 
     from vimpdb.config import get_package_path
     tests_path = get_package_path(build_script)
     script_path = sys.executable + " " + os.path.sep.join([tests_path,
-        'scripts', vim_client_script])
+        'scripts', script])
     return script_path
 
 
