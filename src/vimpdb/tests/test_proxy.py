@@ -64,10 +64,11 @@ def test_Communicator_send_return_code():
 def test_ProxyToVim_instantiation():
     from vimpdb.proxy import ProxyToVim
 
-    communicator = Mock(spec=['_remote_expr', '_send'])
+    communicator = Mock()
 
     to_vim = ProxyToVim(communicator)
     assert isinstance(to_vim, ProxyToVim)
+    assert to_vim.communicator == communicator
 
 
 def test_ProxyToVim_setupRemote():
