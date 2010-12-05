@@ -77,7 +77,7 @@ defaultConfig = Config(DEFAULT_CLIENT_SCRIPT, DEFAULT_SERVER_SCRIPT,
 defaultConfig.vim_client_script = defaultConfig.scripts[CLIENT]
 
 
-def getConfiguration(filename=RCNAME):
+def get_configuration(filename=RCNAME):
     if not os.path.exists(filename):
         mustCheck = True
         mustWrite = True

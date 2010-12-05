@@ -198,7 +198,7 @@ else:
 
 
 def make_instance():
-    configuration = config.getConfiguration()
+    configuration = config.get_configuration()
     communicator = proxy.Communicator(configuration.vim_client_script,
         configuration.server_name)
     to_vim = proxy.ProxyToVim(communicator)
