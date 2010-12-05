@@ -249,6 +249,15 @@ class VimpdbSwitcher(Switcher):
         self.print_stack_entry(self.stack[self.curindex])
 
 
+def setupMethod(klass, method):
+    name = method.__name__
+    orig = getattr(klass, name)
+    orig_attr = '_orig_' + name
+    if not hasattr(klass, orig_attr):
+        setattr(klass, '_orig_' + name, orig)
+        setattr(klass, name, method)
+
+
 def hook(klass):
     """
     monkey-patch pdb.Pdb class
@@ -256,14 +265,6 @@ def hook(klass):
     adds a 'vim' (and 'v') command:
     it switches to debugging with vimpdb
     """
-
-    def setupMethod(klass, method):
-        name = method.__name__
-        orig = getattr(klass, name)
-        orig_attr = '_orig_' + name
-        if not hasattr(klass, orig_attr):
-            setattr(klass, '_orig_' + name, orig)
-            setattr(klass, name, method)
 
     if not hasattr(klass, 'do_vim'):
         setupMethod(klass, trace_dispatch)
