@@ -1,4 +1,5 @@
 from mock import Mock
+from mock import patch
 
 
 def test_klass_after_setup_method():
@@ -41,3 +42,40 @@ def test_instance_of_klass_after_setup_method():
 
     instance._orig_method()
     assert mocked_method.called
+
+
+@patch('vimpdb.debugger.trace_dispatch')
+def test_hook(mocked_trace_dispatch):
+    from vimpdb.debugger import hook
+    from vimpdb.debugger import VimpdbSwitcher
+
+    class Klass:
+
+        def trace_dispatch(self):
+            pass
+
+    orig_trace_dispatch = Klass.trace_dispatch
+    mocked_trace_dispatch.__name__ = 'trace_dispatch'
+
+    hook(Klass)
+
+    assert Klass._orig_trace_dispatch == orig_trace_dispatch
+    assert VimpdbSwitcher in Klass.__bases__
+    assert Klass.trace_dispatch == mocked_trace_dispatch
+
+
+@patch('vimpdb.debugger.setupMethod')
+def test_hook_do_nothing(mocked_setupMethod):
+    from vimpdb.debugger import hook
+    from vimpdb.debugger import VimpdbSwitcher
+
+    class Klass:
+
+        def do_vim(self):
+            pass
+
+
+    hook(Klass)
+
+    assert not mocked_setupMethod.called
+    assert VimpdbSwitcher not in Klass.__bases__
