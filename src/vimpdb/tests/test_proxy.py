@@ -1,5 +1,64 @@
 import os
+import sys
+import py
 from mock import Mock
+
+
+def build_script(script):
+    """make path to scripts used by tests
+    """
+
+    from vimpdb.config import get_package_path
+    tests_path = get_package_path(build_script)
+    script_path = sys.executable + " " + os.path.sep.join([tests_path,
+        'scripts', script])
+    return script_path
+
+
+def test_Communicator_instantiation():
+    from vimpdb.proxy import Communicator
+
+    communicator = Communicator('script', 'server_name')
+
+    assert communicator.script == 'script'
+    assert communicator.server_name == 'server_name'
+
+
+def test_Communicator_remote_expr_ok():
+    from vimpdb.proxy import Communicator
+    script = build_script("communicator.py")
+
+    communicator = Communicator(script, 'server_name')
+    result = communicator._remote_expr('expr')
+
+    assert 'expr' in result
+    assert 'server_name' in result
+
+
+def test_Communicator_remote_expr_return_code():
+    from vimpdb.proxy import Communicator
+    from vimpdb.errors import RemoteUnavailable
+    script = build_script("returncode.py")
+
+    communicator = Communicator(script, 'server_name')
+    py.test.raises(RemoteUnavailable, communicator._remote_expr, 'expr')
+
+
+def test_Communicator_send_ok():
+    from vimpdb.proxy import Communicator
+    script = build_script("communicator.py")
+
+    communicator = Communicator(script, 'server_name')
+    communicator._send('command')
+
+
+def test_Communicator_send_return_code():
+    from vimpdb.proxy import Communicator
+    from vimpdb.errors import RemoteUnavailable
+    script = build_script("returncode.py")
+
+    communicator = Communicator(script, 'server_name')
+    py.test.raises(RemoteUnavailable, communicator._send, 'command')
 
 
 def test_ProxyToVim_instantiation():
