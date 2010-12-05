@@ -82,9 +82,7 @@ def test_ProxyToVim_setupRemote():
 
     method_calls = communicator.method_calls
     assert len(method_calls) == 5
-    call = method_calls[0]
-    assert call[0] == '_remote_expr'
-    assert call[1] == ("exists('*PDB_setup_egg')",)
+    communicator._remote_expr.assert_called_with("exists('*PDB_setup_egg')")
     call = method_calls[1]
     assert call[0] == '_send'
     assert call[1][0].endswith('vimpdb/vimpdb.vim<CR>')
@@ -110,9 +108,7 @@ def test_ProxyToVim_setupRemote_does_nothing():
 
     method_calls = communicator.method_calls
     assert len(method_calls) == 1
-    call = method_calls[0]
-    assert call[0] == '_remote_expr'
-    assert call[1] == ("exists('*PDB_setup_egg')",)
+    communicator._remote_expr.assert_called_with("exists('*PDB_setup_egg')")
 
 
 def test_ProxyToVim_isRemoteSetup():
@@ -125,9 +121,7 @@ def test_ProxyToVim_isRemoteSetup():
 
     method_calls = communicator.method_calls
     assert len(method_calls) == 1
-    call = method_calls[0]
-    assert call[0] == '_remote_expr'
-    assert call[1] == ("exists('*PDB_setup_egg')",)
+    communicator._remote_expr.assert_called_with("exists('*PDB_setup_egg')")
 
 
 def test_ProxyToVim_showFeedback_empty():
@@ -153,12 +147,9 @@ def test_ProxyToVim_showFeedback_content():
 
     method_calls = communicator.method_calls
     assert len(method_calls) == 2
-    call = method_calls[0]
-    assert call[0] == '_remote_expr'
-    assert call[1] == ("exists('*PDB_setup_egg')",)
-    call = method_calls[1]
-    assert call[0] == '_send'
-    assert call[1][0] == ":call PDB_show_feedback(['first', 'second'])<CR>"
+    communicator._remote_expr.assert_called_with("exists('*PDB_setup_egg')")
+    communicator._send.assert_called_with(
+        ":call PDB_show_feedback(['first', 'second'])<CR>")
 
 
 def test_ProxyToVim_showFileAtLine_wrong_file():
@@ -189,9 +180,7 @@ def test_ProxyToVim_showFileAtLine_existing_file():
 
     method_calls = communicator.method_calls
     assert len(method_calls) == 2
-    call = method_calls[0]
-    assert call[0] == '_remote_expr'
-    assert call[1] == ("exists('*PDB_setup_egg')",)
+    communicator._remote_expr.assert_called_with("exists('*PDB_setup_egg')")
     call = method_calls[1]
     assert call[0] == '_send'
     assert call[1][0].startswith(':call PDB_show_file_at_line("')
@@ -215,9 +204,7 @@ def test_ProxyToVim_showFileAtLine_existing_file_windows():
 
     method_calls = communicator.method_calls
     assert len(method_calls) == 2
-    call = method_calls[0]
-    assert call[0] == '_remote_expr'
-    assert call[1] == ("exists('*PDB_setup_egg')",)
+    communicator._remote_expr.assert_called_with("exists('*PDB_setup_egg')")
     call = method_calls[1]
     assert call[0] == '_send'
     assert call[1][0].startswith(':call PDB_show_file_at_line("')
