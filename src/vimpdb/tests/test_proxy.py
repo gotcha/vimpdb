@@ -104,7 +104,8 @@ def test_ProxyToVim_setupRemote_does_nothing():
     to_vim = ProxyToVim(communicator)
     to_vim.setupRemote()
 
-    assert communicator._remote_expr.call_count == 1
+    assert communicator._remote_expr.call_count == 1, (
+        "_remote_expr not called")
     communicator._remote_expr.assert_called_with("exists('*PDB_setup_egg')")
 
 
