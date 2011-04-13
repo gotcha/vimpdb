@@ -29,11 +29,6 @@ def get_package_path(instance):
     return os.path.dirname(module.__file__)
 
 
-def get_dependencies_paths():
-    import vim_bridge
-    return (get_package_path(vim_bridge.bridged),)
-
-
 class Config(object):
 
     def __init__(self, vim_client_script, vim_server_script, server_name,

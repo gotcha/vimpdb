@@ -6,6 +6,16 @@ from vimpdb import config
 from vimpdb import errors
 
 
+def get_eggs_paths():
+    import vim_bridge
+    vimpdb_path = config.get_package_path(errors.ReturnCodeError())
+    vim_bridge_path = config.get_package_path(vim_bridge.bridged)
+    return (
+        os.path.dirname(vimpdb_path),
+        os.path.dirname(vim_bridge_path),
+        )
+
+
 class Communicator(object):
 
     def __init__(self, script, server_name):
@@ -56,18 +66,14 @@ class ProxyToVim(object):
 
     def setupRemote(self):
         if not self.isRemoteSetup():
-            package_path = config.get_package_path(self)
-            filename = os.path.join(package_path, "vimpdb.vim")
+            # source vimpdb.vim
+            proxy_package_path = config.get_package_path(self)
+            filename = os.path.join(proxy_package_path, "vimpdb.vim")
             command = "<C-\><C-N>:source %s<CR>" % filename
             self._send(command)
-            self.setup_egg(package_path)
-            for package_path in config.get_dependencies_paths():
-                self.setup_egg(package_path)
+            for egg_path in get_eggs_paths():
+                self._send(':call PDB_setup_egg(%s)<CR>' % repr(egg_path))
             self._send(':call PDB_init_controller()')
-
-    def setup_egg(self, package_path):
-        egg_path = os.path.dirname(package_path)
-        self._send(':call PDB_setup_egg(%s)<CR>' % repr(egg_path))
 
     def isRemoteSetup(self):
         status = self._expr("exists('*PDB_setup_egg')")
