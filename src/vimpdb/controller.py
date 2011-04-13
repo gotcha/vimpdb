@@ -29,7 +29,7 @@ def buffer_create():
     vim.command('set nowrap')
     buffer = vim.current.buffer
     while True:
-        vim.command('wincmd w')   #switch back window
+        vim.command('wincmd w')  # switch back window
         if source_buffer == vim.current.buffer.name:
             break
     return buffer
@@ -37,7 +37,7 @@ def buffer_create():
 
 def buffer_find():
     for win in vim.windows:
-        try:                 #FIXME: Error while new a unnamed buffer
+        try:  # FIXME: Error while new a unnamed buffer
             if '-vimpdb-' in win.buffer.name:
                 return win.buffer
         except:
