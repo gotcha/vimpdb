@@ -86,6 +86,15 @@ class ProxyToVim(object):
         self.setupRemote()
         self._send(':call PDB_show_feedback(%s)<CR>' % repr(feedback_list))
 
+    def displayLocals(self, feedback):
+        if not feedback:
+            return
+        feedback_list = feedback.splitlines()
+        self.setupRemote()
+        self._send(':call PDB_reset_watch()<CR>')
+        for line in feedback_list:
+            self._send(':call PDB_append_watch([%s])<CR>' % repr(line))
+
     def showFileAtLine(self, filename, lineno):
         if os.path.exists(filename):
             self._showFileAtLine(filename, lineno)

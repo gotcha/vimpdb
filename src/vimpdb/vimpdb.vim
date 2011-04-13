@@ -51,6 +51,14 @@ function! PDB_show_feedback(message)
     call s:PDBBufferWrite(a:message)
 endfunction
 
+function! PDB_reset_watch()
+    call s:PDBWatchReset()
+endfunction
+
+function! PDB_append_watch(message)
+    call s:PDBWatchWrite(a:message)
+endfunction
+
 "---------------------------------------------------------------------
 " debug tab support
 "
@@ -139,6 +147,7 @@ function! PDB_continue()
     call PDBSendCommand('c')
     call s:PDB_reset_original_map()
     call s:PDBBufferClose()
+    call s:PDBWatchClose()
 endfunction
 
 function! PDB_reset()
@@ -171,6 +180,7 @@ endfunction
 function! PDB_exit()
     call s:PDB_reset_original_map()
     call s:PDBBufferClose()
+    call s:PDBWatchClose()
     call s:PDBSocketClose()
     echohl ErrorMsg
     echo "Switch back to shell.\n\n"

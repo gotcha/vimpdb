@@ -2,6 +2,7 @@ import pdb
 from pdb import Pdb
 import sys
 import StringIO
+import pprint
 from vimpdb import proxy
 from vimpdb import config
 
@@ -114,8 +115,7 @@ class VimPdb(Pdb, Switcher):
         self.postloop()
 
     def preloop(self):
-        filename, lineno = self.getFileAndLine()
-        self.to_vim.showFileAtLine(filename, lineno)
+        self.showFileAtLine()
 
     def getFileAndLine(self):
         frame, lineno = self.stack[self.curindex]
@@ -125,6 +125,20 @@ class VimPdb(Pdb, Switcher):
     def showFileAtLine(self):
         filename, lineno = self.getFileAndLine()
         self.to_vim.showFileAtLine(filename, lineno)
+        watches = self.formatLocals()
+        self.to_vim.displayLocals(watches)
+
+    def formatLocals(self):
+        stream = StringIO.StringIO()
+        locals = self.curframe.f_locals
+        for key in locals:
+            stream.write('%s = \n' % key)
+            formatted_value = pprint.pformat(locals[key], width=36)
+            for line in formatted_value.splitlines():
+                stream.write('    %s\n' % line)
+        watches = stream.getvalue()
+        stream.close()
+        return watches
 
     # stdout captures to send back to Vim
     def capture_sys_stdout(self):
