@@ -1,3 +1,4 @@
+import sys
 from mock import Mock
 from mock import patch
 
@@ -74,7 +75,6 @@ def test_hook_do_nothing(mocked_setupMethod):
         def do_vim(self):
             pass
 
-
     hook(Klass)
 
     assert not mocked_setupMethod.called
@@ -112,3 +112,39 @@ def test_make_instance(mocked_get_configuration):
     assert instance.from_vim.port == 6666
     assert instance.to_vim.communicator.script == 'client'
     assert instance.to_vim.communicator.server_name == 'name'
+
+
+@patch('vimpdb.config.get_configuration')
+def xtest_SwitcherToVimpdb_do_vim(mocked_get_configuration):
+    from vimpdb.debugger import get_hooked_pdb
+    from vimpdb.debugger import VimPdb
+    from vimpdb.config import Config
+
+    mocked_get_configuration.return_value = Config(
+        'client', 'server', 'name', 6666)
+
+    switcher = get_hooked_pdb()
+    switcher.set_trace(sys._getframe())
+
+    assert not hasattr(switcher, 'vimpdb')
+
+    assert switcher.do_vim(None) == 1
+    assert isinstance(switcher.vimpdb, VimPdb)
+
+
+@patch('vimpdb.config.get_configuration')
+def xtest_SwitcherToVimpdb_do_v(mocked_get_configuration):
+    from vimpdb.debugger import get_hooked_pdb
+    from vimpdb.debugger import VimPdb
+    from vimpdb.config import Config
+
+    mocked_get_configuration.return_value = Config(
+        'client', 'server', 'name', 6666)
+
+    switcher = get_hooked_pdb()
+    switcher.set_trace(sys._getframe())
+
+    assert not hasattr(switcher, 'vimpdb')
+
+    assert switcher.do_v(None) == 1
+    assert isinstance(switcher.vimpdb, VimPdb)
