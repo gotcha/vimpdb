@@ -1,10 +1,16 @@
 Changelog
 =========
 
-0.4.5 (unreleased)
+0.4.6 (unreleased)
 ------------------
 
 - Nothing changed yet.
+
+
+0.4.5 (2011-04-28)
+------------------
+
+- fix highlighting of current line.
 
 
 0.4.4 (2010-11-29)
