@@ -1,7 +1,7 @@
 Changelog
 =========
 
-0.4.5 (Unreleased)
+0.4.5 (2011-04-28)
 ------------------
 
 - fix highlighting of current line.
