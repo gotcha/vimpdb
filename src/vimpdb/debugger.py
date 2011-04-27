@@ -131,7 +131,9 @@ class VimPdb(Pdb, Switcher):
     def formatLocals(self):
         stream = StringIO.StringIO()
         locals = self.curframe.f_locals
-        for key in locals:
+        keys = locals.keys()
+        keys.sort()
+        for key in keys:
             stream.write('%s = \n' % key)
             formatted_value = pprint.pformat(locals[key], width=36)
             for line in formatted_value.splitlines():
