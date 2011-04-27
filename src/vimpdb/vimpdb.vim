@@ -1,4 +1,4 @@
-highlight PdbCurrentLine ctermbg=Grey guibg=Grey
+highlight link PdbCurrentLine Cursor
 
 function! PDB_setup_egg(path)
 python <<EOT
