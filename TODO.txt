@@ -9,6 +9,8 @@ In priority order:
 
 - conditional breakpoints
 
+- list of breakpoints window
+
 - keep debugging state in VIM to switch **vimpdb** back to ``pdb`` when closing
   VIM while debugging.
 
