@@ -2,15 +2,15 @@
 VIM Pdb integration
 ===================
 
-.. image:: https://secure.travis-ci.org/gotcha/vimpdb.png
-
-.. contents::
-
 Abstract
 ========
 
 This package provides an integration of the Python debugger ``pdb`` into the
 VIM editor.
+
+.. image:: https://secure.travis-ci.org/gotcha/vimpdb.png
+
+.. contents:: Table of contents
 
 Usage
 =====
