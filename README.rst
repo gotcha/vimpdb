@@ -2,6 +2,8 @@
 VIM Pdb integration
 ===================
 
+.. image:: https://secure.travis-ci.org/gotcha/vimpdb.png
+
 .. contents::
 
 Abstract
