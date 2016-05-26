@@ -135,6 +135,7 @@ class ProxyFromVim(object):
         if self.socket_inactive:
             self.socket = self.socket_factory(
                 socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+            self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             self.socket.bind(('', self.port))
             self.socket_inactive = False
 
