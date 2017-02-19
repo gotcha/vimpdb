@@ -137,6 +137,7 @@ The default values per OS are listed hereunder.
 
 For Linux::
 
+    [vimpdb]
     vim_client_script = vim
     vim_server_script = gvim
     server_name = GVIM
@@ -144,6 +145,7 @@ For Linux::
 
 For MacOSX::
 
+    [vimpdb]
     vim_client_script = mvim
     vim_server_script = mvim
     server_name = VIM
@@ -151,6 +153,7 @@ For MacOSX::
 
 For Windows::
 
+    [vimpdb]
     vim_client_script = vim.exe
     vim_server_script = gvim.exe
     server_name = VIM
